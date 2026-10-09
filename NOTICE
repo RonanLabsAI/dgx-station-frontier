@@ -22,6 +22,11 @@ Third-party material included in this repository
    and, through item 1, recipes/dsv4-pro-two-stations/hook/sitecustomize.py.
    The MIT licence text is in recipes/dsv4-pro-two-stations/licenses/J-M-Recipes-MIT.txt.
 
+3. llama.cpp / ggml (https://github.com/ggml-org/llama.cpp). Copyright (c) 2023-2026 The ggml authors. MIT License.
+   recipes/kimi-k3/cuda132/byteidx.cu reproduces the byte-indexing pattern of vec_dot_iq3_s_q8_1 / get_int_b2 from
+   ggml/src/ggml-cuda/vecdotq.cuh; that file is MIT (header in the file). recipes/kimi-k3/llamacpp/patches/
+   ggml-cuda-c2c-zerocopy.patch is our own one-line change to ggml-cuda.cu, offered under MIT to match llama.cpp.
+
 Third-party software used but NOT included
 ------------------------------------------
 
@@ -32,6 +37,9 @@ Third-party software used but NOT included
 - perftest (linux-rdma, BSD/GPL dual): host package.
 - J-M-Recipes flash_bench.py (MIT): the decode harness behind logs/fabric-data-direct/fused-glm-*.log; not vendored.
 - GSM8K test set (openai/grade-school-math, MIT): downloaded at run time, not vendored.
+- llama.cpp (MIT), commits 99b95488 and c479922a: built from source for recipes/kimi-k3 (with the patch above); not vendored.
+- compressed-tensors (neuralmagic, Apache-2.0) and humming (in vLLM, Apache-2.0): recipes/kimi-k3/vllm/hook converts
+  between their 3-bit packing layouts; no code from either is included.
 
 Referenced, nothing copied
 --------------------------
@@ -40,5 +48,6 @@ Referenced, nothing copied
   for comparison and credit it for the benchmark shape and the Data Direct container overlay. No file, script or text
   from it is included; the Data Direct helper in recipes/fabric-data-direct was written from our own notes.
 
-Model weights are not included. DeepSeek-V4.1-Flash, DeepSeek-V4-Pro-0813 and GLM-5.3 are used under their own licences;
+Model weights are not included. DeepSeek-V4.1-Flash, DeepSeek-V4-Pro-0813, GLM-5.3, Nemotron 3 Ultra and Kimi K3 (Kimi K3 License,
+including vellum-ai/Kimi-K3-W3A16-g64 and unsloth/Kimi-K3-GGUF) are used under their own licences;
 check each model card before redistributing anything derived from them.

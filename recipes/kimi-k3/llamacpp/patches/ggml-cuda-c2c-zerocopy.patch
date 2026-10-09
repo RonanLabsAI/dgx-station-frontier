@@ -1,0 +1,28 @@
+ggml-cuda: opt-in zero-copy reads of host-resident tensors on GB300 (NVLink-C2C)
+
+Copyright 2026 RonanLabs. This patch is offered under the MIT License, the licence of llama.cpp, so it can be
+upstreamed as is (the rest of this repository is Apache-2.0).
+
+llama.cpp marks every CUDA device as non-integrated (the line below), so tensors kept in host memory with
+--n-cpu-moe / -ot ...=CPU are copied to the GPU, or computed on the CPU, at every use. On a DGX Station GB300 the GPU
+can read pinned Grace memory in place over NVLink-C2C at about 350 GB/s. With GGML_CUDA_C2C_ZEROCOPY set, devices of
+compute capability 10.x are reported as integrated, so the CUDA backend reads host-resident expert weights directly
+(one graph split; all MUL_MAT_ID runs on the GB300). Unset, behaviour is unchanged.
+
+Measured (Kimi K3 UD-IQ1_M, one Station, 63 expert layers in Grace, --load-mode none): C1 decode 10.49 -> 15.99 tok/s;
+wikitext-2 perplexity identical with and without it. Receipts: logs/kimi-k3/llamacpp-one-station.log.
+Applied and run on llama.cpp 99b95488 and c479922a; it also applies to master 50e3e3e480 (2026-10-09).
+Use: GGML_CUDA_C2C_ZEROCOPY=1 llama-server ... --load-mode none  (host buffers must be pinned CUDA_Host buffers).
+
+diff --git a/ggml/src/ggml-cuda/ggml-cuda.cu b/ggml/src/ggml-cuda/ggml-cuda.cu
+--- a/ggml/src/ggml-cuda/ggml-cuda.cu
++++ b/ggml/src/ggml-cuda/ggml-cuda.cu
+@@ -305,7 +305,7 @@ static ggml_cuda_device_info ggml_cuda_init() {
+ 
+         info.default_tensor_split[id] = total_vram;
+         total_vram += device_vram;
+-        info.devices[id].integrated = false; // Temporarily disabled due to issues with corrupted output (e.g. #15034)
++        info.devices[id].integrated = getenv("GGML_CUDA_C2C_ZEROCOPY") != nullptr && prop.major == 10;  // opt-in: GB300 reads host memory over NVLink-C2C
+         info.devices[id].nsm        = prop.multiProcessorCount;
+         info.devices[id].smpb       = prop.sharedMemPerBlock;
+         info.devices[id].warp_size  = prop.warpSize;

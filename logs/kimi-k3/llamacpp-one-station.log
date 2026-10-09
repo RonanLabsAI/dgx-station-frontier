@@ -1,0 +1,84 @@
+# Kimi K3 unsloth UD-IQ1_M GGUF (15 shards) on ONE Station, llama.cpp, GB300 only (RTX PRO 6000 unused).
+# Run 2026-10-06 21:53 - 2026-10-07 00:04 PT. Experts of layers 0-62 in Grace memory (--n-cpu-moe 63), -ngl 999 -fit off
+# -fa on -t 64, --load-mode none (pinned host buffers), port 8015, in the SGLang dev image (CUDA 13.0.88).
+# "stock" = llama.cpp 99b95488 as released; "zc" = the same tree + recipes/kimi-k3/llamacpp/patches/ggml-cuda-c2c-zerocopy.patch
+# with GGML_CUDA_C2C_ZEROCOPY=1 (the GB300 reads the Grace-resident experts in place over NVLink-C2C). "ctrhead" = HEAD
+# c479922a + the same patch. np16 runs add -c 65536 -np 16 -kvu -b 4096 -ub 2048; the GSM8K-200 server ran -np 8.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs replaced.
+# Bench: bench/kbench.py (/completion, 130-token prompt, n_predict P, ignore_eos, cache_prompt false, temperature 0.7).
+# per_user_decode_median = median of llama-server's timings.predicted_per_second; aggregate_output = output tokens / wall.
+# Quality: bench/ksmoke.py (canaries, GSM8K first N test rows at temperature 0 with "Answer:" extraction, five tool calls),
+# with max_tokens 2048 (reasoning included) for the GSM8K-200 run.
+
+
+--- kimi1s-1006-2153/bench-ctr-stock-c1.log
+RESULT kimi C1 N2 P256 per_user_decode_median 10.49 tok/s min 10.48 max 10.49 aggregate_output 9.00 tok/s wall 56.9s prefill_median 32.2 tok/s prompt_n 130
+
+--- kimi1s-1006-2153/bench-ctr-zc-c1.log
+RESULT kimi C1 N2 P256 per_user_decode_median 15.99 tok/s min 15.96 max 15.99 aggregate_output 13.11 tok/s wall 39.0s prefill_median 37.4 tok/s prompt_n 130
+
+--- kimi1s-1006-2153/bench-ctr-zc-np16-c1.log
+RESULT kimi C1 N2 P256 per_user_decode_median 16.00 tok/s min 15.96 max 16.00 aggregate_output 13.13 tok/s wall 39.0s prefill_median 37.4 tok/s prompt_n 130
+
+--- kimi1s-1006-2153/bench-ctr-zc-np16-c4.log
+RESULT kimi C4 N4 P192 per_user_decode_median 6.46 tok/s min 6.46 max 6.46 aggregate_output 22.10 tok/s wall 34.8s prefill_median 26.0 tok/s prompt_n 130
+
+--- kimi1s-1006-2153/bench-ctr-zc-np16-c16.log
+RESULT kimi C16 N16 P128 per_user_decode_median 1.91 tok/s min 1.91 max 1.91 aggregate_output 26.55 tok/s wall 77.1s prefill_median 13.5 tok/s prompt_n 130
+
+--- kimi1s-1006-2153/bench-ctrhead-zc-c1.log
+RESULT kimi C1 N2 P256 per_user_decode_median 16.00 tok/s min 15.97 max 16.00 aggregate_output 13.12 tok/s wall 39.0s prefill_median 37.4 tok/s prompt_n 130
+
+--- kimi1s-1006-2153/ppl-ctr-zc0.log (wikitext-2, c512, 24 chunks; zero-copy off)
+2.23.019.528 I Final estimate: PPL = 2.0439 +/- 0.03853
+
+--- kimi1s-1006-2153/ppl-ctr-zc1.log (zero-copy on)
+2.18.365.548 I Final estimate: PPL = 2.0439 +/- 0.03853
+
+--- kimi1s-1006-2153/ppl-stock.log (the same model built with the HOST CUDA 13.2.51 toolchain: garbage, see README)
+2.16.131.587 I Final estimate: PPL = 313.4241 +/- 14.50705
+
+--- kimi1s-1006-2153/smoke-ctr-zc-rea-gsm200.log (reasoning on; zero-copy; failures and summaries only)
+CANARY ok=True q='What is 4738 * 2917? Reply with just the' got='13820746' reasoning_len=413
+CANARY ok=True q='What is the capital of Australia? Reply ' got='Canberra' reasoning_len=171
+CANARY ok=True q='Write a Python function is_prime(n) in u' got='```python\ndef is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n    
+GSM 7 ok=False gold=160 got=None
+GSM 14 ok=False gold=60 got=40
+GSM 2 ok=False gold=70000 got=25000
+GSM 12 ok=False gold=13 got=3
+GSM 37 ok=False gold=2 got=0
+GSM 52 ok=False gold=15 got=None
+GSM 93 ok=False gold=36 got=36.36
+GSM 133 ok=False gold=13 got=ERR HTTP Error 500: Internal Server Error
+GSM 136 ok=False gold=6 got=ERR HTTP Error 500: Internal Server Error
+GSM 119 ok=False gold=95200 got=99076.92
+GSM 138 ok=False gold=105 got=None
+GSM 182 ok=False gold=23 got=24
+GSM 165 ok=False gold=77 got=ERR HTTP Error 500: Internal Server Error
+RESULT gsm8k_200 187/200 = 93.5%
+TOOL ok=True "What's the weather at KSFO right now?" -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KSFO"}'}, 'id': 'cpe6Ofc1mY0CJaf7a8UMt32KKelhFYbe'}]
+TOOL ok=True 'Fetch the METAR for KOAK.' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KOAK"}'}, 'id': 'bX2oAh0hMwopUFI5YNxi4Hlv6dA0H5Qg'}]
+TOOL ok=True 'Is it VFR at KLAX?' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KLAX"}'}, 'id': 'H3xfthsI4AH3bkQbCOtdwe8CXAireI8g'}]
+TOOL ok=True 'Get the current observation for KJFK please.' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KJFK"}'}, 'id': 'ycb6D862OHlpKqOzTlm6qThYvaBhcIvV'}]
+TOOL ok=True 'Check the METAR at KSEA.' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KSEA"}'}, 'id': 'ZpOX8yYDoZ2EQkBoZNEEh8kNCbQoSN0l'}]
+RESULT toolcall 5/5
+
+--- kimi1s-1006-2153/smoke-ctr-zc.log (REASONING OFF, -rea off; zero-copy; GSM8K-50 at max_tokens 768; failures and summaries only)
+CANARY ok=False q='What is 4738 * 2917? Reply with just the' got='13810746' reasoning_len=0
+CANARY ok=True q='What is the capital of Australia? Reply ' got='Canberra' reasoning_len=0
+CANARY ok=True q='Write a Python function is_prime(n) in u' got='```python\ndef is_prime(n):\n    if n < 2: return False\n    if n == 2: return True\n    if n % 2 == 0: return False\n    for i in rang
+GSM 16 ok=False gold=230 got=None
+GSM 8 ok=False gold=45 got=15
+GSM 9 ok=False gold=460 got=60
+GSM 12 ok=False gold=13 got=12
+GSM 30 ok=False gold=109 got=128.8
+GSM 34 ok=False gold=23 got=ERR HTTP Error 500: Internal Server Error
+GSM 36 ok=False gold=75 got=ERR HTTP Error 500: Internal Server Error
+GSM 41 ok=False gold=200 got=ERR HTTP Error 500: Internal Server Error
+RESULT gsm8k_50 42/50 = 84.0%
+TOOL ok=False "What's the weather at KSFO right now?" -> []
+TOOL ok=False 'Fetch the METAR for KOAK.' -> []
+TOOL ok=True 'Is it VFR at KLAX?' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KLAX"}'}, 'id': 'EhWJrOeJngK9IwDQ8wd8miIeeVvRKlah'}]
+TOOL ok=False 'Get the current observation for KJFK please.' -> []
+TOOL ok=False 'Check the METAR at KSEA.' -> []
+RESULT toolcall 1/5

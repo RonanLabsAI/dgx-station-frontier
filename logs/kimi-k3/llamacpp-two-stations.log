@@ -1,0 +1,43 @@
+# Kimi K3 unsloth UD-IQ1_M GGUF across TWO Stations with llama.cpp RPC over one 400G link (GB300s only, no RTX PRO 6000).
+# Run 2026-10-07 02:26-02:45 PT. llama.cpp HEAD c479922a + the C2C zero-copy patch, built in the SGLang dev image (CUDA 13.0).
+# Right: ggml-rpc-server on its GB300. Left: llama-server --rpc <right>:50052 -ngl 999 -ts 34,59 -fit off, experts of layers
+# 66-92 in left Grace (-ot ...=CPU, GGML_CUDA_C2C_ZEROCOPY=1), --load-mode none -fa on -t 64 -c 65536 -np 16 -kvu -b 4096 -ub 2048.
+# Excerpt: lines selected verbatim; hostnames, IPs, user names and GPU UUIDs replaced. Bench and smoke harness as in
+# llamacpp-one-station.log (kbench.py, ksmoke.py with max_tokens 768).
+
+
+--- kimi2s-1007-0226/bench-c1.log
+RESULT kimi C1 N2 P256 per_user_decode_median 17.91 tok/s min 17.91 max 17.91 aggregate_output 10.96 tok/s wall 46.7s prefill_median 38.3 tok/s prompt_n 130
+
+--- kimi2s-1007-0226/bench-c4.log
+RESULT kimi C4 N4 P128 per_user_decode_median 8.26 tok/s min 8.26 max 8.26 aggregate_output 24.64 tok/s wall 20.8s prefill_median 25.2 tok/s prompt_n 130
+
+--- kimi2s-1007-0226/bench-c16.log
+RESULT kimi C16 N16 P128 per_user_decode_median 2.23 tok/s min 2.23 max 2.23 aggregate_output 30.05 tok/s wall 68.2s prefill_median 12.9 tok/s prompt_n 130
+
+--- kimi2s-1007-0226/rpc-server.log (right Station)
+  endpoint       : <rail-ip-right>:50052
+  CUDA0: NVIDIA GB300 (255809 MiB, 255104 MiB free)
+  transport      : TCP (RDMA auto-negotiate enabled)
+RDMA activated: qpn=1797->1797 mtu=4096 rx_depth=24
+RDMA activated: qpn=1798->1798 mtu=4096 rx_depth=24
+RDMA activated: qpn=1799->1799 mtu=4096 rx_depth=24
+RDMA activated: qpn=1800->1800 mtu=4096 rx_depth=24
+RDMA activated: qpn=1801->1801 mtu=4096 rx_depth=24
+RDMA activated: qpn=1802->1802 mtu=4096 rx_depth=24
+RDMA activated: qpn=1803->1803 mtu=4096 rx_depth=24
+RDMA activated: qpn=1804->1804 mtu=4096 rx_depth=24
+
+--- kimi2s-1007-0226/smoke-gsm50-rea.log (failures and summaries only)
+CANARY ok=True q='What is 4738 * 2917? Reply with just the' got='13820746' reasoning_len=413
+CANARY ok=True q='What is the capital of Australia? Reply ' got='Canberra' reasoning_len=171
+CANARY ok=True q='Write a Python function is_prime(n) in u' got='```python\ndef is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n    
+GSM 14 ok=False gold=60 got=40
+GSM 12 ok=False gold=13 got=12
+RESULT gsm8k_50 48/50 = 96.0%
+TOOL ok=True "What's the weather at KSFO right now?" -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KSFO"}'}, 'id': '0VMWAWnCcNY4tfh1Ej5JOjCjAfj7XGsB'}]
+TOOL ok=True 'Fetch the METAR for KOAK.' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KOAK"}'}, 'id': '9DtZFnEa3gwqjs9l2J35IuoyEAGGkrbX'}]
+TOOL ok=True 'Is it VFR at KLAX?' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KLAX"}'}, 'id': 'Bbc38nGIdr2itu8KZ0rjyI3mrDccTPxl'}]
+TOOL ok=True 'Get the current observation for KJFK please.' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KJFK"}'}, 'id': '111MHSgAzWN5v63P8G9R75BEPrtD3xvw'}]
+TOOL ok=True 'Check the METAR at KSEA.' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KSEA"}'}, 'id': 'SITI0NLqVLtslHLe9QNvbdeCf8aEiCEd'}]
+RESULT toolcall 5/5

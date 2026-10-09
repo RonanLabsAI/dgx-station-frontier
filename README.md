@@ -5,13 +5,14 @@ Every number in this repository is one row in [`results.jsonl`](results.jsonl), 
 log excerpt under [`logs/`](logs/). [`tools/validate.py`](tools/validate.py) checks both directions: each row against
 its log, and each performance number in the READMEs against `results.jsonl`.
 
-Five recipes and a microbenchmark atlas (the Nemotron recipe was added after the first release).
+Six recipes and a microbenchmark atlas (the Nemotron and Kimi K3 recipes were added after the first release).
 
 | Folder | What it is |
 |---|---|
 | [`recipes/dsv41-flash-sidecar/`](recipes/dsv41-flash-sidecar/) | DeepSeek-V4.1-Flash on one Station, with the RTX PRO 6000 serving the cold experts (original-el8's sidecar design on public b12x). Also run as two independent copies, one per Station (DP2) |
 | [`recipes/dsv4-pro-two-stations/`](recipes/dsv4-pro-two-stations/) | DeepSeek-V4-Pro-0813 (1.6T parameters) across both Stations: E1 stock, E2 hot/cold expert split, E3 with an RTX PRO 6000 warm-expert tier on each Station. A speculative-decoding arm is included and marked experimental |
 | [`recipes/nemotron-ultra/`](recipes/nemotron-ultra/) | NVIDIA Nemotron 3 Ultra 550B-A55B NVFP4 (general and IOI competitive-coding checkpoints) on one Station with routed experts in Grace memory, and on two Stations with every weight in HBM. Stock vLLM, no patches |
+| [`recipes/kimi-k3/`](recipes/kimi-k3/) | Moonshot Kimi K3 at 3 bits (vellum W3A16) across both Stations in vLLM, with most routed experts in Grace memory (load hook and four load fixes included); and the 1.6-bit GGUF in llama.cpp on one Station, two Stations and four GPUs, with our C2C zero-copy patch and a CUDA 13.2 miscompile warning |
 | [`recipes/fabric-data-direct/`](recipes/fabric-data-direct/) | The cross-Station fabric: Data Direct inside containers, a per-message-size NCCL tuner, the lossless traffic class, and what small-message latency does and does not allow |
 | [`atlas/microbench/`](atlas/microbench/) | C2C, HBM, Grace STREAM, RTX PRO 6000 to Grace, CPU vs GPU expert compute, GEMM power |
 | [`articles/`](articles/) | Plain-English write-ups of the results above. [Where should your experts live?](articles/where-should-your-experts-live/) (Grace vs HBM vs RTX PRO 6000); [What does an expert sidecar actually do?](articles/what-does-an-expert-sidecar-do/) |
@@ -26,7 +27,7 @@ Two DGX Station GB300 desktops. Each has:
 - one ConnectX-8 SuperNIC with two 400G ports.
 
 **All cross-Station results use one 400G DAC between the two ConnectX-8s (RoCEv2, no switch).** The second port is not
-cabled yet. Software for every row: driver 595.91.07, host CUDA 13.2, kernel 7.0.0-1019-nvidia-64k, Ubuntu 24.04.4.
+cabled yet. Software for every row: driver 595.91.07 (except the Kimi K3 vLLM rows: 595.99.02), host CUDA 13.2, kernel 7.0.0-1019-nvidia-64k, Ubuntu 24.04.4.
 Engines run in containers pinned by digest; each row of `results.jsonl` names its image digest and versions.
 
 ## Headline results
@@ -44,6 +45,7 @@ streams.
 | DS-V4-Pro-0813 across both Stations, stock vLLM (E1): C1 / C16 aggregate / GSM8K-200 | [37.8](recipes/dsv4-pro-two-stations/) tok/s / [109.5](recipes/dsv4-pro-two-stations/) tok/s / [98.0](recipes/dsv4-pro-two-stations/)% | [log](logs/dsv4-pro-two-stations/e1-stock.log) | none found on fewer than four GB300s |
 | DS-V4-Pro with RTX PRO 6000 warm tiers (E3-A16): C16 aggregate, random ids / private real text; GSM8K-200 | [164.6](recipes/dsv4-pro-two-stations/) / [230.8](recipes/dsv4-pro-two-stations/) tok/s; [97.5](recipes/dsv4-pro-two-stations/)% | [log](logs/dsv4-pro-two-stations/e3-a16-sidecar.log) | |
 | `Nemotron-3-Ultra` NVFP4: one Station (TP1, experts partly in Grace) C1 / C32 aggregate; two Stations (TP2+EP2, all in HBM, IOI coding checkpoint of the same architecture) C1 / C32 aggregate | [39.7](recipes/nemotron-ultra/) / [155.2](recipes/nemotron-ultra/) tok/s; [99.1](recipes/nemotron-ultra/) / [889.1](recipes/nemotron-ultra/) tok/s | [one Station](logs/nemotron-ultra/ultra-one-station.log), [two Stations](logs/nemotron-ultra/cc-two-stations.log) | none found on DGX Station |
+| `Kimi-K3` with int3 experts (vellum W3A16) across both Stations, vLLM TP2+EP2, `408 GiB` per Station of routed experts in Grace: C1 / C16 aggregate (upper bound, prefix-cache hits) / GSM8K-200 | [18.1](recipes/kimi-k3/) tok/s / [52.17](recipes/kimi-k3/) tok/s / [98.0](recipes/kimi-k3/)% | [log](logs/kimi-k3/vllm-two-stations.log) | none found on DGX Station; on sixteen DGX Sparks with speculative decoding and a different prompt shape: [29.81](https://github.com/ciprianveg/gb10-vllm/tree/main/kimi-k3/v5) tok/s C1 (ciprianveg) |
 | Fused GLM-5.3 TP2+EP2 over the rail: `64K`-token prefill with Data Direct + tuner3 + traffic class `106` vs stock | [11,173](recipes/fabric-data-direct/) vs [8,033](recipes/fabric-data-direct/) tok/s ([+39](recipes/fabric-data-direct/)%) | [log](logs/fabric-data-direct/fused-glm-dd-ab.log) | |
 | Smallest cross-Station all-reduce on the engine path (`14 KB`, CUDA graph) | [31.67](recipes/fabric-data-direct/) µs | [log](logs/fabric-data-direct/lambda-engine-path.log) | |
 | GB300 reading pinned Grace memory over C2C (GPU kernel, zero-copy) | [352.8](atlas/microbench/) GB/s | [log](logs/atlas-microbench/gb300-membench.log) | |
@@ -127,6 +129,11 @@ its limit in any recipe.
   written from our own notes.
 - **J-M-Recipes (James Meadlock)**, [recipes](https://github.com/J-M-Recipes/recipes) (MIT): the pin-hot-experts hook our
   DS-V4-Pro E2 hook is ported from (MIT notice kept), and the decode harness used for the GLM fabric A/B (not vendored).
+- **Moonshot AI** (Kimi K3, Kimi K3 License), **Vellum** (the 3-bit `Kimi-K3-W3A16-g64` quantisation) and **unsloth**
+  (the `UD-IQ1_M` GGUF) for the Kimi K3 weights; no weights are included. **ciprianveg**,
+  [gb10-vllm](https://github.com/ciprianveg/gb10-vllm): the sixteen-Spark Kimi K3 reference numbers (no licence; nothing copied).
+- **llama.cpp / ggml** (MIT): our C2C zero-copy patch is against it, and the CUDA 13.2 reproducer follows one of its kernels
+  (MIT notice kept in the file).
 - vLLM, SGLang, FlashInfer, NCCL and nccl-tests, perftest: used as released. Full third-party list: [NOTICE](NOTICE).
 
 ## Layout and validation

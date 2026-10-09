@@ -1,0 +1,305 @@
+# Kimi K3 (vellum-ai/Kimi-K3-W3A16-g64 @09c06868, GPTQ int3 g64 routed experts, BF16 dense) across TWO Stations:
+# vLLM nightly af7f9488, TP2 + EP2 over one 400G RoCE link, Humming 3-bit WNA16 MoE backend, 408 GiB/rank of routed
+# experts (routed_experts.{w13,w2}_weight_packed) in Grace memory via UVA, load hook recipes/kimi-k3/vllm/hook.
+# Run 2026-10-09 08:30-09:37 PT (attempt 2 of this session; attempt 1 is the OOM shown at the end). Rank 1 (right) first.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs replaced
+# with <placeholders>. vllm bench "Namespace(...)" argument dumps are cut to the fields that define the run (marked).
+# "power-summary" lines are computed by us from the 1 s nvidia-smi samples of the named csv (GB300 rows only).
+# Times are Pacific (PT) unless the line says otherwise; vLLM server log lines are UTC ("10-09 15:31:05" = 08:31:05 PDT).
+# Bench harness: an older version of the bench script (random 8,192 in / 1,024 out, ignore-eos, decode_agg = C x 1000 /
+# mean TPOT). It used seed 1006+rep for EVERY concurrency, so C4 and C16 reused C1 rep 1's seed 1007, and prefix caching
+# was ON in the server. C1 (three fresh seeds) and C4 show a 0.0% prefix-cache hit rate; the C16 run does not (see the
+# "prefix cache" section): treat C16 as an upper bound.
+
+
+--- k3e1b-1009/launch-rank0.txt
+launched 2026-10-09 08:30:36 PDT host=<left-host> rank=0 gpu=<left-GB300-uuid> image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+model=/models/hf/vellum-ai__Kimi-K3-W3A16-g64 mode=tp moe=humming pin=alloc offgb=408 ctx=65536 seqs=16 mbt=8192 util=0.95 dd=1 tuner=tuner3.csv
+args: serve /model --served-model-name kimi-k3 --trust-remote-code --reasoning-parser kimi_k3 --tool-call-parser kimi_k3 --enable-auto-tool-choice --distributed-executor-backend mp --nnodes 2 --node-rank 0 --master-addr <rail-ip-left> --master-port 29614 --disable-custom-all-reduce --moe-backend humming --offload-backend uva --cpu-offload-gb 408 --cpu-offload-params routed_experts.w13_weight_packed routed_experts.w2_weight_packed --max-model-len 65536 --max-num-seqs 16 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.95 --no-enable-flashinfer-autotune --tensor-parallel-size 2 --pipeline-parallel-size 1 --enable-expert-parallel --language-model-only --host 0.0.0.0 --port 8010
+
+--- k3e1b-1009/launch-rank1.txt (right Station)
+launched 2026-10-09 08:30:11 PDT host=<right-host> rank=1 gpu=<right-GB300-uuid> image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+model=/models/hf/vellum-ai__Kimi-K3-W3A16-g64 mode=tp moe=humming pin=alloc offgb=408 ctx=65536 seqs=16 mbt=8192 util=0.95 dd=1 tuner=tuner3.csv
+args: serve /model --served-model-name kimi-k3 --trust-remote-code --reasoning-parser kimi_k3 --tool-call-parser kimi_k3 --enable-auto-tool-choice --distributed-executor-backend mp --nnodes 2 --node-rank 1 --master-addr <rail-ip-left> --master-port 29614 --disable-custom-all-reduce --moe-backend humming --offload-backend uva --cpu-offload-gb 408 --cpu-offload-params routed_experts.w13_weight_packed routed_experts.w2_weight_packed --max-model-len 65536 --max-num-seqs 16 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.95 --no-enable-flashinfer-autotune --tensor-parallel-size 2 --pipeline-parallel-size 1 --enable-expert-parallel --language-model-only --headless
+
+--- k3e1b-1009/image-digest-rank0.txt
+sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+vllm/vllm-openai@sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+
+--- k3e1b-1009/meminfo-pre-rank0.txt (host memory before launch, kB)
+MemAvailable:   478537536 kB
+Cached:           738304 kB
+SwapCached:            0 kB
+Unevictable:        5888 kB
+Mlocked:            2816 kB
+AnonPages:       7219456 kB
+Shmem:            422720 kB
+
+--- k3e1b-1009/server-rank0.log (selected lines; UTC)
+(APIServer pid=1) INFO 10-09 15:31:05 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.30.1rc1.dev245+gaf7f9488c
+[k3hook] patched RoutedExperts.weight_loader pid=1
+(APIServer pid=1) INFO 10-09 15:31:10 [config.py:643] Mamba cache mode is set to 'align' for KimiK3ForConditionalGeneration by default when prefix caching is enabled
+[k3hook] patched RoutedExperts.weight_loader pid=334
+[k3hook] patched RoutedExperts.weight_loader pid=553
+[k3hook] patched CompressedTensorsWNA16MoEMethod.process_weights_after_loading pid=553
+(Worker_TP0_EP0 pid=553) INFO 10-09 15:31:42 [fused_humming_moe.py:121] Using grouped_contiguous gemm for humming moe
+(Worker_TP0_EP0 pid=553) INFO 10-09 15:31:42 [int_wna16.py:282] Using 'HUMMING' WNA16 MoE backend.
+(Worker_TP0_EP0 pid=553) INFO 10-09 15:32:19 [uva.py:68] Total CPU offloaded parameters: 408.27
+[k3hook] repacked 1 3-bit tensors (last layers.1.block_sparse_moe.experts.routed_experts.w13_weight_packed -> (3072, 336))
+[k3hook] repacked 1000 3-bit tensors (last layers.1.block_sparse_moe.experts.routed_experts.w13_weight_packed -> (3072, 336))
+[k3hook] repacked 100000 3-bit tensors (last layers.75.block_sparse_moe.experts.routed_experts.w13_weight_packed -> (3072, 336))
+(Worker_TP0_EP0 pid=553) INFO 10-09 15:44:35 [default_loader.py:484] Loading weights took 734.51 seconds
+(Worker_TP0_EP0 pid=553) INFO 10-09 15:44:38 [int_wna16.py:436] Using HummingGroupedExperts
+[k3hook] re-offloaded 2 humming params, 5.2 GiB
+[k3hook] re-offloaded 22 humming params, 56.8 GiB
+[k3hook] re-offloaded 42 humming params, 108.5 GiB
+[k3hook] re-offloaded 62 humming params, 160.2 GiB
+[k3hook] re-offloaded 82 humming params, 211.9 GiB
+[k3hook] re-offloaded 102 humming params, 263.6 GiB
+[k3hook] re-offloaded 122 humming params, 315.2 GiB
+[k3hook] re-offloaded 142 humming params, 366.9 GiB
+(Worker_TP0_EP0 pid=553) INFO 10-09 15:45:01 [model_runner.py:407] Model loading took 165.6 GiB memory and 799.018381 seconds
+(Worker_TP0_EP0 pid=553) INFO 10-09 15:46:41 [model_runner.py:1069] Graph capturing finished in 16 secs, took 0.63 GiB
+(Worker_TP0_EP0 pid=553) INFO 10-09 15:46:42 [gpu_worker.py:692] Available KV cache memory: 66.5 GiB
+(EngineCore pid=334) INFO 10-09 15:46:42 [kv_cache_utils.py:2408] GPU KV cache size: 1,796,096 tokens, Maximum concurrency for 65,536 tokens per request: 27.41x
+(Worker_TP0_EP0 pid=553) INFO 10-09 15:46:59 [model_runner.py:1069] Graph capturing finished in 7 secs, took 0.11 GiB
+(EngineCore pid=334) INFO 10-09 15:47:01 [core.py:380] init engine (profile, create kv cache, warmup model) took 69.25 s
+(APIServer pid=1) INFO 10-09 15:47:04 [entry.py:136] Starting vLLM server on http://0.0.0.0:8010
+INFO:     Application startup complete.
+
+--- k3e1b-1009/server-rank1.log (right Station; selected lines; UTC)
+(Worker_TP1_EP1 pid=401) INFO 10-09 15:32:21 [uva.py:68] Total CPU offloaded parameters: 408.27
+(Worker_TP1_EP1 pid=401) INFO 10-09 15:45:25 [default_loader.py:484] Loading weights took 782.44 seconds
+(Worker_TP1_EP1 pid=401) INFO 10-09 15:45:51 [model_runner.py:407] Model loading took 165.6 GiB memory and 849.870018 seconds
+(Worker_TP1_EP1 pid=401) INFO 10-09 15:46:42 [gpu_worker.py:692] Available KV cache memory: 66.5 GiB
+
+--- k3e1b-1009/run.log (runner; PT)
+08:30:07 E1 launch rank1 (right) offgb=408 shards=275
+08:30:31 launch rank0
+08:35:39 waiting 5 min; MemAvail 31 GiB; Shmem 408 GiB; GB300 NVIDIA GB300, 177896 MiB
+08:40:56 waiting 10 min; MemAvail 32 GiB; Shmem 408 GiB; GB300 NVIDIA GB300, 176676 MiB
+08:46:12 waiting 15 min; MemAvail 30 GiB; Shmem 408 GiB; GB300 NVIDIA GB300, 175010 MiB
+08:47:13 READY load_time 17 min
+L MemAvailable:   30538304 kB
+L Mlocked:            3008 kB
+L Shmem:          428691072 kB
+L NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89201 MiB
+L NVIDIA GB300, 242372 MiB
+R MemAvailable:   31100928 kB
+R Mlocked:            2944 kB
+R Shmem:          429002880 kB
+R NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 90418 MiB
+R NVIDIA GB300, 242372 MiB
+auto-checked 11/12 correct
+decode_agg C1 rep1 = 18.10 tok/s (C x 1000/meanTPOT)
+decode_agg C1 rep2 = 18.10 tok/s (C x 1000/meanTPOT)
+decode_agg C1 rep3 = 18.10 tok/s (C x 1000/meanTPOT)
+decode_agg C4 rep1 = 32.70 tok/s (C x 1000/meanTPOT)
+decode_agg C16 rep1 = 52.17 tok/s (C x 1000/meanTPOT)
+09:15:06 C16 agg 52.17 -> GSM8K-200
+{"n": 200, "correct": 196, "acc": 98.0, "runaways": 0, "errors": 0, "wall_s": 1098, "median_ctoks": 194, "effort": "high"}
+CANARY ok=True q='What is 4738 * 2917? Reply with just the' got='13820746' reasoning_len=0
+CANARY ok=True q='What is the capital of Australia? Reply ' got='Canberra' reasoning_len=0
+CANARY ok=True q='Write a Python function is_prime(n) in u' got='```python\ndef is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**
+RESULT gsm8k_20 19/20 = 95.0%
+TOOL ok=True "What's the weather at KSFO right now?" -> [{'id': 'chatcmpl-tool-bdd1068e7c39b75a', 'type': 'function', 'function': {'name': 'get_metar', 'argumen
+TOOL ok=True 'Fetch the METAR for KOAK.' -> [{'id': 'chatcmpl-tool-bfef314900eac086', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao
+TOOL ok=True 'Is it VFR at KLAX?' -> [{'id': 'chatcmpl-tool-bf59a1a241178474', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao": "KLA
+TOOL ok=True 'Get the current observation for KJFK please.' -> [{'id': 'chatcmpl-tool-8b02e36c35c47c06', 'type': 'function', 'function': {'name': 'get_metar', '
+TOOL ok=True 'Check the METAR at KSEA.' -> [{'id': 'chatcmpl-tool-bd57007878e4f869', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao"
+RESULT toolcall 5/5
+09:36:38 <left-host> before: 246046 MiB
+09:36:41 <left-host> after: 22 MiB (container: exited)
+09:36:41 <right-host> before: 246046 MiB
+09:36:59 <right-host> after: 22 MiB (container: exited)
+09:36:59 E1 finished rc=0
+
+--- k3e1b-1009/server-rank0.log: prefix cache, every logger line whose hit rate changed (UTC). C1 ran 15:48-15:58, C4 15:58-16:03, C16 16:03:30-16:15:06, GSM8K-200 and the tool smoke after that
+(APIServer pid=1) INFO 10-09 15:47:24 [loggers.py:320] Engine 000: Avg prompt throughput: 52.0 tokens/s, Avg generation throughput: 33.7 tokens/s, Running: 8 reqs, Waiting: 0 reqs, GPU KV cache usage: 3.7%, Prefix cache hit rate: 0.0%
+(APIServer pid=1) INFO 10-09 16:03:44 [loggers.py:320] Engine 000: Avg prompt throughput: 230.4 tokens/s, Avg generation throughput: 0.2 tokens/s, Running: 4 reqs, Waiting: 12 reqs, GPU KV cache usage: 3.8%, Prefix cache hit rate: 13.3%
+(APIServer pid=1) INFO 10-09 16:03:54 [loggers.py:320] Engine 000: Avg prompt throughput: 691.2 tokens/s, Avg generation throughput: 0.4 tokens/s, Running: 7 reqs, Waiting: 9 reqs, GPU KV cache usage: 6.3%, Prefix cache hit rate: 17.6%
+(APIServer pid=1) INFO 10-09 16:04:04 [loggers.py:320] Engine 000: Avg prompt throughput: 1280.0 tokens/s, Avg generation throughput: 1.9 tokens/s, Running: 9 reqs, Waiting: 7 reqs, GPU KV cache usage: 7.0%, Prefix cache hit rate: 16.2%
+(APIServer pid=1) INFO 10-09 16:04:14 [loggers.py:320] Engine 000: Avg prompt throughput: 1638.5 tokens/s, Avg generation throughput: 2.6 tokens/s, Running: 11 reqs, Waiting: 5 reqs, GPU KV cache usage: 8.0%, Prefix cache hit rate: 15.1%
+(APIServer pid=1) INFO 10-09 16:04:24 [loggers.py:320] Engine 000: Avg prompt throughput: 1638.3 tokens/s, Avg generation throughput: 3.2 tokens/s, Running: 13 reqs, Waiting: 3 reqs, GPU KV cache usage: 9.4%, Prefix cache hit rate: 14.1%
+(APIServer pid=1) INFO 10-09 16:04:34 [loggers.py:320] Engine 000: Avg prompt throughput: 1638.3 tokens/s, Avg generation throughput: 3.8 tokens/s, Running: 15 reqs, Waiting: 1 reqs, GPU KV cache usage: 10.7%, Prefix cache hit rate: 13.2%
+(APIServer pid=1) INFO 10-09 16:04:44 [loggers.py:320] Engine 000: Avg prompt throughput: 1638.4 tokens/s, Avg generation throughput: 4.4 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 11.6%, Prefix cache hit rate: 12.8%
+(APIServer pid=1) INFO 10-09 16:09:14 [loggers.py:320] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 33.0 tokens/s, Running: 11 reqs, Waiting: 0 reqs, GPU KV cache usage: 9.4%, Prefix cache hit rate: 12.5%
+(APIServer pid=1) INFO 10-09 16:09:24 [loggers.py:320] Engine 000: Avg prompt throughput: 1638.4 tokens/s, Avg generation throughput: 3.3 tokens/s, Running: 11 reqs, Waiting: 3 reqs, GPU KV cache usage: 9.5%, Prefix cache hit rate: 11.8%
+(APIServer pid=1) INFO 10-09 16:09:34 [loggers.py:320] Engine 000: Avg prompt throughput: 1638.4 tokens/s, Avg generation throughput: 3.2 tokens/s, Running: 11 reqs, Waiting: 4 reqs, GPU KV cache usage: 9.2%, Prefix cache hit rate: 11.2%
+(APIServer pid=1) INFO 10-09 16:09:44 [loggers.py:320] Engine 000: Avg prompt throughput: 1638.4 tokens/s, Avg generation throughput: 3.2 tokens/s, Running: 11 reqs, Waiting: 4 reqs, GPU KV cache usage: 9.0%, Prefix cache hit rate: 10.6%
+(APIServer pid=1) INFO 10-09 16:09:54 [loggers.py:320] Engine 000: Avg prompt throughput: 1638.4 tokens/s, Avg generation throughput: 3.2 tokens/s, Running: 11 reqs, Waiting: 4 reqs, GPU KV cache usage: 8.8%, Prefix cache hit rate: 10.1%
+(APIServer pid=1) INFO 10-09 16:10:04 [loggers.py:320] Engine 000: Avg prompt throughput: 1638.5 tokens/s, Avg generation throughput: 3.2 tokens/s, Running: 11 reqs, Waiting: 4 reqs, GPU KV cache usage: 8.6%, Prefix cache hit rate: 9.7%
+(APIServer pid=1) INFO 10-09 16:10:14 [loggers.py:320] Engine 000: Avg prompt throughput: 1638.3 tokens/s, Avg generation throughput: 3.4 tokens/s, Running: 13 reqs, Waiting: 3 reqs, GPU KV cache usage: 9.9%, Prefix cache hit rate: 9.3%
+(APIServer pid=1) INFO 10-09 16:10:24 [loggers.py:320] Engine 000: Avg prompt throughput: 1638.4 tokens/s, Avg generation throughput: 4.0 tokens/s, Running: 15 reqs, Waiting: 1 reqs, GPU KV cache usage: 11.3%, Prefix cache hit rate: 8.9%
+(APIServer pid=1) INFO 10-09 16:10:34 [loggers.py:320] Engine 000: Avg prompt throughput: 1638.4 tokens/s, Avg generation throughput: 11.0 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 11.0%, Prefix cache hit rate: 8.7%
+(APIServer pid=1) INFO 10-09 16:15:14 [loggers.py:320] Engine 000: Avg prompt throughput: 272.2 tokens/s, Avg generation throughput: 24.6 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 7.3%, Prefix cache hit rate: 8.6%
+(APIServer pid=1) INFO 10-09 16:17:54 [loggers.py:320] Engine 000: Avg prompt throughput: 16.2 tokens/s, Avg generation throughput: 49.2 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 7.3%, Prefix cache hit rate: 8.5%
+(APIServer pid=1) INFO 10-09 16:19:54 [loggers.py:320] Engine 000: Avg prompt throughput: 46.5 tokens/s, Avg generation throughput: 42.6 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 7.3%, Prefix cache hit rate: 8.4%
+(APIServer pid=1) INFO 10-09 16:22:14 [loggers.py:320] Engine 000: Avg prompt throughput: 35.9 tokens/s, Avg generation throughput: 44.4 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 7.3%, Prefix cache hit rate: 8.3%
+(APIServer pid=1) INFO 10-09 16:25:14 [loggers.py:320] Engine 000: Avg prompt throughput: 60.9 tokens/s, Avg generation throughput: 39.2 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 7.3%, Prefix cache hit rate: 8.2%
+(APIServer pid=1) INFO 10-09 16:27:44 [loggers.py:320] Engine 000: Avg prompt throughput: 48.8 tokens/s, Avg generation throughput: 41.3 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 7.3%, Prefix cache hit rate: 8.1%
+(APIServer pid=1) INFO 10-09 16:30:34 [loggers.py:320] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 49.4 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 7.3%, Prefix cache hit rate: 8.0%
+
+--- k3e1b-1009/coherence16.log (16 greedy prompts, thinking off, 200 tokens; ok = auto-check, None = not auto-checked)
+0 True 'Paris'
+1 True '391'
+2 False 'The word "airplane" spelled backwards is **enalpira**.'
+3 True 'Carbon dioxide.'
+4 True 'Jupiter'
+5 True '"Thank you" in Spanish is **"gracias"**.\n\nIf you\'d like to be more emphatic, you can say **"muchas gracias"** (thank you very much).'
+6 True '100'
+7 True 'Here\'s a Python function that returns the square of a number:\n\n```python\ndef square(number):\n    """\n    Returns the square of a number.\n   '
+8 None 'The sky appears blue because sunlight is scattered by molecules in Earth’s atmosphere, and shorter blue wavelengths scatter much more strong'
+9 None 'The three primary colors are:\n\n1. **Red**\n2. **Blue**\n3. **Yellow**\n\nThese are the traditional primary colors used in art and pigment mixing'
+10 True '300'
+11 True 'In aviation, **VFR** stands for **Visual Flight Rules**.\n\nThese are a set of regulations under which a pilot operates an aircraft in weather'
+12 True '*Pride and Prejudice* was written by **Jane Austen**. It was first published in 1813.'
+13 None 'Silent peaks touch sky  \nAncient stone whispers to clouds  \nSnow falls, time stands still'
+14 True 'The chemical symbol for gold is **Au**, derived from the Latin word *aurum*, meaning "shining dawn" or "glow of sunrise."'
+15 None 'Two young lovers from feuding families secretly marry, but a series of tragic misunderstandings leads to their untimely deaths, ultimately r'
+auto-checked 11/12 correct
+
+--- k3e1b-1009/bench-c1/warmup.log (warm-up)
+Namespace(... seed=0, num_prompts=4, dataset_name='random', random_input_len=512, random_output_len=64, random_prefix_len=0, max_concurrency=4, num_warmups=0, ignore_eos=True, temperature=None ...)   [cut to these fields]
+Maximum request concurrency: 4
+Successful requests:                     4         
+Failed requests:                         0         
+Maximum request concurrency:             4         
+Benchmark duration (s):                  14.47     
+Total input tokens:                      2048      
+Total generated tokens:                  256       
+Output token throughput (tok/s):         17.70     
+Mean TTFT (ms):                          6849.65   
+Median TTFT (ms):                        7585.77   
+Mean TPOT (ms):                          119.89    
+Median TPOT (ms):                        109.22    
+
+--- k3e1b-1009/bench-c1/c1-r1.log (C1 rep 1)
+Namespace(... seed=1007, num_prompts=3, dataset_name='random', random_input_len=8192, random_output_len=1024, random_prefix_len=0, max_concurrency=1, num_warmups=0, ignore_eos=True, temperature=None ...)   [cut to these fields]
+Maximum request concurrency: 1
+Successful requests:                     3         
+Failed requests:                         0         
+Maximum request concurrency:             1         
+Benchmark duration (s):                  190.79    
+Total input tokens:                      24576     
+Total generated tokens:                  3072      
+Output token throughput (tok/s):         16.10     
+Mean TTFT (ms):                          7073.07   
+Median TTFT (ms):                        7043.68   
+Mean TPOT (ms):                          55.25     
+Median TPOT (ms):                        55.27     
+
+--- k3e1b-1009/bench-c1/c1-r2.log (C1 rep 2)
+Namespace(... seed=1008, num_prompts=3, dataset_name='random', random_input_len=8192, random_output_len=1024, random_prefix_len=0, max_concurrency=1, num_warmups=0, ignore_eos=True, temperature=None ...)   [cut to these fields]
+Maximum request concurrency: 1
+Successful requests:                     3         
+Failed requests:                         0         
+Maximum request concurrency:             1         
+Benchmark duration (s):                  190.65    
+Total input tokens:                      24576     
+Total generated tokens:                  3072      
+Output token throughput (tok/s):         16.11     
+Mean TTFT (ms):                          7041.94   
+Median TTFT (ms):                        7041.75   
+Mean TPOT (ms):                          55.24     
+Median TPOT (ms):                        55.26     
+
+--- k3e1b-1009/bench-c1/c1-r3.log (C1 rep 3)
+Namespace(... seed=1009, num_prompts=3, dataset_name='random', random_input_len=8192, random_output_len=1024, random_prefix_len=0, max_concurrency=1, num_warmups=0, ignore_eos=True, temperature=None ...)   [cut to these fields]
+Maximum request concurrency: 1
+Successful requests:                     3         
+Failed requests:                         0         
+Maximum request concurrency:             1         
+Benchmark duration (s):                  190.69    
+Total input tokens:                      24576     
+Total generated tokens:                  3072      
+Output token throughput (tok/s):         16.11     
+Mean TTFT (ms):                          7041.29   
+Median TTFT (ms):                        7042.18   
+Mean TPOT (ms):                          55.25     
+Median TPOT (ms):                        55.24     
+
+--- k3e1b-1009/bench-c4c16/warmup.log (warm-up)
+Namespace(... seed=0, num_prompts=4, dataset_name='random', random_input_len=512, random_output_len=64, random_prefix_len=0, max_concurrency=4, num_warmups=0, ignore_eos=True, temperature=None ...)   [cut to these fields]
+Maximum request concurrency: 4
+Successful requests:                     4         
+Failed requests:                         0         
+Maximum request concurrency:             4         
+Benchmark duration (s):                  11.66     
+Total input tokens:                      2048      
+Total generated tokens:                  256       
+Output token throughput (tok/s):         21.95     
+Mean TTFT (ms):                          4136.51   
+Median TTFT (ms):                        4854.30   
+Mean TPOT (ms):                          118.43    
+Median TPOT (ms):                        108.05    
+
+--- k3e1b-1009/bench-c4c16/c4-r1.log (C4)
+Namespace(... seed=1007, num_prompts=8, dataset_name='random', random_input_len=8192, random_output_len=1024, random_prefix_len=0, max_concurrency=4, num_warmups=0, ignore_eos=True, temperature=None ...)   [cut to these fields]
+Maximum request concurrency: 4
+Successful requests:                     8         
+Failed requests:                         0         
+Maximum request concurrency:             4         
+Benchmark duration (s):                  281.57    
+Total input tokens:                      65536     
+Total generated tokens:                  8192      
+Output token throughput (tok/s):         29.09     
+Mean TTFT (ms):                          15553.42  
+Median TTFT (ms):                        13210.78  
+Mean TPOT (ms):                          122.33    
+Median TPOT (ms):                        121.11    
+
+--- k3e1b-1009/bench-c4c16/c16-r1.log (C16)
+Namespace(... seed=1007, num_prompts=32, dataset_name='random', random_input_len=8192, random_output_len=1024, random_prefix_len=0, max_concurrency=16, num_warmups=0, ignore_eos=True, temperature=None ...)   [cut to these fields]
+Maximum request concurrency: 16
+Successful requests:                     32        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  685.62    
+Total input tokens:                      262144    
+Total generated tokens:                  32768     
+Output token throughput (tok/s):         47.79     
+Mean TTFT (ms):                          28188.54  
+Median TTFT (ms):                        30009.43  
+Mean TPOT (ms):                          306.67    
+Median TPOT (ms):                        309.90    
+
+--- k3e1b-1009/bench-c1/progress.txt + bench-c4c16/progress.txt
+== C1 rep1 08:48:21
+decode_agg C1 rep1 = 18.10 tok/s (C x 1000/meanTPOT)
+== C1 rep2 08:51:40
+decode_agg C1 rep2 = 18.10 tok/s (C x 1000/meanTPOT)
+== C1 rep3 08:55:00
+decode_agg C1 rep3 = 18.10 tok/s (C x 1000/meanTPOT)
+== C4 rep1 08:58:40
+decode_agg C4 rep1 = 32.70 tok/s (C x 1000/meanTPOT)
+== C16 rep1 09:03:30
+decode_agg C16 rep1 = 52.17 tok/s (C x 1000/meanTPOT)
+
+--- power (computed from k3e1b-1009/bench-c1/power-{left,right}.csv and bench-c4c16/power-{left,right}.csv)
+power-summary C1 bench window, left GB300: GB300 samples 637 (2026/10/09 08:47:42.304 .. 2026/10/09 08:58:18.945) mean 387.9 W max 618.1 W
+power-summary C1 bench window, right GB300: GB300 samples 637 (2026/10/09 08:47:42.540 .. 2026/10/09 08:58:19.188) mean 394.5 W max 629.1 W
+power-summary C4+C16 bench window, left GB300: GB300 samples 1006 (2026/10/09 08:58:19.821 .. 2026/10/09 09:15:05.816) mean 392.9 W max 718.9 W
+power-summary C4+C16 bench window, right GB300: GB300 samples 1006 (2026/10/09 08:58:20.019 .. 2026/10/09 09:15:06.027) mean 400.0 W max 728.9 W
+GB300 power.limit 1300 W (both)
+
+--- k3e1b-1009/gsm8k200.log (first 200 GSM8K test rows, temperature 0, max_tokens 16000, conc 16, chat_template_kwargs thinking=true reasoning_effort=high)
+{"n": 200, "correct": 196, "acc": 98.0, "runaways": 0, "errors": 0, "wall_s": 1098, "median_ctoks": 194, "effort": "high"}
+
+--- k3e1b-1009/ksmoke-tools.log (canaries, GSM8K-20, five tool calls; temperature 0)
+CANARY ok=True q='What is 4738 * 2917? Reply with just the' got='13820746' reasoning_len=0
+CANARY ok=True q='What is the capital of Australia? Reply ' got='Canberra' reasoning_len=0
+CANARY ok=True q='Write a Python function is_prime(n) in u' got='```python\ndef is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n    
+GSM 12 ok=False gold=13 got=12
+RESULT gsm8k_20 19/20 = 95.0%
+TOOL ok=True "What's the weather at KSFO right now?" -> [{'id': 'chatcmpl-tool-bdd1068e7c39b75a', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao": "KSFO"}'}}]
+TOOL ok=True 'Fetch the METAR for KOAK.' -> [{'id': 'chatcmpl-tool-bfef314900eac086', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao": "KOAK"}'}}]
+TOOL ok=True 'Is it VFR at KLAX?' -> [{'id': 'chatcmpl-tool-bf59a1a241178474', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao": "KLAX"}'}}]
+TOOL ok=True 'Get the current observation for KJFK please.' -> [{'id': 'chatcmpl-tool-8b02e36c35c47c06', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao": "KJFK"}'}}]
+TOOL ok=True 'Check the METAR at KSEA.' -> [{'id': 'chatcmpl-tool-bd57007878e4f869', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao": "KSEA"}'}}]
+RESULT toolcall 5/5
+
+--- k3e1b-1009/try1/server-rank0.log (attempt 1 of this session, hook WITHOUT the re-offload step; UTC)
+(Worker_TP0_EP0 pid=553) INFO 10-09 15:15:43 [uva.py:68] Total CPU offloaded parameters: 408.27
+(Worker_TP0_EP0 pid=553) ERROR 10-09 15:28:07 [multiproc_executor.py:948]   File "/usr/local/lib/python3.12/dist-packages/humming/ops/weight.py", line 345, in repack_weight
+(Worker_TP0_EP0 pid=553) ERROR 10-09 15:28:07 [multiproc_executor.py:948] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 3.45 GiB. GPU 0 has a total capacity of 249.81 GiB of which 1.59 GiB is free. Including non-PyTorch memory, this process has 248.19 GiB memory in use. Of the allocated memory 246.86 GiB is alloc

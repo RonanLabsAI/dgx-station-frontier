@@ -1,0 +1,63 @@
+# Kimi K3 unsloth UD-IQ1_M GGUF on FOUR GPUs (both GB300s and both RTX PRO 6000s), llama.cpp RPC, whole model in GPU memory.
+# Run 2026-10-09 03:47-04:12 PT. llama.cpp HEAD c479922a + the C2C zero-copy patch, built in the SGLang dev image (CUDA 13.0)
+# for 103-real;120a-real. One GPU per process: llama-server on the left GB300 (CUDA0) plus three ggml-rpc-servers (left
+# 6000 on 127.0.0.1, right 6000 and right GB300 on the right Station); -dev CUDA0,RPC0,RPC1,RPC2 -sm layer -ts 36,11,11,35,
+# --load-mode none -fa on -t 64 -c 65536 -np 16 -kvu -b 4096 -ub 2048, no Grace use.
+# Excerpt: lines selected verbatim; hostnames, IPs, user names and GPU UUIDs replaced. Harness as in llamacpp-two-stations.log.
+
+
+--- k3-1009/l5b/launch.txt
+launched 2026-10-09 03:47:03 PDT dev=CUDA0,RPC0,RPC1,RPC2 rpc=127.0.0.1:50053,<rail-ip-right>:50053,<rail-ip-right>:50052 ts=36,11,11,35 gb300=<left-GB300-uuid> bin=~/build/ctr-head-c2c-dual/build/bin img=lmsysorg/sglang@sha256:352f1373e721c37d0849cf10ac9ec3c5b81dce76e148b9f271c1b59085eaba1d
+extra: 
+
+--- k3-1009/l5b/list-devices.txt
+Available devices:
+  CUDA0: NVIDIA GB300 (255809 MiB, 255104 MiB free)
+  RPC0: 127.0.0.1:50053 (97249 MiB, 96644 MiB free)
+  RPC1: <rail-ip-right>:50053 (97249 MiB, 96644 MiB free)
+  RPC2: <rail-ip-right>:50052 (255809 MiB, 255104 MiB free)
+
+--- k3-1009/l5b/run.log
+k3-rpc-gb300 up 03:46:51 host=<right-host> gpu=<right-GB300-uuid> <rail-ip-right>:50052
+k3-rpc-rtx up 03:46:52 host=<right-host> gpu=<right-6000-uuid> <rail-ip-right>:50053
+k3-rpc-rtx up 03:46:52 host=<left-host> gpu=<left-6000-uuid> 127.0.0.1:50053
+  CUDA0: NVIDIA GB300 (255809 MiB, 255104 MiB free)
+03:58:35 ready
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 78955 MiB
+NVIDIA GB300, 247736 MiB
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 83217 MiB
+NVIDIA GB300, 238842 MiB
+CANARY ' 9 10 11 12 13 14 15 16'
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB
+NVIDIA GB300, 22 MiB
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB
+NVIDIA GB300, 22 MiB
+04:12:16 L5 finished rc=0
+
+--- k3-1009/l5b/bench-c1-r1.log
+RESULT kimi C1 N3 P256 per_user_decode_median 18.16 tok/s min 18.16 max 18.19 aggregate_output 14.91 tok/s wall 51.5s prefill_median 42.5 tok/s prompt_n 130
+
+--- k3-1009/l5b/bench-c1-r2.log
+RESULT kimi C1 N3 P256 per_user_decode_median 18.20 tok/s min 18.16 max 18.20 aggregate_output 14.84 tok/s wall 51.7s prefill_median 42.5 tok/s prompt_n 130
+
+--- k3-1009/l5b/bench-c1-r3.log
+RESULT kimi C1 N3 P256 per_user_decode_median 18.18 tok/s min 18.17 max 18.19 aggregate_output 14.84 tok/s wall 51.7s prefill_median 42.5 tok/s prompt_n 130
+
+--- k3-1009/l5b/bench-c4.log
+RESULT kimi C4 N4 P128 per_user_decode_median 9.94 tok/s min 9.94 max 9.94 aggregate_output 28.41 tok/s wall 18.0s prefill_median 26.6 tok/s prompt_n 130
+
+--- k3-1009/l5b/bench-c16.log
+RESULT kimi C16 N16 P128 per_user_decode_median 2.55 tok/s min 2.55 max 2.55 aggregate_output 33.47 tok/s wall 61.2s prefill_median 12.7 tok/s prompt_n 130
+
+--- k3-1009/l5b/smoke-gsm50-rea.log (failures and summaries only)
+CANARY ok=True q='What is 4738 * 2917? Reply with just the' got='13820746' reasoning_len=450
+CANARY ok=True q='What is the capital of Australia? Reply ' got='Canberra' reasoning_len=387
+CANARY ok=False q='Write a Python function is_prime(n) in u' got='' reasoning_len=802
+GSM 12 ok=False gold=13 got=12
+RESULT gsm8k_50 49/50 = 98.0%
+TOOL ok=True "What's the weather at KSFO right now?" -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KSFO"}'}, 'id': 'E49Nr0YmpboXEmtxfowJMQfhydxLEekU'}]
+TOOL ok=True 'Fetch the METAR for KOAK.' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KOAK"}'}, 'id': '2ryQAzsib2iH6WskyEMYfGfLWu2o5LB9'}]
+TOOL ok=True 'Is it VFR at KLAX?' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KLAX"}'}, 'id': 'MIMODqt3yx8Vg0lsXkKymFL2iHhNhELP'}]
+TOOL ok=True 'Get the current observation for KJFK please.' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KJFK"}'}, 'id': 'poTFJh7fuVZh71DNAHpAQ3EQ4RHE9KVx'}]
+TOOL ok=True 'Check the METAR at KSEA.' -> [{'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao":"KSEA"}'}, 'id': 'bSPSXN9LfE89CFW9yconrQwXqaPiIroO'}]
+RESULT toolcall 5/5
