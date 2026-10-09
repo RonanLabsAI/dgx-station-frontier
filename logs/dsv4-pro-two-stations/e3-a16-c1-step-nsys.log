@@ -1,0 +1,19 @@
+# DeepSeek-V4-Pro-0813 E3-A16 (same recipe and boot settings as e3-a16-sidecar.log), C1 decode step under Nsight Systems.
+# 2026-10-08 12:2x PT. Boot under `nsys profile -t cuda,nvtx --cuda-graph-trace=node`; one held-out private real-text request
+# profiled (1 prefill + 23 decode steps per rank); steps delimited by vocab_parallel_embedding_kernel; first decode step dropped.
+# Kernel busy times are per rank and overlap across streams, so the categories sum to more than step_ms.
+# Excerpt: JSON fields copied from the analysis output files named below and re-serialised on one line each; values unedited.
+# Per-layer arrays and the per-kernel top list omitted. Nothing else edited. Times are Pacific (PT).
+
+--- e3a16c1-r0-step.json (rank 0)
+{"steps": 22, "dropped": 1, "step_ms": 22.591648, "gpu_idle_ms": 0.9487805000000069}
+{"busy_ms": {"attn_dsa": 1.1422, "dense_gemm": 6.2758, "e3_other": 0.3992, "e3_wait": 0.3579, "marlin": 6.2709, "mhc": 2.0399, "moe_route": 1.0454, "nccl": 4.497, "norm_quant_elem": 2.2916, "other": 1.1118, "sampler_spec": 0.0083}}
+{"calls_per_step": {"attn_dsa": 189.0, "dense_gemm": 761.0, "e3_other": 183.0, "e3_wait": 61.0, "marlin": 244.0, "mhc": 246.0, "moe_route": 393.0, "nccl": 124.0, "norm_quant_elem": 1304.0, "other": 560.0, "sampler_spec": 3.0}}
+--- e3a16c1-r1-step.json (rank 1)
+{"steps": 22, "dropped": 1, "step_ms": 22.592976, "gpu_idle_ms": 0.9799539999999975}
+{"busy_ms": {"attn_dsa": 1.1226, "dense_gemm": 6.3192, "e3_other": 0.3838, "e3_wait": 0.3483, "marlin": 5.9955, "mhc": 1.999, "moe_route": 1.0383, "nccl": 4.7559, "norm_quant_elem": 2.3119, "other": 1.1272, "sampler_spec": 0.0083}}
+{"calls_per_step": {"attn_dsa": 189.0, "dense_gemm": 761.0, "e3_other": 183.0, "e3_wait": 61.0, "marlin": 244.0, "mhc": 246.0, "moe_route": 393.0, "nccl": 124.0, "norm_quant_elem": 1304.0, "other": 560.0, "sampler_spec": 3.0}}
+--- e3a16c1-detail.json rank 0 (hot = HBM-resident expert marlin call, cold = Grace-resident expert marlin call, ms per step; nccl = all-reduce kernels; wait / publish_to_wait_end = sidecar round trip)
+{"steps": 22, "hot_ms": 2.82608, "cold_ms": 3.445056, "nccl_us": {"n_per_step": 123.0, "p10": 17.6, "p50": 20.32, "p90": 111.584, "min": 15.552, "sum_ms": 4.517005227272727}, "wait_us": {"p10": 0.928, "p50": 1.12, "p90": 17.856, "max": 6834.944, "n_gt5us": 15.545454545454545}, "publish_to_wait_end_us": {"p10": 67.52, "p50": 84.608, "p90": 211.104}}
+--- e3a16c1-detail.json rank 1 (hot = HBM-resident expert marlin call, cold = Grace-resident expert marlin call, ms per step; nccl = all-reduce kernels; wait / publish_to_wait_end = sidecar round trip)
+{"steps": 22, "hot_ms": 2.805072, "cold_ms": 3.2583200000000003, "nccl_us": {"n_per_step": 123.0, "p10": 17.376, "p50": 20.032, "p90": 126.208, "min": 15.424, "sum_ms": 4.966350545454546}, "wait_us": {"p10": 1.056, "p50": 1.248, "p90": 16.608, "max": 107.712, "n_gt5us": 15.409090909090908}, "publish_to_wait_end_us": {"p10": 67.808, "p50": 82.944, "p90": 210.752}}

@@ -56,6 +56,11 @@ What the comparisons mean:
 - **The DS-V4-Pro real-text numbers use private prompts** and a hot/warm expert map fitted to private traffic. Neither is
   published, so those numbers are not reproducible from this repo; the random-id numbers are.
 
+Result pages:
+
+- [How much does an RTX PRO 6000 expert sidecar add to a DGX Station GB300?](results/sidecar-ab.md) Same-session A/B
+  with the sidecar on and off: DS-V4-Pro across both Stations, and DS-V4.1-Flash on one Station (pending).
+
 ## Methodology
 
 **Benchmark shape.** Decode: `vllm bench serve` (or SGLang's `bench_serving`) with random token ids, 8,192 in,

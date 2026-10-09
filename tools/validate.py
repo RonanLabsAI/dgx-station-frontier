@@ -14,7 +14,7 @@ results.jsonl
   * computed rows are recomputed from their inputs (sum, mean, ratio, pct_change, difference, minutes_between, ratio_rows);
   * image_digest pins a sha256 digest; recipe folders exist.
 
-README files (README.md, recipes/*/README.md, atlas/*/README.md)
+README files (README.md, recipes/*/README.md, atlas/*/README.md) and result pages (results/*.md)
   Fenced code, inline code spans, HTML comments and link URLs are ignored (only link text is read).
   * Inside <!-- results --> ... <!-- /results --> blocks, EVERY number must match a results.jsonl row value at the
     precision written (1,856 matches 1855.6; 49.8K matches 49788.5; signs are ignored), and the same table line must
@@ -107,7 +107,10 @@ for r in rows:
             elif op == "ratio":
                 got = ins[0] / ins[1]
             elif op == "pct_change":
-                if r["id"].startswith("dsv4pro-e3-vs-e2"):   # ratio of the 3-rep means of the two named rows
+                if r.get("rows_in"):                           # change from rows_in[0] to rows_in[1] (other row ids)
+                    a, b = (byid[x]["value"] for x in r["rows_in"])
+                    got = (b / a - 1) * 100
+                elif r["id"].startswith("dsv4pro-e3-vs-e2"):   # ratio of the 3-rep means of the two named rows
                     a, b = (byid[x]["value"] for x in (
                         ("dsv4pro-e2-real-c16", "dsv4pro-e3a16-real-c16") if "real" in r["id"] else ("dsv4pro-e2-catid-c16", "dsv4pro-e3a16-catid-c16")))
                     got = (b / a - 1) * 100
@@ -182,7 +185,8 @@ def strip_line(line):
 
 
 links_seen = set()
-readmes = [p for p in ["README.md"] + glob.glob("recipes/*/README.md", root_dir=ROOT) + glob.glob("atlas/*/README.md", root_dir=ROOT)]
+readmes = [p for p in ["README.md"] + glob.glob("recipes/*/README.md", root_dir=ROOT) + glob.glob("atlas/*/README.md", root_dir=ROOT)
+           + sorted(glob.glob("results/*.md", root_dir=ROOT))]
 n_checked = 0
 for rel in readmes:
     path = os.path.join(ROOT, rel)
