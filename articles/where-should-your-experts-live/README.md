@@ -60,7 +60,7 @@ Same container, same weights, same expert map, same server flags. Run back to ba
 
 Prefill gains less because a long prompt batches its expert reads, so Grace's per-byte cost hurts it less than it hurts decode.
 
-Power went up, but not by much. In the decode runs the GB300 averaged 496 W with the sidecar and 397 W without, and the 6000 added 145 W (it idles near 20 W when empty). So roughly 1.5 to 1.6 times the GPU power for 2 to 2.8 times the speed.
+Power went up, but not by much. In the decode runs the GB300 averaged 496 W with the sidecar and 397 W without, and the 6000 added 145 W (it idles near 20 W when empty). At 16 and 32 users it draws about twice the GPU power for 2.8 times the speed, so 1.3 to 1.4 times more tokens per joule; at one user, 1.6 times the power for twice the speed.
 
 A note on the numbers: "decode tok/s" leaves out the time spent reading the prompt. vLLM's "output tok/s," which includes it, reads lower: 474 vs 247 at one user, 1,739 vs 646 at 16 users. The ratios hold either way. Single-user runs swing about 10% between runs in arm A and 20% in arm B because of speculative decoding, which is why we report the mean.
 
@@ -106,7 +106,7 @@ Rows are in [`results.jsonl`](../../results.jsonl); each row points at its log e
 | A/B decode 529 / 269, 2,049 / 723, 2,617 / 928; ratios 1.97x / 2.83x / 2.82x | `dsv41-ab-a-c1-decode-mean`, `dsv41-ab-b-c1-decode-mean`, `dsv41-ab-*-c16-decode`, `dsv41-ab-*-c32-decode`, `dsv41-ab-ratio-*-decode`; page: [`results/sidecar-ab.md`](../../results/sidecar-ab.md) |
 | 64K prefill 38.6K / 26.5K, 1.46x | `dsv41-ab-a-prefill64k-c1`, `dsv41-ab-b-prefill64k-c1`, `dsv41-ab-ratio-prefill64k-c1` |
 | Output tok/s 474 / 247, 1,739 / 646 | `dsv41-ab-*-c1-output-mean`, `dsv41-ab-*-c16-output` |
-| Power 496 / 397 / 145 W, empty 6000 about 20 W | `dsv41-ab-a-gb300-power-mean-decode`, `dsv41-ab-b-gb300-power-mean-decode`, `dsv41-ab-a-rtx-power-mean-decode`, `dsv41-ab-b-rtx-power-mean-decode`. The "1.5 to 1.6 times" is (495.9 + 144.7) / (397.2 + 19.5) = 1.54 and / 397.2 = 1.61, means over the whole decode window |
+| Power 496 / 397 / 145 W, empty 6000 about 20 W; per-run power ratio 1.6x / 2.1x / 2.0x and 1.23x / 1.34x / 1.40x tokens per joule at 1 / 16 / 32 users | `dsv41-ab-a-gb300-power-mean-decode`, `dsv41-ab-b-gb300-power-mean-decode`, `dsv41-ab-a-rtx-power-mean-decode`, `dsv41-ab-b-rtx-power-mean-decode`; `dsv41-ab-ratio-c1-decode-tok-per-j-incl-idle-rtx` and the c16 / c32 tok/J rows (arm B counted with its idle RTX PRO 6000). Corrected 2026-10-09: the first version gave 1.5 to 1.6x power from window means over all runs, which holds only at 1 user |
 | 285 hot / 99 cold experts per layer | [`results/sidecar-ab.md`](../../results/sidecar-ab.md) section 2 |
 | DS-V4-Pro two Stations: +52% / +39% at 16 users, +8% / +6% at 1 user, quality | `dsv4pro-e3-vs-e2-real-c16`, `dsv4pro-e3-vs-e2-catid-c16`, `dsv4pro-sidecar-ab-real-c1-gain`, `dsv4pro-sidecar-ab-catid-c1-gain`, `dsv4pro-e2-gsm8k200`, `dsv4pro-e3a16-gsm8k200`, `dsv4pro-e3a16-flips` |
 | el8's 1,154 vs 821 tok/s at 16 users | public: [original-el8/dgx-station-gb300-research](https://github.com/original-el8/dgx-station-gb300-research) `deepseek-v4.1-flash/m3/DETAILS.md`, runs `up-v20-peer2` (1,153.6) and `up-v20` (820.5). Not our measurement |
