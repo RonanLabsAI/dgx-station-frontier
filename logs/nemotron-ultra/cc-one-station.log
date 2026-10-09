@@ -1,0 +1,324 @@
+# NVIDIA-Nemotron-Labs-3-Competitive-Coding-550B-A55B-NVFP4 on ONE Station (same recipe as Ultra) + GSM8K-200
+# Run 2026-10-08 20:34-21:56 PT, left Station only. Weights nvidia/NVIDIA-Nemotron-Labs-3-Competitive-Coding-550B-A55B-NVFP4
+# rev 3ae22c58. The launch line printed an empty "args:" for this boot; the server's own "non-default args" line below
+# shows the flags. GSM8K-200 ran on this boot after the bench: bench/gsm8k200.py, thinking on, greedy, max_tokens 16,000, C32.
+# Its stdout was lost to an ssh drop; the summary line was recomputed from gsm8k200.jsonl (rows below).
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise; vLLM server
+# log lines are UTC ("10-09 03:05:11" = 2026-10-08 20:05:11 PDT).
+# Bench: bench/bench-nemotron-ultra.sh (vllm bench serve, random 8,192 in / 1,024 out, ignore-eos, fresh seed per run,
+# separate warm-up seed and shape). decode_agg = C x 1000 / mean TPOT. Prefix caching is OFF on the server, so the
+# "hit 0.00% (0/0 tok) [prefix cache off]" field is 0 by construction (the /metrics delta is still taken per run).
+# Power table: bench/power_windows.py over the 1 s nvidia-smi samples of both Stations (power-left.csv, power-right.csv);
+# columns window, host, gpu, mean W, max W, samples. The RTX PRO 6000s are not used by this recipe; each held an unrelated,
+# idle resident model during these runs (memory in use, idle power draw).
+
+
+--- nu-1008-cc1s/launch-rank0.txt
+launched 2026-10-08 20:34:58 PDT host=<left-host> rank=0 gpu=<left-GB300-uuid> image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+model=/models/hf/nvidia__NVIDIA-Nemotron-Labs-3-Competitive-Coding-550B-A55B-NVFP4 mode=one moe=marlin mtp=0 ssm=float32 offgb=100 ctx=73728 seqs=32 mbt=16384 util=0.95 dd=0
+args:
+
+--- nu-1008-cc1s/image-digest-rank0.txt
+sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+vllm/vllm-openai@sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+
+--- nu-1008-cc1s/meminfo-pre-rank0.txt (host memory before launch, kB)
+MemAvailable:   475179136 kB
+Cached:          1311360 kB
+SwapCached:            0 kB
+Unevictable:        5888 kB
+Mlocked:            2816 kB
+AnonPages:       7200064 kB
+Shmem:            413952 kB
+
+--- nu-1008-cc1s/server-rank0.log (selected lines; UTC)
+(APIServer pid=1) INFO 10-09 03:35:26 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.30.1rc1.dev245+gaf7f9488c
+(APIServer pid=1) INFO 10-09 03:35:26 [api_utils.py:286] non-default args: {'model_tag': '/model', 'host': '0.0.0.0', 'port': 8017, 'model': '/model', 'trust_remote_code': True, 'max_model_len': 73728, 'served_model_name': ['nemotron-3-ultra'], 'model_loader_extra_config': {'enable_multithread_load': True, 'num_threads': 32}, 'reasoning_parser': 'nemotron_v3', 'block_size': 64, 'gpu_memory_utilization': 0.95, 'kv_cache_dtype': 'fp8', 'enable_prefix_caching': False, 'mamba_ssm_cache_dtype': 'float32', 'offload_backend': 'uva', 'cpu_offload_gb': 100.0, 'cpu_offload_params': ['routed_experts.w13_weight', 'routed_experts.w2_weight'], 'max_num_batched_tokens': 16384, 'max_num_seqs': 32, 'enable_chunked_prefill': True, 'enable_flashinfer_autotune': False, 'moe_backend': 'marlin'}
+(APIServer pid=1) INFO 10-09 03:35:27 [model.py:699] Resolved architecture: NemotronHForCausalLM
+(EngineCore pid=403) INFO 10-09 03:35:44 [nvfp4.py:259] Using 'MARLIN' NvFp4 MoE backend out of potential backends: ['FLASHINFER_TRTLLM', 'FLASHINFER_CUTEDSL', 'FLASHINFER_CUTEDSL_BATCHED', 'FLASHINFER_CUTLASS', 'VLLM_CUTLASS', 'MARLIN', 'HUMMING', 'EMULATION'].
+(EngineCore pid=403) INFO 10-09 03:35:55 [uva.py:68] Total CPU offloaded parameters: 100.0
+(EngineCore pid=403) INFO 10-09 03:37:21 [default_loader.py:484] Loading weights took 85.14 seconds
+(EngineCore pid=403) WARNING 10-09 03:37:21 [marlin_utils_fp4.py:341] Your GPU does not have native support for FP4 computation but FP4 quantization is being used. Weight-only FP4 compression will be used leveraging the Marlin kernel. This may degrade performance for compute-heavy workloads.
+(EngineCore pid=403) INFO 10-09 03:37:49 [model_runner.py:407] Model loading took 206.82 GiB memory and 126.966718 seconds
+(EngineCore pid=403) INFO 10-09 03:38:18 [monitor.py:53] torch.compile took 26.26 s in total
+(EngineCore pid=403) INFO 10-09 03:39:14 [monitor.py:81] Initial profiling/warmup run took 56.46 s
+(EngineCore pid=403) INFO 10-09 03:39:22 [model_runner.py:1069] Graph capturing finished in 6 secs, took 0.87 GiB
+(EngineCore pid=403) INFO 10-09 03:39:22 [gpu_worker.py:692] Available KV cache memory: 15.23 GiB
+(EngineCore pid=403) INFO 10-09 03:39:22 [kv_cache_utils.py:2408] GPU KV cache size: 1,302,528 tokens, Maximum concurrency for 73,728 tokens per request: 17.67x
+(EngineCore pid=403) INFO 10-09 03:39:34 [model_runner.py:1069] Graph capturing finished in 5 secs, took 0.35 GiB
+(EngineCore pid=403) INFO 10-09 03:39:34 [gpu_worker.py:950] Free memory on device (249.12/249.81 GiB) on startup. Desired GPU memory utilization is (0.95, 237.32 GiB). Actual usage is 217.56 GiB for consumed memory (weights + non-torch), 4.54 GiB for peak activation, and 0.35 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=15817419572` (14.73 GiB) to fit into requested memory, or `--kv-cache-memory=28489807872` (26.53 GiB) to fully utilize gpu memory. Current kv cache memory in use is 15.23 GiB.
+(EngineCore pid=403) INFO 10-09 03:39:37 [core.py:373] init engine (profile, create kv cache, warmup model) took 108.30 s (compilation: 26.26 s)
+(APIServer pid=1) INFO 10-09 03:39:48 [entry.py:136] Starting vLLM server on http://0.0.0.0:8017
+INFO:     Application startup complete.
+
+--- nu-1008-cc1s/bench/summary.txt
+== 2026-10-08 20:40:19 PDT seedbase 8100 container nu-ultra image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+catid-c1-r1 seed 8211: decode_agg 39.78 (TPOT 25.14 ms, TTFT 2861.95 ms, out_tput 35.83) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c1-r2 seed 8212: decode_agg 39.79 (TPOT 25.13 ms, TTFT 2863.39 ms, out_tput 35.84) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c1-r3 seed 8213: decode_agg 39.76 (TPOT 25.15 ms, TTFT 2861.02 ms, out_tput 35.82) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c4-r1 seed 8241: decode_agg 79.41 (TPOT 50.37 ms, TTFT 9082.36 ms, out_tput 67.55) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c16-r1 seed 8361: decode_agg 118.07 (TPOT 135.51 ms, TTFT 23440.84 ms, out_tput 101.00) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c32-r1 seed 8521: decode_agg 146.13 (TPOT 218.99 ms, TTFT 40525.79 ms, out_tput 117.21) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+prefill-8k-c1 seed 8301: prefill 2864.0 tok/s (mean TTFT 2860.37 ms) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+prefill-64k-c1 seed 8401: prefill 2904.9 tok/s (mean TTFT 22560.12 ms) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+C1 mean over 3 reps: 39.78 (min 39.76 max 39.79)
+DONE 21:04:06
+
+--- nu-1008-cc1s/bench/windows.tsv
+catid-c1-r1	start	2026-10-08 20:40:19
+catid-c1-r1	end	2026-10-08 20:41:55
+catid-c1-r2	start	2026-10-08 20:41:55
+catid-c1-r2	end	2026-10-08 20:43:31
+catid-c1-r3	start	2026-10-08 20:43:31
+catid-c1-r3	end	2026-10-08 20:45:06
+catid-c4-r1	start	2026-10-08 20:45:07
+catid-c4-r1	end	2026-10-08 20:47:18
+catid-c16-r1	start	2026-10-08 20:47:18
+catid-c16-r1	end	2026-10-08 20:52:54
+catid-c32-r1	start	2026-10-08 20:52:54
+catid-c32-r1	end	2026-10-08 21:02:25
+prefill-8k-c1	start	2026-10-08 21:02:25
+prefill-8k-c1	end	2026-10-08 21:02:47
+prefill-64k-c1	start	2026-10-08 21:02:47
+prefill-64k-c1	end	2026-10-08 21:04:06
+
+--- power_windows.py nu-1008-cc1s/bench
+window	host	gpu	mean_W	max_W	n
+catid-c1-r1	left	NVIDIA GB300	485	847	97
+catid-c1-r1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	97
+catid-c1-r2	left	NVIDIA GB300	489	876	97
+catid-c1-r2	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	97
+catid-c1-r3	left	NVIDIA GB300	491	804	96
+catid-c1-r3	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	96
+catid-c4-r1	left	NVIDIA GB300	473	893	132
+catid-c4-r1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	132
+catid-c16-r1	left	NVIDIA GB300	479	902	337
+catid-c16-r1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	337
+catid-c32-r1	left	NVIDIA GB300	492	911	572
+catid-c32-r1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	17	572
+prefill-8k-c1	left	NVIDIA GB300	423	808	23
+prefill-8k-c1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	23
+prefill-64k-c1	left	NVIDIA GB300	560	897	79
+prefill-64k-c1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	79
+catid-c1-r1	right	NVIDIA GB300	207	207	97
+catid-c1-r1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	97
+catid-c1-r2	right	NVIDIA GB300	207	207	97
+catid-c1-r2	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	97
+catid-c1-r3	right	NVIDIA GB300	207	207	96
+catid-c1-r3	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	96
+catid-c4-r1	right	NVIDIA GB300	207	207	132
+catid-c4-r1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	132
+catid-c16-r1	right	NVIDIA GB300	207	207	336
+catid-c16-r1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	336
+catid-c32-r1	right	NVIDIA GB300	207	207	572
+catid-c32-r1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	572
+prefill-8k-c1	right	NVIDIA GB300	207	207	23
+prefill-8k-c1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	21	25	23
+prefill-64k-c1	right	NVIDIA GB300	207	208	79
+prefill-64k-c1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	25	79
+
+--- nu-1008-cc1s/gsm8k200.summary (fields: rows, correct, finish reasons, mean completion tokens, max_tokens, wall s)
+200 185 {'stop': 185, 'length': 15} 1663.685 16000 2810.6
+
+--- nu-1008-cc1s/gsm8k200.jsonl (per row: index, gold, prediction, correct, finish reason, completion tokens; content tails omitted)
+0	gold=18	pred=18	ok=True	finish=stop	ctoks=212
+1	gold=3	pred=3	ok=True	finish=stop	ctoks=201
+2	gold=70000	pred=70000	ok=True	finish=stop	ctoks=1813
+3	gold=540	pred=540	ok=True	finish=stop	ctoks=172
+4	gold=20	pred=20	ok=True	finish=stop	ctoks=222
+5	gold=64	pred=64	ok=True	finish=stop	ctoks=266
+6	gold=260	pred=260	ok=True	finish=stop	ctoks=339
+7	gold=160	pred=160	ok=True	finish=stop	ctoks=406
+8	gold=45	pred=45	ok=True	finish=stop	ctoks=546
+9	gold=460	pred=460	ok=True	finish=stop	ctoks=418
+10	gold=366	pred=366	ok=True	finish=stop	ctoks=271
+11	gold=694	pred=694	ok=True	finish=stop	ctoks=316
+12	gold=13	pred=	ok=False	finish=length	ctoks=16000
+13	gold=18	pred=18	ok=True	finish=stop	ctoks=1667
+14	gold=60	pred=60	ok=True	finish=stop	ctoks=224
+15	gold=125	pred=125	ok=True	finish=stop	ctoks=273
+16	gold=230	pred=230	ok=True	finish=stop	ctoks=875
+17	gold=57500	pred=57500	ok=True	finish=stop	ctoks=328
+18	gold=7	pred=7	ok=True	finish=stop	ctoks=201
+19	gold=6	pred=6	ok=True	finish=stop	ctoks=221
+20	gold=15	pred=15	ok=True	finish=stop	ctoks=581
+21	gold=14	pred=14	ok=True	finish=stop	ctoks=214
+22	gold=7	pred=7	ok=True	finish=stop	ctoks=177
+23	gold=8	pred=8	ok=True	finish=stop	ctoks=139
+24	gold=26	pred=26	ok=True	finish=stop	ctoks=323
+25	gold=2	pred=2	ok=True	finish=stop	ctoks=222
+26	gold=243	pred=243	ok=True	finish=stop	ctoks=348
+27	gold=16	pred=16	ok=True	finish=stop	ctoks=240
+28	gold=25	pred=25	ok=True	finish=stop	ctoks=177
+29	gold=104	pred=104	ok=True	finish=stop	ctoks=241
+30	gold=109	pred=109	ok=True	finish=stop	ctoks=231
+31	gold=80	pred=80	ok=True	finish=stop	ctoks=301
+32	gold=35	pred=35	ok=True	finish=stop	ctoks=146
+33	gold=70	pred=70	ok=True	finish=stop	ctoks=229
+34	gold=23	pred=23	ok=True	finish=stop	ctoks=219
+35	gold=9	pred=9	ok=True	finish=stop	ctoks=164
+36	gold=75	pred=75	ok=True	finish=stop	ctoks=305
+37	gold=2	pred=2	ok=True	finish=stop	ctoks=742
+38	gold=10	pred=10	ok=True	finish=stop	ctoks=1349
+39	gold=18	pred=18	ok=True	finish=stop	ctoks=2448
+40	gold=8	pred=	ok=False	finish=length	ctoks=16000
+41	gold=200	pred=200	ok=True	finish=stop	ctoks=1270
+42	gold=26	pred=26	ok=True	finish=stop	ctoks=157
+43	gold=48	pred=48	ok=True	finish=stop	ctoks=361
+44	gold=20	pred=20	ok=True	finish=stop	ctoks=416
+45	gold=104	pred=104	ok=True	finish=stop	ctoks=3413
+46	gold=163	pred=163	ok=True	finish=stop	ctoks=309
+47	gold=800	pred=800	ok=True	finish=stop	ctoks=314
+48	gold=8	pred=8	ok=True	finish=stop	ctoks=175
+49	gold=30	pred=30	ok=True	finish=stop	ctoks=268
+50	gold=294	pred=294	ok=True	finish=stop	ctoks=310
+51	gold=5	pred=5	ok=True	finish=stop	ctoks=267
+52	gold=15	pred=15	ok=True	finish=stop	ctoks=224
+53	gold=40	pred=40	ok=True	finish=stop	ctoks=264
+54	gold=40	pred=	ok=False	finish=length	ctoks=16000
+55	gold=14	pred=14	ok=True	finish=stop	ctoks=158
+56	gold=3	pred=3	ok=True	finish=stop	ctoks=136
+57	gold=83	pred=83	ok=True	finish=stop	ctoks=226
+58	gold=57	pred=57	ok=True	finish=stop	ctoks=370
+59	gold=187	pred=187	ok=True	finish=stop	ctoks=109
+60	gold=17	pred=17	ok=True	finish=stop	ctoks=459
+61	gold=1430	pred=1430	ok=True	finish=stop	ctoks=258
+62	gold=25000	pred=25000	ok=True	finish=stop	ctoks=2567
+63	gold=1596	pred=1596	ok=True	finish=stop	ctoks=301
+64	gold=300	pred=300	ok=True	finish=stop	ctoks=254
+65	gold=36	pred=36	ok=True	finish=stop	ctoks=235
+66	gold=48	pred=48	ok=True	finish=stop	ctoks=243
+67	gold=595	pred=595	ok=True	finish=stop	ctoks=343
+68	gold=36	pred=36	ok=True	finish=stop	ctoks=219
+69	gold=60	pred=60	ok=True	finish=stop	ctoks=178
+70	gold=7425	pred=7425	ok=True	finish=stop	ctoks=314
+71	gold=60	pred=60	ok=True	finish=stop	ctoks=195
+72	gold=221	pred=221	ok=True	finish=stop	ctoks=187
+73	gold=255	pred=	ok=False	finish=length	ctoks=16000
+74	gold=88	pred=88	ok=True	finish=stop	ctoks=370
+75	gold=60	pred=60	ok=True	finish=stop	ctoks=259
+76	gold=5	pred=5	ok=True	finish=stop	ctoks=418
+77	gold=100	pred=100	ok=True	finish=stop	ctoks=334
+78	gold=6	pred=6	ok=True	finish=stop	ctoks=1058
+79	gold=70	pred=70	ok=True	finish=stop	ctoks=181
+80	gold=10	pred=10	ok=True	finish=stop	ctoks=219
+81	gold=17	pred=17	ok=True	finish=stop	ctoks=312
+82	gold=623	pred=623	ok=True	finish=stop	ctoks=205
+83	gold=600	pred=600	ok=True	finish=stop	ctoks=163
+84	gold=15	pred=15	ok=True	finish=stop	ctoks=266
+85	gold=44	pred=44	ok=True	finish=stop	ctoks=2293
+86	gold=22	pred=	ok=False	finish=length	ctoks=16000
+87	gold=9360	pred=9360	ok=True	finish=stop	ctoks=2251
+88	gold=8000	pred=8000	ok=True	finish=stop	ctoks=185
+89	gold=24	pred=24	ok=True	finish=stop	ctoks=231
+90	gold=225	pred=225	ok=True	finish=stop	ctoks=207
+91	gold=28	pred=28	ok=True	finish=stop	ctoks=273
+92	gold=4	pred=4	ok=True	finish=stop	ctoks=247
+93	gold=36	pred=	ok=False	finish=length	ctoks=16000
+94	gold=348	pred=348	ok=True	finish=stop	ctoks=290
+95	gold=40	pred=40	ok=True	finish=stop	ctoks=211
+96	gold=3	pred=3	ok=True	finish=stop	ctoks=151
+97	gold=12	pred=12	ok=True	finish=stop	ctoks=250
+98	gold=5	pred=5	ok=True	finish=stop	ctoks=524
+99	gold=58	pred=58	ok=True	finish=stop	ctoks=288
+100	gold=175	pred=	ok=False	finish=length	ctoks=16000
+101	gold=6	pred=6	ok=True	finish=stop	ctoks=183
+102	gold=26	pred=26	ok=True	finish=stop	ctoks=415
+103	gold=140	pred=140	ok=True	finish=stop	ctoks=232
+104	gold=500	pred=500	ok=True	finish=stop	ctoks=236
+105	gold=20	pred=20	ok=True	finish=stop	ctoks=171
+106	gold=72	pred=72	ok=True	finish=stop	ctoks=533
+107	gold=3	pred=3	ok=True	finish=stop	ctoks=307
+108	gold=50	pred=50	ok=True	finish=stop	ctoks=261
+109	gold=28	pred=28	ok=True	finish=stop	ctoks=345
+110	gold=45	pred=45	ok=True	finish=stop	ctoks=1340
+111	gold=16	pred=16	ok=True	finish=stop	ctoks=326
+112	gold=24	pred=24	ok=True	finish=stop	ctoks=250
+113	gold=25	pred=25	ok=True	finish=stop	ctoks=162
+114	gold=6	pred=6	ok=True	finish=stop	ctoks=944
+115	gold=90	pred=90	ok=True	finish=stop	ctoks=347
+116	gold=42	pred=42	ok=True	finish=stop	ctoks=305
+117	gold=360	pred=360	ok=True	finish=stop	ctoks=165
+118	gold=4	pred=4	ok=True	finish=stop	ctoks=207
+119	gold=95200	pred=	ok=False	finish=length	ctoks=16000
+120	gold=240	pred=240	ok=True	finish=stop	ctoks=262
+121	gold=27	pred=27	ok=True	finish=stop	ctoks=297
+122	gold=48	pred=48	ok=True	finish=stop	ctoks=1195
+123	gold=50	pred=50	ok=True	finish=stop	ctoks=209
+124	gold=10	pred=10	ok=True	finish=stop	ctoks=266
+125	gold=10	pred=	ok=False	finish=length	ctoks=16000
+126	gold=82	pred=82	ok=True	finish=stop	ctoks=187
+127	gold=120	pred=120	ok=True	finish=stop	ctoks=181
+128	gold=880	pred=880	ok=True	finish=stop	ctoks=306
+129	gold=10000	pred=10000	ok=True	finish=stop	ctoks=465
+130	gold=30	pred=30	ok=True	finish=stop	ctoks=208
+131	gold=940	pred=940	ok=True	finish=stop	ctoks=189
+132	gold=60	pred=60	ok=True	finish=stop	ctoks=252
+133	gold=13	pred=13	ok=True	finish=stop	ctoks=165
+134	gold=720	pred=720	ok=True	finish=stop	ctoks=178
+135	gold=40	pred=40	ok=True	finish=stop	ctoks=298
+136	gold=6	pred=6	ok=True	finish=stop	ctoks=200
+137	gold=29	pred=29	ok=True	finish=stop	ctoks=372
+138	gold=105	pred=105	ok=True	finish=stop	ctoks=614
+139	gold=70	pred=70	ok=True	finish=stop	ctoks=468
+140	gold=20	pred=20	ok=True	finish=stop	ctoks=134
+141	gold=400	pred=400	ok=True	finish=stop	ctoks=216
+142	gold=140	pred=140	ok=True	finish=stop	ctoks=207
+143	gold=16	pred=16	ok=True	finish=stop	ctoks=245
+144	gold=20	pred=20	ok=True	finish=stop	ctoks=292
+145	gold=4000	pred=4000	ok=True	finish=stop	ctoks=252
+146	gold=2125	pred=2125	ok=True	finish=stop	ctoks=4474
+147	gold=75	pred=75	ok=True	finish=stop	ctoks=3453
+148	gold=30	pred=30	ok=True	finish=stop	ctoks=150
+149	gold=16	pred=16	ok=True	finish=stop	ctoks=156
+150	gold=4	pred=4	ok=True	finish=stop	ctoks=394
+151	gold=5	pred=5	ok=True	finish=stop	ctoks=315
+152	gold=4	pred=4	ok=True	finish=stop	ctoks=515
+153	gold=48	pred=48	ok=True	finish=stop	ctoks=721
+154	gold=272	pred=272	ok=True	finish=stop	ctoks=197
+155	gold=280	pred=280	ok=True	finish=stop	ctoks=330
+156	gold=1400	pred=1400	ok=True	finish=stop	ctoks=220
+157	gold=80	pred=	ok=False	finish=length	ctoks=16000
+158	gold=34	pred=34	ok=True	finish=stop	ctoks=177
+159	gold=15	pred=	ok=False	finish=length	ctoks=16000
+160	gold=16	pred=16	ok=True	finish=stop	ctoks=137
+161	gold=32	pred=	ok=False	finish=length	ctoks=16000
+162	gold=92	pred=92	ok=True	finish=stop	ctoks=282
+163	gold=50	pred=50	ok=True	finish=stop	ctoks=262
+164	gold=15	pred=15	ok=True	finish=stop	ctoks=226
+165	gold=77	pred=77	ok=True	finish=stop	ctoks=215
+166	gold=5	pred=5	ok=True	finish=stop	ctoks=211
+167	gold=16	pred=16	ok=True	finish=stop	ctoks=192
+168	gold=18	pred=18	ok=True	finish=stop	ctoks=154
+169	gold=120	pred=120	ok=True	finish=stop	ctoks=269
+170	gold=150	pred=150	ok=True	finish=stop	ctoks=219
+171	gold=1210	pred=1210	ok=True	finish=stop	ctoks=203
+172	gold=51	pred=51	ok=True	finish=stop	ctoks=347
+173	gold=18000	pred=18000	ok=True	finish=stop	ctoks=230
+174	gold=95	pred=95	ok=True	finish=stop	ctoks=306
+175	gold=15	pred=15	ok=True	finish=stop	ctoks=342
+176	gold=100	pred=100	ok=True	finish=stop	ctoks=189
+177	gold=350	pred=350	ok=True	finish=stop	ctoks=358
+178	gold=122	pred=122	ok=True	finish=stop	ctoks=291
+179	gold=130	pred=130	ok=True	finish=stop	ctoks=159
+180	gold=20	pred=20	ok=True	finish=stop	ctoks=166
+181	gold=160	pred=160	ok=True	finish=stop	ctoks=577
+182	gold=23	pred=23	ok=True	finish=stop	ctoks=3082
+183	gold=2	pred=2	ok=True	finish=stop	ctoks=275
+184	gold=25	pred=25	ok=True	finish=stop	ctoks=11905
+185	gold=30	pred=30	ok=True	finish=stop	ctoks=140
+186	gold=5	pred=	ok=False	finish=length	ctoks=16000
+187	gold=106	pred=	ok=False	finish=length	ctoks=16000
+188	gold=50	pred=50	ok=True	finish=stop	ctoks=211
+189	gold=34	pred=34	ok=True	finish=stop	ctoks=338
+190	gold=360	pred=360	ok=True	finish=stop	ctoks=170
+191	gold=5	pred=5	ok=True	finish=stop	ctoks=180
+192	gold=91	pred=	ok=False	finish=length	ctoks=16000
+193	gold=24	pred=24	ok=True	finish=stop	ctoks=410
+194	gold=10	pred=10	ok=True	finish=stop	ctoks=139
+195	gold=12	pred=12	ok=True	finish=stop	ctoks=339
+196	gold=120	pred=120	ok=True	finish=stop	ctoks=151
+197	gold=6277	pred=6277	ok=True	finish=stop	ctoks=262
+198	gold=320	pred=320	ok=True	finish=stop	ctoks=590
+199	gold=7500	pred=7500	ok=True	finish=stop	ctoks=268

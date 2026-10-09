@@ -5,12 +5,13 @@ Every number in this repository is one row in [`results.jsonl`](results.jsonl), 
 log excerpt under [`logs/`](logs/). [`tools/validate.py`](tools/validate.py) checks both directions: each row against
 its log, and each performance number in the READMEs against `results.jsonl`.
 
-First release: four recipes and a microbenchmark atlas.
+Five recipes and a microbenchmark atlas (the Nemotron recipe was added after the first release).
 
 | Folder | What it is |
 |---|---|
 | [`recipes/dsv41-flash-sidecar/`](recipes/dsv41-flash-sidecar/) | DeepSeek-V4.1-Flash on one Station, with the RTX PRO 6000 serving the cold experts (original-el8's sidecar design on public b12x). Also run as two independent copies, one per Station (DP2) |
 | [`recipes/dsv4-pro-two-stations/`](recipes/dsv4-pro-two-stations/) | DeepSeek-V4-Pro-0813 (1.6T parameters) across both Stations: E1 stock, E2 hot/cold expert split, E3 with an RTX PRO 6000 warm-expert tier on each Station. A speculative-decoding arm is included and marked experimental |
+| [`recipes/nemotron-ultra/`](recipes/nemotron-ultra/) | NVIDIA Nemotron 3 Ultra 550B-A55B NVFP4 (general and IOI competitive-coding checkpoints) on one Station with routed experts in Grace memory, and on two Stations with every weight in HBM. Stock vLLM, no patches |
 | [`recipes/fabric-data-direct/`](recipes/fabric-data-direct/) | The cross-Station fabric: Data Direct inside containers, a per-message-size NCCL tuner, the lossless traffic class, and what small-message latency does and does not allow |
 | [`atlas/microbench/`](atlas/microbench/) | C2C, HBM, Grace STREAM, RTX PRO 6000 to Grace, CPU vs GPU expert compute, GEMM power |
 
@@ -41,6 +42,7 @@ streams.
 | DS-V4.1-Flash, C1 per user (each DP2 copy, mean of three warm reps) | [445](recipes/dsv41-flash-sidecar/) / [452](recipes/dsv41-flash-sidecar/) tok/s | [left](logs/dsv41-flash-sidecar/dp2-left.log), [right](logs/dsv41-flash-sidecar/dp2-right.log) | |
 | DS-V4-Pro-0813 across both Stations, stock vLLM (E1): C1 / C16 aggregate / GSM8K-200 | [37.8](recipes/dsv4-pro-two-stations/) tok/s / [109.5](recipes/dsv4-pro-two-stations/) tok/s / [98.0](recipes/dsv4-pro-two-stations/)% | [log](logs/dsv4-pro-two-stations/e1-stock.log) | none found on fewer than four GB300s |
 | DS-V4-Pro with RTX PRO 6000 warm tiers (E3-A16): C16 aggregate, random ids / private real text; GSM8K-200 | [164.6](recipes/dsv4-pro-two-stations/) / [230.8](recipes/dsv4-pro-two-stations/) tok/s; [97.5](recipes/dsv4-pro-two-stations/)% | [log](logs/dsv4-pro-two-stations/e3-a16-sidecar.log) | |
+| `Nemotron-3-Ultra` NVFP4: one Station (TP1, experts partly in Grace) C1 / C32 aggregate; two Stations (TP2+EP2, all in HBM, IOI coding checkpoint of the same architecture) C1 / C32 aggregate | [39.7](recipes/nemotron-ultra/) / [155.2](recipes/nemotron-ultra/) tok/s; [99.1](recipes/nemotron-ultra/) / [889.1](recipes/nemotron-ultra/) tok/s | [one Station](logs/nemotron-ultra/ultra-one-station.log), [two Stations](logs/nemotron-ultra/cc-two-stations.log) | none found on DGX Station |
 | Fused GLM-5.3 TP2+EP2 over the rail: `64K`-token prefill with Data Direct + tuner3 + traffic class `106` vs stock | [11,173](recipes/fabric-data-direct/) vs [8,033](recipes/fabric-data-direct/) tok/s ([+39](recipes/fabric-data-direct/)%) | [log](logs/fabric-data-direct/fused-glm-dd-ab.log) | |
 | Smallest cross-Station all-reduce on the engine path (`14 KB`, CUDA graph) | [31.67](recipes/fabric-data-direct/) µs | [log](logs/fabric-data-direct/lambda-engine-path.log) | |
 | GB300 reading pinned Grace memory over C2C (GPU kernel, zero-copy) | [352.8](atlas/microbench/) GB/s | [log](logs/atlas-microbench/gb300-membench.log) | |
@@ -78,7 +80,7 @@ Since then every run follows three rules:
    random-token run above `2%`.
 
 The DS-V4-Pro E2, E3 and speculative rows follow all three rules (every reported run: zero measured hits; one contaminated
-repetition was discarded and is visible in its log). The DS-V4.1 and fabric rows were measured before the rules and
+repetition was discarded and is visible in its log). The Nemotron rows run with prefix caching off on the server (zero hits by construction, still checked per run). The DS-V4.1 and fabric rows were measured before the rules and
 were audited instead: the decode figures are clean (the only cache hits were warm-up copies hitting each other), except
 the C1 means, which reuse one prompt set by design and read a few percent high. Each row's `notes` field says which applies.
 

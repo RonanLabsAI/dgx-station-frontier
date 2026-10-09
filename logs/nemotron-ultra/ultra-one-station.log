@@ -1,0 +1,125 @@
+# NVIDIA-Nemotron-3-Ultra-550B-A55B-NVFP4 on ONE Station (TP1, marlin MoE, 100 GiB routed experts in Grace via UVA)
+# Run 2026-10-08 20:04-20:35 PT, left Station only. Weights nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-NVFP4 rev 02462641.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise; vLLM server
+# log lines are UTC ("10-09 03:05:11" = 2026-10-08 20:05:11 PDT).
+# Bench: bench/bench-nemotron-ultra.sh (vllm bench serve, random 8,192 in / 1,024 out, ignore-eos, fresh seed per run,
+# separate warm-up seed and shape). decode_agg = C x 1000 / mean TPOT. Prefix caching is OFF on the server, so the
+# "hit 0.00% (0/0 tok) [prefix cache off]" field is 0 by construction (the /metrics delta is still taken per run).
+# Power table: bench/power_windows.py over the 1 s nvidia-smi samples of both Stations (power-left.csv, power-right.csv);
+# columns window, host, gpu, mean W, max W, samples. The RTX PRO 6000s are not used by this recipe; each held an unrelated,
+# idle resident model during these runs (memory in use, idle power draw).
+
+
+--- nu-1008-ultra1s/launch-rank0.txt
+launched 2026-10-08 20:04:42 PDT host=<left-host> rank=0 gpu=<left-GB300-uuid> image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+model=/models/hf/nvidia__NVIDIA-Nemotron-3-Ultra-550B-A55B-NVFP4 mode=one moe=marlin mtp=0 ssm=float32 offgb=100 ctx=73728 seqs=32 mbt=16384 util=0.95 dd=0
+args: serve /model --served-model-name nemotron-3-ultra --trust-remote-code --dtype auto --kv-cache-dtype fp8 --block-size 64 --mamba-ssm-cache-dtype float32 --no-enable-prefix-caching --enable-chunked-prefill --reasoning-parser nemotron_v3 --moe-backend marlin --no-enable-flashinfer-autotune --max-model-len 73728 --max-num-seqs 32 --max-num-batched-tokens 16384 --gpu-memory-utilization 0.95 --model-loader-extra-config \{\"enable_multithread_load\":true\,\"num_threads\":32\} --offload-backend uva --cpu-offload-gb 100 --cpu-offload-params routed_experts.w13_weight routed_experts.w2_weight --tensor-parallel-size 1 --host 0.0.0.0 --port 8017
+
+--- nu-1008-ultra1s/image-digest-rank0.txt
+sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+vllm/vllm-openai@sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+
+--- nu-1008-ultra1s/meminfo-pre-rank0.txt (host memory before launch, kB)
+MemAvailable:   475052480 kB
+Cached:          1338880 kB
+SwapCached:            0 kB
+Unevictable:        5888 kB
+Mlocked:            2816 kB
+AnonPages:       7200448 kB
+Shmem:            413824 kB
+
+--- nu-1008-ultra1s/meminfo-serving.txt (host memory while serving, kB)
+MemAvailable:   352495936 kB
+Mlocked:            2944 kB
+Shmem:          105376320 kB
+
+--- nu-1008-ultra1s/gpus-serving.csv (memory.used while serving)
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89201 MiB
+NVIDIA GB300, 241964 MiB
+
+--- nu-1008-ultra1s/server-rank0.log (selected lines; UTC)
+(APIServer pid=1) INFO 10-09 03:05:11 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.30.1rc1.dev245+gaf7f9488c
+(APIServer pid=1) INFO 10-09 03:05:11 [api_utils.py:286] non-default args: {'model_tag': '/model', 'host': '0.0.0.0', 'port': 8017, 'model': '/model', 'trust_remote_code': True, 'max_model_len': 73728, 'served_model_name': ['nemotron-3-ultra'], 'model_loader_extra_config': {'enable_multithread_load': True, 'num_threads': 32}, 'reasoning_parser': 'nemotron_v3', 'block_size': 64, 'gpu_memory_utilization': 0.95, 'kv_cache_dtype': 'fp8', 'enable_prefix_caching': False, 'mamba_ssm_cache_dtype': 'float32', 'offload_backend': 'uva', 'cpu_offload_gb': 100.0, 'cpu_offload_params': ['routed_experts.w13_weight', 'routed_experts.w2_weight'], 'max_num_batched_tokens': 16384, 'max_num_seqs': 32, 'enable_chunked_prefill': True, 'enable_flashinfer_autotune': False, 'moe_backend': 'marlin'}
+(APIServer pid=1) INFO 10-09 03:05:23 [model.py:699] Resolved architecture: NemotronHForCausalLM
+(EngineCore pid=543) INFO 10-09 03:05:38 [nvfp4.py:259] Using 'MARLIN' NvFp4 MoE backend out of potential backends: ['FLASHINFER_TRTLLM', 'FLASHINFER_CUTEDSL', 'FLASHINFER_CUTEDSL_BATCHED', 'FLASHINFER_CUTLASS', 'VLLM_CUTLASS', 'MARLIN', 'HUMMING', 'EMULATION'].
+(EngineCore pid=543) INFO 10-09 03:05:49 [uva.py:68] Total CPU offloaded parameters: 100.0
+(EngineCore pid=543) INFO 10-09 03:07:13 [default_loader.py:484] Loading weights took 82.85 seconds
+(EngineCore pid=543) WARNING 10-09 03:07:16 [marlin_utils_fp4.py:341] Your GPU does not have native support for FP4 computation but FP4 quantization is being used. Weight-only FP4 compression will be used leveraging the Marlin kernel. This may degrade performance for compute-heavy workloads.
+(EngineCore pid=543) INFO 10-09 03:07:54 [model_runner.py:407] Model loading took 206.82 GiB memory and 138.320746 seconds
+(EngineCore pid=543) INFO 10-09 03:08:25 [monitor.py:53] torch.compile took 26.87 s in total
+(EngineCore pid=543) INFO 10-09 03:09:50 [monitor.py:81] Initial profiling/warmup run took 84.92 s
+(EngineCore pid=543) INFO 10-09 03:10:57 [model_runner.py:1069] Graph capturing finished in 63 secs, took 0.87 GiB
+(EngineCore pid=543) INFO 10-09 03:10:57 [gpu_worker.py:692] Available KV cache memory: 15.23 GiB
+(EngineCore pid=543) INFO 10-09 03:10:57 [kv_cache_utils.py:2408] GPU KV cache size: 1,302,528 tokens, Maximum concurrency for 73,728 tokens per request: 17.67x
+(EngineCore pid=543) INFO 10-09 03:11:13 [model_runner.py:1069] Graph capturing finished in 5 secs, took 0.35 GiB
+(EngineCore pid=543) INFO 10-09 03:11:13 [gpu_worker.py:950] Free memory on device (249.12/249.81 GiB) on startup. Desired GPU memory utilization is (0.95, 237.32 GiB). Actual usage is 217.56 GiB for consumed memory (weights + non-torch), 4.54 GiB for peak activation, and 0.35 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=15817419572` (14.73 GiB) to fit into requested memory, or `--kv-cache-memory=28489807872` (26.53 GiB) to fully utilize gpu memory. Current kv cache memory in use is 15.23 GiB.
+(EngineCore pid=543) INFO 10-09 03:11:15 [core.py:373] init engine (profile, create kv cache, warmup model) took 200.85 s (compilation: 26.87 s)
+(APIServer pid=1) INFO 10-09 03:11:26 [entry.py:136] Starting vLLM server on http://0.0.0.0:8017
+INFO:     Application startup complete.
+
+--- nu-1008-ultra1s/bench/summary.txt
+== 2026-10-08 20:12:02 PDT seedbase 7100 container nu-ultra image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+catid-c1-r1 seed 7211: decode_agg 39.71 (TPOT 25.18 ms, TTFT 2859.35 ms, out_tput 35.78) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c1-r2 seed 7212: decode_agg 39.7 (TPOT 25.19 ms, TTFT 2859.47 ms, out_tput 35.77) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c1-r3 seed 7213: decode_agg 39.71 (TPOT 25.18 ms, TTFT 2859.19 ms, out_tput 35.78) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c4-r1 seed 7241: decode_agg 67.82 (TPOT 58.98 ms, TTFT 9074.83 ms, out_tput 58.99) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c16-r1 seed 7361: decode_agg 154.92 (TPOT 103.28 ms, TTFT 23415.50 ms, out_tput 126.83) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c32-r1 seed 7521: decode_agg 155.22 (TPOT 206.16 ms, TTFT 40061.25 ms, out_tput 121.88) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+prefill-8k-c1 seed 7301: prefill 2866.6 tok/s (mean TTFT 2857.72 ms) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+prefill-64k-c1 seed 7401: prefill 2904.6 tok/s (mean TTFT 22562.61 ms) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+C1 mean over 3 reps: 39.71 (min 39.70 max 39.71)
+DONE 20:34:38
+
+--- nu-1008-ultra1s/bench/windows.tsv
+catid-c1-r1	start	2026-10-08 20:12:02
+catid-c1-r1	end	2026-10-08 20:13:38
+catid-c1-r2	start	2026-10-08 20:13:38
+catid-c1-r2	end	2026-10-08 20:15:14
+catid-c1-r3	start	2026-10-08 20:15:14
+catid-c1-r3	end	2026-10-08 20:16:50
+catid-c4-r1	start	2026-10-08 20:16:50
+catid-c4-r1	end	2026-10-08 20:19:19
+catid-c16-r1	start	2026-10-08 20:19:19
+catid-c16-r1	end	2026-10-08 20:23:48
+catid-c32-r1	start	2026-10-08 20:23:48
+catid-c32-r1	end	2026-10-08 20:32:58
+prefill-8k-c1	start	2026-10-08 20:32:58
+prefill-8k-c1	end	2026-10-08 20:33:20
+prefill-64k-c1	start	2026-10-08 20:33:20
+prefill-64k-c1	end	2026-10-08 20:34:38
+
+--- power_windows.py nu-1008-ultra1s/bench
+window	host	gpu	mean_W	max_W	n
+catid-c1-r1	left	NVIDIA GB300	485	872	97
+catid-c1-r1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	15	97
+catid-c1-r2	left	NVIDIA GB300	488	823	97
+catid-c1-r2	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	97
+catid-c1-r3	left	NVIDIA GB300	489	884	97
+catid-c1-r3	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	97
+catid-c4-r1	left	NVIDIA GB300	458	885	150
+catid-c4-r1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	150
+catid-c16-r1	left	NVIDIA GB300	495	904	270
+catid-c16-r1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	270
+catid-c32-r1	left	NVIDIA GB300	490	903	550
+catid-c32-r1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	550
+prefill-8k-c1	left	NVIDIA GB300	430	862	23
+prefill-8k-c1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	15	23
+prefill-64k-c1	left	NVIDIA GB300	562	903	79
+prefill-64k-c1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	15	79
+catid-c1-r1	right	NVIDIA GB300	209	209	97
+catid-c1-r1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	21	25	97
+catid-c1-r2	right	NVIDIA GB300	209	209	97
+catid-c1-r2	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	21	25	97
+catid-c1-r3	right	NVIDIA GB300	209	209	97
+catid-c1-r3	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	97
+catid-c4-r1	right	NVIDIA GB300	208	209	150
+catid-c4-r1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	21	25	150
+catid-c16-r1	right	NVIDIA GB300	207	208	270
+catid-c16-r1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	25	270
+catid-c32-r1	right	NVIDIA GB300	207	207	550
+catid-c32-r1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	550
+prefill-8k-c1	right	NVIDIA GB300	207	207	23
+prefill-8k-c1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	23
+prefill-64k-c1	right	NVIDIA GB300	207	207	79
+prefill-64k-c1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	79

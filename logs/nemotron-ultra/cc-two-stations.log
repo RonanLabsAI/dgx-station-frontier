@@ -1,0 +1,168 @@
+# NVIDIA-Nemotron-Labs-3-Competitive-Coding-550B-A55B-NVFP4 across TWO Stations (TP2+EP2, FlashInfer TRT-LLM NVFP4 MoE, no offload) + code20
+# Run 2026-10-08 23:13-23:49 PT. vLLM mp multi-node over one 400G RoCE link with the fabric block from
+# recipes/fabric-data-direct (Data Direct overlay, tuner3.csv, NCCL_IB_TC=106). Rank 1 (right) started first.
+# code20 ran on this boot after the bench: bench/code20.py, thinking on, T 1.0 / top_p 0.95, seed 1, max_tokens 24,000.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise; vLLM server
+# log lines are UTC ("10-09 03:05:11" = 2026-10-08 20:05:11 PDT).
+# Bench: bench/bench-nemotron-ultra.sh (vllm bench serve, random 8,192 in / 1,024 out, ignore-eos, fresh seed per run,
+# separate warm-up seed and shape). decode_agg = C x 1000 / mean TPOT. Prefix caching is OFF on the server, so the
+# "hit 0.00% (0/0 tok) [prefix cache off]" field is 0 by construction (the /metrics delta is still taken per run).
+# Power table: bench/power_windows.py over the 1 s nvidia-smi samples of both Stations (power-left.csv, power-right.csv);
+# columns window, host, gpu, mean W, max W, samples. The RTX PRO 6000s are not used by this recipe; each held an unrelated,
+# idle resident model during these runs (memory in use, idle power draw).
+
+
+--- nu-1008-cc2s/launch-rank0.txt
+launched 2026-10-08 23:13:46 PDT host=<left-host> rank=0 gpu=<left-GB300-uuid> image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+model=/models/hf/nvidia__NVIDIA-Nemotron-Labs-3-Competitive-Coding-550B-A55B-NVFP4 mode=tp moe=flashinfer_trtllm mtp=0 ssm=float32 offgb=0 ctx=73728 seqs=32 mbt=16384 util=0.95 dd=1
+args:
+
+--- nu-1008-cc2s/launch-rank1.txt (right Station)
+launched 2026-10-08 23:13:42 PDT host=<right-host> rank=1 gpu=<right-GB300-uuid> image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+model=/models/hf/nvidia__NVIDIA-Nemotron-Labs-3-Competitive-Coding-550B-A55B-NVFP4 mode=tp moe=flashinfer_trtllm mtp=0 ssm=float32 offgb=0 ctx=73728 seqs=32 mbt=16384 util=0.95 dd=1
+args:
+
+--- nu-1008-cc2s/image-digest-rank0.txt
+sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+vllm/vllm-openai@sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+
+--- nu-1008-cc2s/meminfo-pre-rank0.txt (host memory before launch, kB)
+MemAvailable:   473615168 kB
+Cached:          1327104 kB
+SwapCached:            0 kB
+Unevictable:        5952 kB
+Mlocked:            2880 kB
+AnonPages:       7169792 kB
+Shmem:            413760 kB
+
+--- nu-1008-cc2s/server-rank0.log (selected lines; UTC)
+(APIServer pid=1) INFO 10-09 06:14:14 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.30.1rc1.dev245+gaf7f9488c
+(APIServer pid=1) INFO 10-09 06:14:14 [api_utils.py:286] non-default args: {'model_tag': '/model', 'host': '0.0.0.0', 'port': 8017, 'model': '/model', 'trust_remote_code': True, 'max_model_len': 73728, 'served_model_name': ['nemotron-3-ultra'], 'model_loader_extra_config': {'enable_multithread_load': True, 'num_threads': 32}, 'reasoning_parser': 'nemotron_v3', 'distributed_executor_backend': 'mp', 'master_addr': '<rank0-rail-ip>', 'master_port': 29617, 'nnodes': 2, 'tensor_parallel_size': 2, 'enable_expert_parallel': True, 'disable_custom_all_reduce': True, 'block_size': 64, 'gpu_memory_utilization': 0.95, 'kv_cache_dtype': 'fp8', 'enable_prefix_caching': False, 'mamba_ssm_cache_dtype': 'float32', 'max_num_batched_tokens': 16384, 'max_num_seqs': 32, 'enable_chunked_prefill': True, 'enable_flashinfer_autotune': False, 'moe_backend': 'flashinfer_trtllm'}
+(APIServer pid=1) INFO 10-09 06:14:15 [model.py:699] Resolved architecture: NemotronHForCausalLM
+<left-host>:623:623 [0] NCCL INFO NET/IB : Using [0]mlx5_1_dma:1/RoCE [RO]; OOB enP1p3s0f1np1:<rank0-rail-ip><0>
+<left-host>:623:623 [0] NCCL INFO ncclCommInitRank comm 0x21e61a00 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 906000 commId 0x86f7f9bea0765dd7 - Init COMPLETE
+(Worker_TP0_EP0 pid=623) INFO 10-09 06:14:44 [nvfp4.py:259] Using 'FLASHINFER_TRTLLM' NvFp4 MoE backend out of potential backends: ['FLASHINFER_TRTLLM', 'FLASHINFER_CUTEDSL', 'FLASHINFER_CUTEDSL_BATCHED', 'FLASHINFER_CUTLASS', 'VLLM_CUTLASS', 'MARLIN', 'HUMMING', 'EMULATION'].
+(Worker_TP0_EP0 pid=623) INFO 10-09 06:15:56 [default_loader.py:484] Loading weights took 70.73 seconds
+(Worker_TP0_EP0 pid=623) INFO 10-09 06:15:59 [model_runner.py:407] Model loading took 155.15 GiB memory and 75.692774 seconds
+(Worker_TP0_EP0 pid=623) INFO 10-09 06:16:40 [monitor.py:53] torch.compile took 34.86 s in total
+2026-10-09 06:17:33,242 - INFO - core.py:564 - flashinfer.jit: Building JIT module fused_moe_trtllm_sm100; this can take several minutes on first use.
+[2026-10-09 06:31:45.560] [info] TRT-LLM fused MoE cooperative launch SM allocation: 144 SMs used for MoE, 8 SMs reserved for overlapping kernels (total SMs: 152)
+(Worker_TP0_EP0 pid=623) INFO 10-09 06:32:22 [monitor.py:81] Initial profiling/warmup run took 941.97 s
+(Worker_TP0_EP0 pid=623) INFO 10-09 06:33:29 [model_runner.py:1069] Graph capturing finished in 65 secs, took 0.91 GiB
+(Worker_TP0_EP0 pid=623) INFO 10-09 06:33:30 [gpu_worker.py:692] Available KV cache memory: 75.94 GiB
+(EngineCore pid=404) INFO 10-09 06:33:30 [kv_cache_utils.py:2408] GPU KV cache size: 13,066,240 tokens, Maximum concurrency for 73,728 tokens per request: 177.22x
+(Worker_TP0_EP0 pid=623) INFO 10-09 06:33:46 [model_runner.py:1069] Graph capturing finished in 5 secs, took 0.22 GiB
+(Worker_TP0_EP0 pid=623) INFO 10-09 06:33:46 [gpu_worker.py:950] Free memory on device (248.49/249.81 GiB) on startup. Desired GPU memory utilization is (0.95, 237.32 GiB). Actual usage is 155.61 GiB for consumed memory (weights + non-torch), 5.77 GiB for peak activation, and 0.22 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=81144138548` (75.57 GiB) to fit into requested memory, or `--kv-cache-memory=93134952448` (86.74 GiB) to fully utilize gpu memory. Current kv cache memory in use is 75.94 GiB.
+(EngineCore pid=404) INFO 10-09 06:33:49 [core.py:373] init engine (profile, create kv cache, warmup model) took 1066.32 s (compilation: 35.61 s)
+(APIServer pid=1) INFO 10-09 06:34:00 [entry.py:136] Starting vLLM server on http://0.0.0.0:8017
+INFO:     Application startup complete.
+
+--- nu-1008-cc2s/server-rank1.log (right Station, selected lines; UTC)
+(MainProcess pid=1) INFO 10-09 06:14:22 [model.py:699] Resolved architecture: NemotronHForCausalLM
+<right-host>:610:610 [0] NCCL INFO NET/IB : Using [0]mlx5_1_dma:1/RoCE [RO]; OOB enP1p3s0f1np1:<rank1-rail-ip><0>
+<right-host>:610:610 [0] NCCL INFO ncclCommInitRank comm 0x1f47bb10 rank 1 nranks 2 cudaDev 0 nvmlDev 0 busId 906000 commId 0x86f7f9bea0765dd7 - Init COMPLETE
+(Worker_TP1_EP1 pid=610) INFO 10-09 06:14:48 [nvfp4.py:259] Using 'FLASHINFER_TRTLLM' NvFp4 MoE backend out of potential backends: ['FLASHINFER_TRTLLM', 'FLASHINFER_CUTEDSL', 'FLASHINFER_CUTEDSL_BATCHED', 'FLASHINFER_CUTLASS', 'VLLM_CUTLASS', 'MARLIN', 'HUMMING', 'EMULATION'].
+(Worker_TP1_EP1 pid=610) INFO 10-09 06:15:55 [default_loader.py:484] Loading weights took 65.97 seconds
+(Worker_TP1_EP1 pid=610) INFO 10-09 06:16:02 [model_runner.py:407] Model loading took 155.15 GiB memory and 79.363295 seconds
+(Worker_TP1_EP1 pid=610) INFO 10-09 06:16:42 [monitor.py:53] torch.compile took 35.61 s in total
+2026-10-09 06:17:43,824 - INFO - core.py:564 - flashinfer.jit: Building JIT module fused_moe_trtllm_sm100; this can take several minutes on first use.
+[2026-10-09 06:32:21.137] [info] TRT-LLM fused MoE cooperative launch SM allocation: 144 SMs used for MoE, 8 SMs reserved for overlapping kernels (total SMs: 152)
+(Worker_TP1_EP1 pid=610) INFO 10-09 06:32:22 [monitor.py:81] Initial profiling/warmup run took 940.39 s
+2026-10-09 06:32:29,539 - INFO - core.py:564 - flashinfer.jit: Building JIT module fmha_gen; this can take several minutes on first use.
+(Worker_TP1_EP1 pid=610) INFO 10-09 06:33:29 [model_runner.py:1069] Graph capturing finished in 63 secs, took 0.91 GiB
+(Worker_TP1_EP1 pid=610) INFO 10-09 06:33:30 [gpu_worker.py:692] Available KV cache memory: 75.94 GiB
+(Worker_TP1_EP1 pid=610) INFO 10-09 06:33:46 [model_runner.py:1069] Graph capturing finished in 5 secs, took 0.22 GiB
+(Worker_TP1_EP1 pid=610) INFO 10-09 06:33:46 [gpu_worker.py:950] Free memory on device (248.49/249.81 GiB) on startup. Desired GPU memory utilization is (0.95, 237.32 GiB). Actual usage is 155.61 GiB for consumed memory (weights + non-torch), 5.77 GiB for peak activation, and 0.22 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=81144138548` (75.57 GiB) to fit into requested memory, or `--kv-cache-memory=93134952448` (86.74 GiB) to fully utilize gpu memory. Current kv cache memory in use is 75.94 GiB.
+
+--- nu-1008-cc2s/bench/summary.txt
+== 2026-10-08 23:34:32 PDT seedbase 9100 container nu-ultra image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+catid-c1-r1 seed 9211: decode_agg 99.21 (TPOT 10.08 ms, TTFT 638.55 ms, out_tput 93.47) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c1-r2 seed 9212: decode_agg 99.11 (TPOT 10.09 ms, TTFT 626.79 ms, out_tput 93.53) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c1-r3 seed 9213: decode_agg 99.11 (TPOT 10.09 ms, TTFT 626.02 ms, out_tput 93.54) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c4-r1 seed 9241: decode_agg 287.77 (TPOT 13.90 ms, TTFT 1822.42 ms, out_tput 255.17) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c16-r1 seed 9361: decode_agg 685.52 (TPOT 23.34 ms, TTFT 4666.44 ms, out_tput 573.30) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+catid-c32-r1 seed 9521: decode_agg 889.14 (TPOT 35.99 ms, TTFT 6784.80 ms, out_tput 750.22) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+prefill-8k-c1 seed 9301: prefill 13112.9 tok/s (mean TTFT 624.73 ms) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+prefill-64k-c1 seed 9401: prefill 13779.7 tok/s (mean TTFT 4755.97 ms) failed 0 hit 0.00% (0/0 tok) [prefix cache off]
+C1 mean over 3 reps: 99.14 (min 99.11 max 99.21)
+DONE 23:40:48
+
+--- nu-1008-cc2s/bench/windows.tsv
+catid-c1-r1	start	2026-10-08 23:34:32
+catid-c1-r1	end	2026-10-08 23:35:14
+catid-c1-r2	start	2026-10-08 23:35:14
+catid-c1-r2	end	2026-10-08 23:35:57
+catid-c1-r3	start	2026-10-08 23:35:57
+catid-c1-r3	end	2026-10-08 23:36:40
+catid-c4-r1	start	2026-10-08 23:36:40
+catid-c4-r1	end	2026-10-08 23:37:23
+catid-c16-r1	start	2026-10-08 23:37:23
+catid-c16-r1	end	2026-10-08 23:38:31
+catid-c32-r1	start	2026-10-08 23:38:31
+catid-c32-r1	end	2026-10-08 23:40:11
+prefill-8k-c1	start	2026-10-08 23:40:11
+prefill-8k-c1	end	2026-10-08 23:40:23
+prefill-64k-c1	start	2026-10-08 23:40:23
+prefill-64k-c1	end	2026-10-08 23:40:48
+
+--- power_windows.py nu-1008-cc2s/bench
+window	host	gpu	mean_W	max_W	n
+catid-c1-r1	left	NVIDIA GB300	464	614	43
+catid-c1-r1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	10	15	43
+catid-c1-r2	left	NVIDIA GB300	471	597	44
+catid-c1-r2	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	10	15	44
+catid-c1-r3	left	NVIDIA GB300	472	631	44
+catid-c1-r3	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	10	15	44
+catid-c4-r1	left	NVIDIA GB300	520	708	44
+catid-c4-r1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	15	44
+catid-c16-r1	left	NVIDIA GB300	623	739	69
+catid-c16-r1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	69
+catid-c32-r1	left	NVIDIA GB300	676	767	101
+catid-c32-r1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	11	16	101
+prefill-8k-c1	left	NVIDIA GB300	322	697	13
+prefill-8k-c1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	10	15	13
+prefill-64k-c1	left	NVIDIA GB300	513	770	26
+prefill-64k-c1	left	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	10	15	26
+catid-c1-r1	right	NVIDIA GB300	467	605	43
+catid-c1-r1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	43
+catid-c1-r2	right	NVIDIA GB300	474	632	44
+catid-c1-r2	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	44
+catid-c1-r3	right	NVIDIA GB300	475	642	44
+catid-c1-r3	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	44
+catid-c4-r1	right	NVIDIA GB300	523	727	44
+catid-c4-r1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	25	44
+catid-c16-r1	right	NVIDIA GB300	627	761	69
+catid-c16-r1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	69
+catid-c32-r1	right	NVIDIA GB300	682	776	101
+catid-c32-r1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	101
+prefill-8k-c1	right	NVIDIA GB300	318	707	13
+prefill-8k-c1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	21	24	13
+prefill-64k-c1	right	NVIDIA GB300	520	793	26
+prefill-64k-c1	right	NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition	20	24	26
+
+--- nu-1008-cc2s/code20.log
+code20 pass@1: 11/20  easy 6/6  medium 5/8  hard 0/6  length-capped 8  mean ctoks 12546  wall 506s
+ALLDONE 2026-10-08 23:49:15
+
+--- nu-1008-cc2s/code20/code20.jsonl (per problem: finish reason, completion tokens, language, tests passed)
+{"id": "abc387_a", "difficulty": "easy", "finish": "stop", "ctoks": 579, "gen_sec": 21.3, "lang": "cpp", "tests_ok": 30, "tests": 30, "pass": true, "note": ""}
+{"id": "abc389_a", "difficulty": "easy", "finish": "stop", "ctoks": 209, "gen_sec": 10.2, "lang": "cpp", "tests_ok": 30, "tests": 30, "pass": true, "note": ""}
+{"id": "abc391_a", "difficulty": "easy", "finish": "stop", "ctoks": 376, "gen_sec": 16.3, "lang": "cpp", "tests_ok": 30, "tests": 30, "pass": true, "note": ""}
+{"id": "abc393_a", "difficulty": "easy", "finish": "stop", "ctoks": 479, "gen_sec": 19.0, "lang": "python", "tests_ok": 30, "tests": 30, "pass": true, "note": ""}
+{"id": "abc395_a", "difficulty": "easy", "finish": "stop", "ctoks": 400, "gen_sec": 16.9, "lang": "cpp", "tests_ok": 30, "tests": 30, "pass": true, "note": ""}
+{"id": "abc397_a", "difficulty": "easy", "finish": "stop", "ctoks": 784, "gen_sec": 26.0, "lang": "cpp", "tests_ok": 30, "tests": 30, "pass": true, "note": ""}
+{"id": "abc387_c", "difficulty": "medium", "finish": "stop", "ctoks": 17723, "gen_sec": 395.0, "lang": "cpp", "tests_ok": 30, "tests": 30, "pass": true, "note": ""}
+{"id": "abc389_d", "difficulty": "medium", "finish": "length", "ctoks": 24000, "gen_sec": 506.0, "pass": false, "note": "no code block (length)"}
+{"id": "arc191_a", "difficulty": "medium", "finish": "length", "ctoks": 24000, "gen_sec": 506.4, "pass": false, "note": "no code block (length)"}
+{"id": "abc392_d", "difficulty": "medium", "finish": "stop", "ctoks": 8941, "gen_sec": 209.8, "lang": "cpp", "tests_ok": 2, "tests": 30, "pass": false, "note": "test 2: rc 0 (wrong answer)"}
+{"id": "abc394_d", "difficulty": "medium", "finish": "stop", "ctoks": 7859, "gen_sec": 186.1, "lang": "cpp", "tests_ok": 30, "tests": 30, "pass": true, "note": ""}
+{"id": "abc396_d", "difficulty": "medium", "finish": "stop", "ctoks": 10697, "gen_sec": 247.1, "lang": "cpp", "tests_ok": 30, "tests": 30, "pass": true, "note": ""}
+{"id": "abc397_c", "difficulty": "medium", "finish": "stop", "ctoks": 2350, "gen_sec": 61.8, "lang": "cpp", "tests_ok": 30, "tests": 30, "pass": true, "note": ""}
+{"id": "arc195_a", "difficulty": "medium", "finish": "stop", "ctoks": 8528, "gen_sec": 200.9, "lang": "cpp", "tests_ok": 30, "tests": 30, "pass": true, "note": ""}
+{"id": "abc387_f", "difficulty": "hard", "finish": "length", "ctoks": 24000, "gen_sec": 506.4, "pass": false, "note": "no code block (length)"}
+{"id": "abc390_e", "difficulty": "hard", "finish": "length", "ctoks": 24000, "gen_sec": 506.4, "pass": false, "note": "no code block (length)"}
+{"id": "arc192_b", "difficulty": "hard", "finish": "length", "ctoks": 24000, "gen_sec": 506.4, "pass": false, "note": "no code block (length)"}
+{"id": "arc193_b", "difficulty": "hard", "finish": "length", "ctoks": 24000, "gen_sec": 506.4, "pass": false, "note": "no code block (length)"}
+{"id": "arc194_e", "difficulty": "hard", "finish": "length", "ctoks": 24000, "gen_sec": 506.4, "pass": false, "note": "no code block (length)"}
+{"id": "arc195_d", "difficulty": "hard", "finish": "length", "ctoks": 24000, "gen_sec": 506.4, "pass": false, "note": "no code block (length)"}
