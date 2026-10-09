@@ -147,3 +147,9 @@ Output token throughput (tok/s):         5.69
 Total token throughput (tok/s):          46587.00  
 Mean TTFT (ms):                          2538.09   
 Mean TPOT (ms):                          0.00      
+--- decode/decode-c*-r*.json (vllm bench serve result files, one JSON line each; the "date" and "duration" fields quoted verbatim. "date" is written when the run finishes, in UTC = PT + 7 h, 1 s resolution; the per-concurrency power rows use [date - duration, date] + 0.5 s (centring the 1 s stamp) as each run's window)
+decode-c1-r1.json: "date": "20261009-071346" ... "duration": 10.676173557061702
+decode-c1-r2.json: "date": "20261009-071418" ... "duration": 11.665903838933446
+decode-c1-r3.json: "date": "20261009-071448" ... "duration": 10.142465617973357
+decode-c16-r1.json: "date": "20261009-071600" ... "duration": 47.108087429078296
+decode-c32-r1.json: "date": "20261009-071741" ... "duration": 70.88368179695681

@@ -144,6 +144,45 @@ Notes on the table:
   published [44.5K](https://github.com/original-el8/dgx-station-gb300-research) tok/s, so that withdrawal stands (and the
   prompt shapes differ: el8's is `16K` tokens).
 
+### Energy per token, by concurrency
+
+The power rows above pool all five decode runs plus the warm-ups and gaps between them, so they cannot be divided by a
+throughput. Here the same 1 s samples are split by run: each measured run's window is its result file's end stamp
+minus its duration (both quoted in the bench receipts), centred on the 1 s stamp; warm-ups and gaps are dropped, and
+the three C1 repetitions are pooled. tok/J = tok/s / mean W over the same window.
+
+<!-- results -->
+| Measurement | A: sidecar | B: Grace only | A / B | Receipts |
+|---|---|---|---|---|
+| C1, GB300 mean W | 531.6 | 395.82 | | [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C1, RTX PRO 6000 mean W (B: idle, empty) | 133.77 | 19.6 | | [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C1, GPU total W (B: GB300 only / incl. idle RTX) | 665.37 | 395.82 / 415.42 | | [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C1, decode tok/J (B: GB300 only / incl. idle RTX) | 0.795 | 0.679 / 0.647 | 1.17x / 1.23x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log), [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C1, output tok/J (B: GB300 only / incl. idle RTX) | 0.713 | 0.624 / 0.595 | 1.14x / 1.20x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log), [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C16, GB300 mean W | 777.17 | 449.06 | | [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C16, RTX PRO 6000 mean W (B: idle, empty) | 212.77 | 18.87 | | [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C16, GPU total W (B: GB300 only / incl. idle RTX) | 989.94 | 449.06 / 467.93 | | [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C16, decode tok/J (B: GB300 only / incl. idle RTX) | 2.07 | 1.61 / 1.54 | 1.29x / 1.34x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log), [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C16, output tok/J (B: GB300 only / incl. idle RTX) | 1.76 | 1.44 / 1.38 | 1.22x / 1.27x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log), [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C32, GB300 mean W | 788.06 | 480.93 | | [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C32, RTX PRO 6000 mean W (B: idle, empty) | 217.99 | 19.38 | | [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C32, GPU total W (B: GB300 only / incl. idle RTX) | 1,006.05 | 480.93 / 500.31 | | [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C32, decode tok/J (B: GB300 only / incl. idle RTX) | 2.60 | 1.93 / 1.85 | 1.35x / 1.40x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log), [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| C32, output tok/J (B: GB300 only / incl. idle RTX) | 2.30 | 1.77 / 1.70 | 1.30x / 1.35x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log), [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+<!-- /results -->
+
+- **Two readings of B.** "GB300 only" leaves the idle RTX PRO 6000 out, as if the Station had no sidecar card;
+  "incl. idle RTX" charges B for the card sitting in the same Station, empty. Every Station GB300 ships with the card,
+  so the second is the like-for-like box comparison; the first is the conservative one for the sidecar.
+- **The sidecar draws more power and still spends less energy per token,** because it more than doubles throughput:
+  at C32 the two GPUs draw about twice B's power for 2.82x the decode rate.
+- **GPU board power only** (nvidia-smi `power.draw`). Grace CPU, LPDDR5X, fans and PSU losses are not measured. Arm B
+  streams its cold experts from Grace memory over C2C, so its unmeasured share is probably the larger one, and these
+  ratios likely understate the sidecar's advantage at the wall.
+- **Decode tok/J includes prefill power.** The window is the whole run, prefill included, but decode tok/s excludes
+  TTFT; output tok/J is the self-consistent wall-time figure. Moving every window by half a second either way changes
+  each mean by under 1.2%.
+
 ## 3. Takeaways
 
 - **The sidecar is a throughput tier.** For a mixture-of-experts model that spills out of HBM, the RTX PRO 6000 as a
@@ -160,7 +199,8 @@ Notes on the table:
 - **Prefill gains less** (1.45x at 8K, 1.46x at 64K): long prompts batch the expert reads, so Grace bandwidth hurts
   them less than it hurts decode.
 - **The power cost is modest.** In the decode window the GB300 averages 495.9 W with the sidecar vs 397.2 W without,
-  and the RTX PRO 6000 adds 144.7 W, for 2.8x the C32 decode throughput: far less energy per token.
+  and the RTX PRO 6000 adds 144.7 W, for 2.8x the C32 decode throughput. Split by run, GPU energy per decode token
+  falls at every concurrency: 1.35x the C32 decode tok/J of Grace only (1.40x counting the idle card in B).
 
 ## Credits
 

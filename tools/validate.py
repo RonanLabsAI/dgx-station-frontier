@@ -11,7 +11,8 @@ results.jsonl
       withdrawn  log log_match, notes starting with WITHDRAWN
       public-reference  url source   (numbers published by others; quoted for comparison only)
   * every log file exists under logs/, every log_match / inputs string occurs in it;
-  * computed rows are recomputed from their inputs (sum, mean, ratio, pct_change, difference, minutes_between, ratio_rows);
+  * computed rows are recomputed from their inputs (sum, mean, ratio, pct_change, difference, minutes_between, ratio_rows,
+    sum_rows);
   * image_digest pins a sha256 digest; recipe folders exist.
 
 README files (README.md, recipes/*/README.md, atlas/*/README.md) and result pages (results/*.md)
@@ -125,6 +126,8 @@ for r in rows:
             elif op == "ratio_rows":
                 a, b = (byid[x] for x in r["rows_in"])
                 got = a["value"] / b["value"]
+            elif op == "sum_rows":
+                got = sum(byid[x]["value"] for x in r["rows_in"])
             else:
                 raise ValueError(op)
             if not close(got, v):
