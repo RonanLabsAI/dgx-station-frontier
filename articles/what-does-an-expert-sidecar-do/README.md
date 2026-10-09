@@ -108,6 +108,8 @@ Our rows are in [`results.jsonl`](../../results.jsonl). el8's figures are from
 | 64 users on one Station 3,047-3,160 tok/s | `dsv41-solo-right-c64`, `dsv41-solo-left-c64` |
 | About a quarter of random-token routes on the 6000 | 99 / 384 if routing were perfectly even. Arithmetic, not measured |
 | About 5% of real-text decode routes on those experts | el8 `m3/DETAILS.md` (Choosing the hot set): 5.4% out of sample |
-| No other public V4-Pro run on fewer than four GB300s | our search of 2026-10-06 (see the top-level README) |
+| ~~No other public V4-Pro run on fewer than four GB300s~~ WITHDRAWN 2026-10-09: @antirez ran V4-Pro (Q2 quant, DwarfStar) on one DGX Station at ~45-50 tok/s on 2026-08-16 | https://x.com/antirez/status/2089060410359972091 |
 
 Figures: drawn from the values above. Cover art generated with Grok Imagine; title set by us.
+
+**Correction (2026-10-09):** this article said we found no other public DeepSeek-V4-Pro run on fewer than four GB300s. That was wrong: [@antirez ran V4-Pro as a 2-bit quant on one DGX Station](https://x.com/antirez/status/2089060410359972091) in August 2026, at about 45 tok/s. Our run differs in using the released precision (MXFP4 experts + FP8) in vLLM across two Stations with 16 concurrent users.
