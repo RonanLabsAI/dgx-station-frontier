@@ -1,4 +1,4 @@
-# EXPERIMENTAL, NOT SERVABLE. DeepSeek-V4-Pro E3-A16 + bundled DSpark drafter (K=5), multi-node. 2026-10-08 12:55-13:43 PT.
+# SUPERSEDED (unfixed configuration; fixed later, see dspark-guard-r31b.log and dspark-final-v4p.log). DeepSeek-V4-Pro E3-A16 + bundled DSpark drafter (K=5), multi-node. 2026-10-08 12:55-13:43 PT.
 # The engine hung on thinking-mode GSM8K traffic (ranks desynchronised); quality is therefore unreceipted.
 # Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
 # replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.

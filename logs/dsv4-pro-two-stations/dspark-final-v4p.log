@@ -1,0 +1,113 @@
+# DeepSeek-V4-Pro final stack, 2026-10-09 12:33-15:14 PT: E2 + E3-A16 + DSpark K=5 + guard + acceptance-gated K + skip-draft,
+# on a MIXED expert map re-fitted from route counts. CAVEAT: the map's fit counts included the private C1 prompts and the
+# public C1 slices measured in the placement A/B below (a snapshot-name collision), so those C1 numbers are in-sample;
+# random ids, the C16 rows (9 of 12 prompts not in the fit), GSM8K-200, flips and the soak are not.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names, GPU UUIDs and the name of
+# the private prompt set replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- master.log (placement A/B: same C1 slices, no drafter, counters on; old map then mixed map)
+13:01:56 +28m   <private>-off: {"set": "<private>", "think": 0, "idx": "3-26", "C": 16, "n": 24, "mean_tpot_ms": 62.62, "decode_agg": 255.5, "median_ttft_s": 0.9, "mean_tokens": 768.0, "tok_per_chunk": 1.004, "out_tput": 199.93, "wall_s": 92.2} hit
+13:01:56 +28m   <private>-on: {"set": "<private>", "think": 1, "idx": "3-26", "C": 16, "n": 24, "mean_tpot_ms": 57.07, "decode_agg": 280.36, "median_ttft_s": 1.19, "mean_tokens": 768.0, "tok_per_chunk": 1.04, "out_tput": 217.18, "wall_s": 84.9} hit
+13:01:56 +28m   cnn-off: {"set": "pool", "think": 0, "idx": "0-15", "C": 16, "n": 16, "mean_tpot_ms": 112.4, "decode_agg": 142.35, "median_ttft_s": 19.86, "mean_tokens": 512.0, "tok_per_chunk": 1.0, "out_tput": 107.22, "wall_s": 76.4} h
+13:01:56 +28m   cnn-on: {"set": "pool", "think": 0, "idx": "0-15", "C": 16, "n": 16, "mean_tpot_ms": 101.11, "decode_agg": 158.24, "median_ttft_s": 19.89, "mean_tokens": 512.0, "tok_per_chunk": 1.0, "out_tput": 116.08, "wall_s": 70.6} h
+13:01:56 +28m   sg-off: {"set": "pool", "think": 0, "idx": "0-47", "C": 16, "n": 48, "mean_tpot_ms": 99.76, "decode_agg": 160.38, "median_ttft_s": 0.66, "mean_tokens": 378.8333333333333, "tok_per_chunk": 1.002, "out_tput": 136.1, "wall_
+13:01:56 +28m   sg-on: {"set": "pool", "think": 0, "idx": "0-47", "C": 16, "n": 48, "mean_tpot_ms": 93.22, "decode_agg": 171.63, "median_ttft_s": 0.95, "mean_tokens": 678.7708333333334, "tok_per_chunk": 1.001, "out_tput": 153.51, "wall_
+13:13:16 +39m C eval exit 0
+13:13:16 +39m   <private>-off: {"set": "<private>", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 23.9, "decode_agg": 41.84, "median_ttft_s": 0.1, "mean_tokens": 1024.0, "tok_per_chunk": 1.002, "out_tput": 41.7, "wall_s": 73.7} hit 0.00
+13:13:16 +39m   <private>-on: {"set": "<private>", "think": 1, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 22.78, "decode_agg": 43.89, "median_ttft_s": 0.32, "mean_tokens": 1024.0, "tok_per_chunk": 1.042, "out_tput": 43.32, "wall_s": 70.9} hit 0.
+13:13:16 +39m   cnn-off: {"set": "pool", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 27.07, "decode_agg": 36.93, "median_ttft_s": 1.96, "mean_tokens": 1024.0, "tok_per_chunk": 1.0, "out_tput": 34.51, "wall_s": 89.0} hit 0.
+13:13:16 +39m   cnn-on: {"set": "pool", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 26.43, "decode_agg": 37.83, "median_ttft_s": 2.0, "mean_tokens": 1024.0, "tok_per_chunk": 1.0, "out_tput": 35.29, "wall_s": 87.1} hit 0.00
+13:13:16 +39m   sg-off: {"set": "pool", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 26.51, "decode_agg": 37.72, "median_ttft_s": 0.12, "mean_tokens": 688.0, "tok_per_chunk": 1.0, "out_tput": 36.92, "wall_s": 55.9} hit 0.00
+13:13:16 +39m   sg-on: {"set": "pool", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 25.29, "decode_agg": 39.54, "median_ttft_s": 0.12, "mean_tokens": 754.0, "tok_per_chunk": 1.0, "out_tput": 38.19, "wall_s": 59.2} hit 0.00%
+13:13:16 +39m   catid C1 seed 9411: decode_agg 35.83 (TPOT 27.91 ms) hit 0.00% (0/24576 tok)
+13:13:46 +40m   mixfit <private>-off: Grace routes/token/rank old 23.17/21.34 -> mixed 8.62/8.45 (tokens 3164)
+13:13:46 +40m   mixfit <private>-on: Grace routes/token/rank old 16.36/14.77 -> mixed 7.74/7.75 (tokens 3069)
+13:13:46 +40m   mixfit cnn-off: Grace routes/token/rank old 43.37/43.42 -> mixed 13.16/12.81 (tokens 3069)
+13:13:46 +40m   mixfit cnn-on: Grace routes/token/rank old 38.35/40.06 -> mixed 11.92/12.02 (tokens 3069)
+13:13:46 +40m   mixfit sg-off: Grace routes/token/rank old 45.85/40.72 -> mixed 12.15/12.48 (tokens 2164)
+13:13:46 +40m   mixfit sg-on: Grace routes/token/rank old 36.25/38.94 -> mixed 10.39/10.44 (tokens 2349)
+13:13:46 +40m   mixfit gsm-on: Grace routes/token/rank old 11.74/11.38 -> mixed 16.31/16.63 (tokens 19376)
+14:35:09 +121m   <private>-off-c1-r1: {"set": "<private>", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 11.14, "decode_agg": 89.77, "median_ttft_s": 0.11, "mean_tokens": 1024.0, "tok_per_chunk": 2.917, "out_tput": 89.02, "wall_s": 34.5} hit 0.00% (0/82 tok
+14:35:09 +121m   <private>-off-c1-r2: {"set": "<private>", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 11.28, "decode_agg": 88.69, "median_ttft_s": 0.1, "mean_tokens": 1024.0, "tok_per_chunk": 2.915, "out_tput": 87.99, "wall_s": 34.9} hit 0.00% (0/82 tok)
+14:35:09 +121m   <private>-off-c1-r3: {"set": "<private>", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 11.2, "decode_agg": 89.27, "median_ttft_s": 0.12, "mean_tokens": 1024.0, "tok_per_chunk": 2.94, "out_tput": 88.48, "wall_s": 34.7} hit 0.00% (0/82 tok)
+14:52:40 +139m H eval exit 0
+14:52:40 +139m   <private>-off: {"set": "<private>", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 21.46, "decode_agg": 46.6, "median_ttft_s": 0.11, "mean_tokens": 1024.0, "tok_per_chunk": 1.003, "out_tput": 46.41, "wall_s": 66.2} hit 0.
+14:52:40 +139m   <private>-on: {"set": "<private>", "think": 1, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 21.37, "decode_agg": 46.8, "median_ttft_s": 0.33, "mean_tokens": 1024.0, "tok_per_chunk": 1.039, "out_tput": 46.16, "wall_s": 66.6} hit 0.0
+14:52:40 +139m   cnn-off: {"set": "pool", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 22.57, "decode_agg": 44.31, "median_ttft_s": 1.7, "mean_tokens": 1024.0, "tok_per_chunk": 1.0, "out_tput": 41.33, "wall_s": 74.3} hit 0.0
+14:52:40 +139m   cnn-on: {"set": "pool", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 22.5, "decode_agg": 44.45, "median_ttft_s": 1.68, "mean_tokens": 1024.0, "tok_per_chunk": 1.0, "out_tput": 41.47, "wall_s": 74.1} hit 0.00
+14:52:40 +139m   sg-off: {"set": "pool", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 21.99, "decode_agg": 45.47, "median_ttft_s": 0.12, "mean_tokens": 582.6666666666666, "tok_per_chunk": 1.001, "out_tput": 44.21, "wall_s":
+14:52:40 +139m   sg-on: {"set": "pool", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 22.5, "decode_agg": 44.45, "median_ttft_s": 0.11, "mean_tokens": 753.0, "tok_per_chunk": 1.0, "out_tput": 43.84, "wall_s": 51.5} hit 0.00%
+14:52:40 +139m   catid C1 seed 9511: decode_agg 35.59 (TPOT 28.10 ms) hit 0.00% (0/24576 tok)
+--- F gate.txt
+{
+ "rank0": {
+  "checks": 183,
+  "layers_checked": 61,
+  "missing_layers": [],
+  "below_0.999": {},
+  "timeouts_in_checks": 0,
+  "cos_min": 0.99999,
+  "cos_mean": 0.999993,
+  "worst_layer": 6,
+  "pass": true
+ },
+ "rank1": {
+  "checks": 183,
+  "layers_checked": 61,
+  "missing_layers": [],
+  "below_0.999": {},
+  "timeouts_in_checks": 0,
+  "cos_min": 0.999989,
+  "cos_mean": 0.999993,
+  "worst_layer": 46,
+  "pass": true
+ },
+ "PASS": true
+}
+--- F <private>/summary.txt (skip-draft ON)
+== 2026-10-09 13:32:41 seedbase 9100
+catid-c1-r1 seed 9111: decode_agg 37.01 (TPOT 27.02 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.000 drafts 52 | running mean 0.9 max 1 waiting mean 0.0
+catid-c1-r2 seed 9112: decode_agg 37.17 (TPOT 26.90 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.062 drafts 48 | running mean 0.9 max 1 waiting mean 0.0
+catid-c1-r3 seed 9113: decode_agg 37.19 (TPOT 26.89 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.042 drafts 48 | running mean 0.9 max 1 waiting mean 0.0
+catid-c16-r1 seed 9261: decode_agg 154.29 (TPOT 103.70 ms) failed 0 hit 0.00% (0/262144 tok) acc_len 1.078 drafts 128 | running mean 14.0 max 16 waiting mean 0.9
+<private>-off-c1-r1: {"set": "<private>", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 11.57, "decode_agg": 86.46, "median_ttft_s": 0.1, "mean_tokens": 1024.0, "tok_per_chunk": 2.651, "out_tput": 85.78, "wall_s": 35.8} hit 0.00% (0/82 tok) acc_len 3.007 drafts 954 | running mean 1.0 max 1 waiting mean 0.0
+<private>-off-c1-r2: {"set": "<private>", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 11.25, "decode_agg": 88.87, "median_ttft_s": 0.1, "mean_tokens": 1024.0, "tok_per_chunk": 2.931, "out_tput": 88.1, "wall_s": 34.9} hit 0.00% (0/82 tok) acc_len 2.944 drafts 1045 | running mean 0.9 max 1 waiting mean 0.0
+<private>-off-c1-r3: {"set": "<private>", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 11.39, "decode_agg": 87.83, "median_ttft_s": 0.13, "mean_tokens": 1024.0, "tok_per_chunk": 2.906, "out_tput": 86.99, "wall_s": 35.3} hit 0.00% (0/82 tok) acc_len 2.917 drafts 1054 | running mean 1.0 max 1 waiting mean 0.0
+<private>-off-c16-legacy: {"set": "<private>", "think": 0, "idx": "0-31", "C": 16, "n": 32, "mean_tpot_ms": 46.58, "decode_agg": 343.51, "median_ttft_s": 0.46, "mean_tokens": 1024.0, "tok_per_chunk": 2.574, "out_tput": 328.12, "wall_s": 99.9} hit 0.00% (0/924 tok) acc_len 2.579 drafts 12704 | running mean 15.4 max 16 waiting mean 0.0
+<private>-off-c16-heldout: {"set": "<private>", "think": 0, "idx": "27-35,0-2", "C": 16, "n": 16, "mean_tpot_ms": 47.28, "decode_agg": 338.41, "median_ttft_s": 0.82, "mean_tokens": 1024.0, "tok_per_chunk": 2.536, "out_tput": 321.49, "wall_s": 51.0} hit 0.00% (0/456 tok) acc_len 2.540 drafts 6450 | running mean 15.6 max 16 waiting mean 0.0
+<private>-on-c1-r1: {"set": "<private>", "think": 1, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 12.51, "decode_agg": 79.93, "median_ttft_s": 0.19, "mean_tokens": 1024.0, "tok_per_chunk": 2.601, "out_tput": 78.83, "wall_s": 39.0} hit 0.00% (0/319 tok) acc_len 2.611 drafts 1171 | running mean 0.9 max 1 waiting mean 0.0
+<private>-on-c1-r2: {"set": "<private>", "think": 1, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 11.94, "decode_agg": 83.74, "median_ttft_s": 0.2, "mean_tokens": 1024.0, "tok_per_chunk": 2.768, "out_tput": 82.5, "wall_s": 37.2} hit 0.00% (0/319 tok) acc_len 2.772 drafts 1109 | running mean 1.0 max 1 waiting mean 0.0
+<private>-on-c1-r3: {"set": "<private>", "think": 1, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 12.3, "decode_agg": 81.27, "median_ttft_s": 0.2, "mean_tokens": 1024.0, "tok_per_chunk": 2.662, "out_tput": 80.06, "wall_s": 38.4} hit 0.00% (0/319 tok) acc_len 2.638 drafts 1164 | running mean 1.0 max 1 waiting mean 0.0
+<private>-on-c16-heldout: {"set": "<private>", "think": 1, "idx": "27-35,0-2", "C": 16, "n": 16, "mean_tpot_ms": 48.35, "decode_agg": 330.94, "median_ttft_s": 1.07, "mean_tokens": 1024.0, "tok_per_chunk": 2.418, "out_tput": 310.18, "wall_s": 52.8} hit 0.00% (0/1720 tok) acc_len 2.414 drafts 6791 | running mean 15.4 max 16 waiting mean 0.0
+--- F progress.log (flips, arrival/sweep, GSM8K-200, STREAMING soak, divergence checks)
+13:29:23 flips skipon pass 1: {"positions": 3944, "flips": 142, "flip_pct": 3.6, "cont_positions": 3405, "cont_flips": 97, "cont_flip_pct": 2.849, "free_identical": 7, "n_prompts": 32} | spec 11 55 22 -> 1053 5265 2434
+13:30:10 flips skipon pass 2: {"positions": 3944, "flips": 147, "flip_pct": 3.727, "cont_positions": 3405, "cont_flips": 96, "cont_flip_pct": 2.819, "free_identical": 7, "n_prompts": 32} | spec 1053 5265 2434 -> 2073 10365 4867
+13:31:12 repro arrival exit 0: {"mode": "arrival", "ok": 48, "timeout": 0, "http_error": 0, "other": 0, "healthy_after": true}
+13:32:40 repro sweep exit 0: {"mode": "sweep", "ok": 45, "timeout": 0, "http_error": 0, "other": 0, "healthy_after": true}
+{"n": 200, "correct": 195, "acc": 97.5, "runaways": 1, "errors": 0, "wall_s": 461, "median_ctoks": 243, "effort": "high"}
+13:57:09 div peer r0 {'published': 1708000, 'completed': 1708000, 'timeouts': 0, 'rows': 24639927, 'tokens': 54753966, 'wait_s': 10.71, 'waits': 1284863}
+13:57:09 div peer r1 {'published': 1708000, 'completed': 1708000, 'timeouts': 0, 'rows': 22311778, 'tokens': 54753966, 'wait_s': 12.1, 'waits': 1240351}
+13:57:09 div server-rank0.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=3 shm_stall=0
+13:57:09 div server-rank1-copy.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=4 shm_stall=0
+13:57:09 div r31b-stats r0 free_min_MiB 2691 free_last_MiB 2691 failfast 0 injected 0 dg 1164 0.14 skip {'calls': 27940, 'light': 11452, 'full': 16488, 'checks': 54}
+13:57:09 div r31b-stats r1 free_min_MiB 2634 free_last_MiB 2634 failfast 0 injected 0 dg 1164 0.13 skip {'calls': 27848, 'light': 11452, 'full': 16396, 'checks': 54}
+13:57:09 div kctl {"time": 1791579429.2520993, "on": true, "ema": 5.658, "flips": 6, "steps_off": 19, "probes": 48, "probe_gap": 16, "k_hist": {"5": 11437, "0": 11444, "3": 5051}}
+14:17:35 soak exit 0: {"mode": "soak-stream", "duration_s": 1200.0, "submitted": 801, "ok": 801, "timeout": 0, "http_error": 0, "other": 0, "hang": false, "hang_why": "", "healthy_after": true, "kinds": {"long": {"n": 87, "ok": 87, "max_wall": 35.03, "max_gap": 1.16}, "gsmT": {"n": 89, "ok": 89, "max_wall": 168.09, "max_gap": 2.16}, "chat": {"n": 134, "ok": 134, "max_wall": 34.34, "max_gap": 1.16}, "gsm": {"n": 263, "ok": 263, "max_wall": 313.17, "max_gap": 2.17}, "ids": {"n": 124, "ok": 124, "max_wall": 106.16, "max_gap": 2.31}, "gsmnt": {"n": 104, "ok": 104, "max_wall": 28.8, "max_gap": 1.16}}}
+14:17:35 div peer r0 {'published': 2035875, 'completed': 2035875, 'timeouts': 0, 'rows': 75249452, 'tokens': 153285436, 'wait_s': 14.64, 'waits': 1612558}
+14:17:35 div peer r1 {'published': 2035875, 'completed': 2035875, 'timeouts': 0, 'rows': 71168621, 'tokens': 153285436, 'wait_s': 17.7, 'waits': 1567974}
+14:17:35 div server-rank0.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=3 shm_stall=0
+14:17:35 div server-rank1-copy.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=4 shm_stall=0
+14:17:35 div r31b-stats r0 free_min_MiB 2691 free_last_MiB 2691 failfast 0 injected 0 dg 1164 0.14 skip {'calls': 33280, 'light': 11452, 'full': 21828, 'checks': 65}
+14:17:35 div r31b-stats r1 free_min_MiB 2634 free_last_MiB 2634 failfast 0 injected 0 dg 1164 0.13 skip {'calls': 33286, 'light': 11452, 'full': 21834, 'checks': 65}
+14:17:35 div kctl {"time": 1791580655.8375306, "on": true, "ema": 3.579, "flips": 6, "steps_off": 19, "probes": 48, "probe_gap": 16, "k_hist": {"5": 11582, "0": 11444, "3": 10281}}
+--- G progress.log + <private>/summary.txt (same session and maps, skip-draft OFF: K_OFF=1 control)
+14:26:21 flips skipoff pass 1: {"positions": 3944, "flips": 142, "flip_pct": 3.6, "cont_positions": 3405, "cont_flips": 100, "cont_flip_pct": 2.937, "free_identical": 7, "n_prompts": 32} | spec 0 0 0 -> 1021 5105 2411
+14:27:08 flips skipoff pass 2: {"positions": 3944, "flips": 145, "flip_pct": 3.676, "cont_positions": 3405, "cont_flips": 108, "cont_flip_pct": 3.172, "free_identical": 6, "n_prompts": 32} | spec 1021 5105 2411 -> 2041 10205 4785
+14:35:09 div kctl {"time": 1791581706.1098099, "on": true, "ema": 3.126, "flips": 2, "steps_off": 9093, "probes": 568, "probe_gap": 16, "k_hist": {"5": 5855, "1": 8525}}
+== 2026-10-09 14:27:08 mini seedbase 9200
+catid-c1-r1 seed 9211: decode_agg 29.6 (TPOT 33.78 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.019 drafts 3013 | running mean 0.8 max 1 waiting mean 0.0
+catid-c1-r2 seed 9212: decode_agg 29.62 (TPOT 33.76 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.016 drafts 3022 | running mean 0.9 max 1 waiting mean 0.0
+catid-c1-r3 seed 9213: decode_agg 29.73 (TPOT 33.64 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.018 drafts 3014 | running mean 0.9 max 1 waiting mean 0.0
+<private>-off-c1-r1: {"set": "<private>", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 11.14, "decode_agg": 89.77, "median_ttft_s": 0.11, "mean_tokens": 1024.0, "tok_per_chunk": 2.917, "out_tput": 89.02, "wall_s": 34.5} hit 0.00% (0/82 tok) acc_len 2.927 drafts 1051 | running mean 1.0 max 1 waiting mean 0.0
+<private>-off-c1-r2: {"set": "<private>", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 11.28, "decode_agg": 88.69, "median_ttft_s": 0.1, "mean_tokens": 1024.0, "tok_per_chunk": 2.915, "out_tput": 87.99, "wall_s": 34.9} hit 0.00% (0/82 tok) acc_len 2.931 drafts 1051 | running mean 1.0 max 1 waiting mean 0.0
+<private>-off-c1-r3: {"set": "<private>", "think": 0, "idx": "0-2", "C": 1, "n": 3, "mean_tpot_ms": 11.2, "decode_agg": 89.27, "median_ttft_s": 0.12, "mean_tokens": 1024.0, "tok_per_chunk": 2.94, "out_tput": 88.48, "wall_s": 34.7} hit 0.00% (0/82 tok) acc_len 2.948 drafts 1042 | running mean 0.9 max 1 waiting mean 0.0

@@ -35,7 +35,10 @@ Every E2, E3 and speculative run used a fresh seed and measured 0.00% prefix-cac
 | E2, pin-hot split | 35.32 | 118.3 | 40.5 | 152.02 | 97.5 | 3.88 | [log](../../logs/dsv4-pro-two-stations/e2-pin-hot.log) |
 | E3-A8, sidecar W4A8-MX, public b12x | 37.68 | 166.11 | 43.86 | 233.04 | 96.5 | 3.45 | [log](../../logs/dsv4-pro-two-stations/e3-a8-sidecar.log) |
 | **E3-A16, sidecar W4A16, b12x + our patch** | **37.58** | **164.61** | **43.93** | **230.75** | **97.5** | **3.91** | [log](../../logs/dsv4-pro-two-stations/e3-a16-sidecar.log) |
-| *Experimental, not servable:* E3-A16 + DSpark drafter, `K = 5` | 21.62 | 72.11 | 77.56 | 270.86 | engine hang: 200 of 200 requests errored | | [log](../../logs/dsv4-pro-two-stations/dspark-experimental.log) |
+| *Superseded, unfixed:* E3-A16 + DSpark drafter, `K = 5` | 21.62 | 72.11 | 77.56 | 270.86 | engine hang: 200 of 200 requests errored | | [log](../../logs/dsv4-pro-two-stations/dspark-experimental.log) |
+| E3-A16 + DSpark + rank-symmetric guard + acceptance-gated `K` | 30.07 | 114.57 | 76.51 | 298.25 | 97.5 | 3.68 | [log](../../logs/dsv4-pro-two-stations/dspark-guard-r31b.log) |
+| + skip-draft (context-only step when `K = 0`) | 40.68 | 160.93 | 76.57 | 303.59 | 98.0 | 4.62 | [log](../../logs/dsv4-pro-two-stations/dspark-skipdraft-r31c.log) |
+| **Final: + mixed expert map (see note)** | **37.12** | **154.29** | **87.72** | **338.41** | **97.5** | **3.66** | [log](../../logs/dsv4-pro-two-stations/dspark-final-v4p.log) |
 <!-- /results -->
 
 <!-- results -->
@@ -62,12 +65,19 @@ Reading the numbers:
   ([patches/](patches/)); A8 runs on public b12x master.
 - **Flips.** Stock vLLM on this path is not run-to-run deterministic: E1 against itself flips 3.22% of teacher-forced
   top-1 tokens. E2 and E3 add well under one point over that floor.
-- **DSpark is experimental.** The bundled drafter composes with TP2 + EP2 multi-node, the E2/E3 hooks and CUDA graphs,
-  and doubles real-text C1 (acceptance about 2.9 tokens per step). On random ids it predicts almost nothing and halves
-  throughput. It also **hung** on GSM8K thinking traffic at C16: the two ranks desynchronised, all 200 requests failed,
-  so it has no quality receipt and is not servable. Our diagnosis so far (not yet validated on hardware): an
-  out-of-memory error while JIT-loading a kernel on the non-output rank was swallowed, so that rank skipped the
-  drafter's collectives.
+- **DSpark (the bundled drafter) is servable after two fixes.** Unfixed, it hung on thinking-mode GSM8K at C16: an
+  out-of-memory error while JIT-loading a drafter kernel on the non-output rank was swallowed, so that rank skipped the
+  drafter's collectives and the ranks desynchronised. The guard makes every failure rank-symmetric and attributable
+  (failfast, drafter kernel warm-up, KV headroom, `K` decided in the scheduler and broadcast). Skip-draft then runs a
+  context-only step when the scheduler sets `K = 0`, so random-id traffic no longer pays for a drafter that predicts
+  nothing. The final stack passed a 20-minute mixed soak at C16 with a streaming client: 801 of 801 requests completed,
+  0 timeouts, no hang ([log](../../logs/dsv4-pro-two-stations/dspark-final-v4p.log)). A same-session A/B shows
+  skip-draft does not change flips (3.66 on, 3.64 off) and is worth +25% on random ids at C1 (37.12 vs 29.65 tok/s).
+- **Note on the final row.** Its expert map was re-fitted from route counts over thinking-on and thinking-off traffic
+  (private and public text, GSM8K). The fit counts included the C1 real-text prompts measured here, so the 87.72 tok/s
+  C1 figure (81.65 with thinking on) is in-sample for the map. Random ids, the C16 run (338.41 tok/s; 330.94 with
+  thinking on; 9 of its 12 prompts were not in the fit), GSM8K-200, flips and the soak are not. A clean held-out
+  public-text measurement is still owed.
 
 ## Hardware and software
 

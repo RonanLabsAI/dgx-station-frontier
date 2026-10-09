@@ -1,0 +1,59 @@
+# DeepSeek-V4-Pro E3-A16 + DSpark K=5 + guard + skip-draft (scheduler K=0 -> context-only light step, rank-symmetric).
+# 2026-10-09 02:38-03:52 PT. Old (private-workload) expert maps.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names, GPU UUIDs and the name of
+# the private prompt set replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- bench/summary.txt
+== 2026-10-09 02:50:02 seedbase 74
+catid C1 rep1 seed 85: decode_agg 41.6 (TPOT 24.04 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 2.816 accept_rate 0.363 drafts 250
+catid C1 rep2 seed 86: decode_agg 38.01 (TPOT 26.31 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.021 accept_rate 0.004 drafts 48
+catid C1 rep3 seed 87: decode_agg 42.44 (TPOT 23.56 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 3.171 accept_rate 0.434 drafts 164
+catid C16 rep1 seed 235: decode_agg 160.34 (TPOT 99.79 ms) failed 0 hit 0.00% (0/262144 tok) acc_len 1.023 accept_rate 0.008 drafts 128
+catid C16 rep2 seed 236: decode_agg 159.66 (TPOT 100.21 ms) failed 0 hit 0.00% (0/262144 tok) acc_len 1.135 accept_rate 0.045 drafts 126
+catid C16 rep3 seed 237: decode_agg 162.78 (TPOT 98.29 ms) failed 0 hit 0.00% (0/262144 tok) acc_len 1.016 accept_rate 0.005 drafts 128
+real C1 rep1: {"C": 1, "n": 3, "offset": 0, "mean_tpot_ms": 13.16, "decode_agg": 75.96, "median_ttft_s": 0.12, "mean_tokens": 1024.0, "tok_per_chunk": 2.657, "wall_s": 40.7} hit 0.00% (0/82 tok) acc_len 3.001 accept_rate 0.400 drafts 959
+real C1 rep2: {"C": 1, "n": 3, "offset": 0, "mean_tpot_ms": 12.73, "decode_agg": 78.54, "median_ttft_s": 0.12, "mean_tokens": 1024.0, "tok_per_chunk": 2.954, "wall_s": 39.4} hit 0.00% (0/82 tok) acc_len 2.965 accept_rate 0.393 drafts 1037
+real C1 rep3: {"C": 1, "n": 3, "offset": 0, "mean_tpot_ms": 13.3, "decode_agg": 75.2, "median_ttft_s": 0.13, "mean_tokens": 1024.0, "tok_per_chunk": 2.842, "wall_s": 41.2} hit 0.00% (0/82 tok) acc_len 2.847 accept_rate 0.369 drafts 1078
+real C16 rep1: {"C": 16, "n": 32, "offset": 0, "mean_tpot_ms": 52.52, "decode_agg": 304.67, "median_ttft_s": 0.53, "mean_tokens": 1024.0, "tok_per_chunk": 2.585, "wall_s": 112.5} hit 0.00% (0/924 tok) acc_len 2.590 accept_rate 0.529 drafts 12651
+real C16 rep2: {"C": 16, "n": 32, "offset": 0, "mean_tpot_ms": 52.48, "decode_agg": 304.86, "median_ttft_s": 0.53, "mean_tokens": 1024.0, "tok_per_chunk": 2.585, "wall_s": 113.1} hit 0.00% (0/924 tok) acc_len 2.590 accept_rate 0.528 drafts 12652
+real C16 rep3: {"C": 16, "n": 32, "offset": 0, "mean_tpot_ms": 53.11, "decode_agg": 301.25, "median_ttft_s": 0.52, "mean_tokens": 1024.0, "tok_per_chunk": 2.568, "wall_s": 113.6} hit 0.00% (0/924 tok) acc_len 2.574 accept_rate 0.523 drafts 12730
+DONE 03:14:20
+--- gate.txt
+{
+ "rank0": {
+  "checks": 183,
+  "layers_checked": 61,
+  "missing_layers": [],
+  "below_0.999": {},
+  "timeouts_in_checks": 0,
+  "cos_min": 0.999991,
+  "cos_mean": 0.999994,
+  "worst_layer": 21,
+  "pass": true
+ },
+ "rank1": {
+  "checks": 183,
+  "layers_checked": 61,
+  "missing_layers": [],
+  "below_0.999": {},
+  "timeouts_in_checks": 0,
+  "cos_min": 0.999991,
+  "cos_mean": 0.999993,
+  "worst_layer": 0,
+  "pass": true
+ },
+ "PASS": true
+}
+--- flips.log (summary)
+{"positions": 3944, "flips": 182, "flip_pct": 4.615, "cont_positions": 3405, "cont_flips": 125, "cont_flip_pct": 3.671, "free_identical": 4, "n_prompts": 32}
+--- progress.log (GSM8K-200, soak with a NON-streaming client and a 240 s request timeout, divergence checks)
+{"n": 200, "correct": 196, "acc": 98.0, "runaways": 0, "errors": 0, "wall_s": 424, "median_ctoks": 239, "effort": "high"}
+03:30:11 repro soak exit 2: {"mode": "soak", "ok": 329, "timeout": 2, "http_error": 6, "other": 0, "healthy_after": true}
+03:30:11 HANG/unhealthy in soak -> stop
+03:30:12 div peer r0 {'published': 1897954, 'completed': 1897954, 'timeouts': 0, 'rows': 60489866, 'tokens': 135802409, 'wait_s': 9.55, 'waits': 1580726}
+03:30:12 div peer r1 {'published': 1897954, 'completed': 1897954, 'timeouts': 0, 'rows': 58839828, 'tokens': 135802409, 'wait_s': 11.15, 'waits': 1564631}
+03:30:12 div server-rank0.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=0 shm_stall=0
+03:30:12 div server-rank1-copy.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=2 shm_stall=0
+03:30:12 div r31b-stats r0 free_min_MiB 775 free_last_MiB 775 failfast 0 injected 0 dg 1164 0.14 skip {'calls': 30943, 'light': 14444, 'full': 16499, 'checks': 60}
+03:30:12 div r31b-stats r1 free_min_MiB 900 free_last_MiB 900 failfast 0 injected 0 dg 1164 0.14 skip {'calls': 30978, 'light': 14444, 'full': 16534, 'checks': 60}
+03:30:12 div kctl {"time": 1791541810.8937755, "on": true, "ema": 3.414, "flips": 6, "steps_off": 7431, "probes": 64, "probe_gap": 256, "k_hist": {"5": 8121, "3": 8461, "0": 14436}}
