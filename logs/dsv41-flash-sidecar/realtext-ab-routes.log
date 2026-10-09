@@ -1,0 +1,801 @@
+# DeepSeek-V4.1-Flash RT real-text A/B: cold-route share from original-el8's on-device route counter (MEGA_COUNT),
+# cumulative int64 [40 layers x 384 experts] dumped by the hook; snapshots taken around each concurrency block
+# (start -> after-c1 -> after-c16 -> after-c32) after a forced eager pass with a unique ~410-token real-text
+# CNN snippet. Block counts = difference of two snapshots, so they include that block's warm-up invocations
+# and one snippet. cold = experts in rowmap-mix-v1's per-layer 'cold' list (99 of 384 per layer, published by
+# original-el8); uniform routing would put 99/384 = 25.8% of routes on them. Prefill and decode tokens are both
+# counted (long is prefill-heavy: 8K in per 1,024 out; short is decode-heavy). Every per-layer line is listed.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- arm A long block C1 (start -> after-c1); dump times 11:16:21 -> 11:19:01 PT
+layer 0: cold 113800 of 1081020
+layer 1: cold 90890 of 1081020
+layer 2: cold 177010 of 1081020
+layer 3: cold 167214 of 1081020
+layer 4: cold 257169 of 1081020
+layer 5: cold 194428 of 1081020
+layer 6: cold 231511 of 1081020
+layer 7: cold 212009 of 1081020
+layer 8: cold 318658 of 1081020
+layer 9: cold 334387 of 1081020
+layer 10: cold 366319 of 1081020
+layer 11: cold 261718 of 1081020
+layer 12: cold 444903 of 1081020
+layer 13: cold 101507 of 1081020
+layer 14: cold 393145 of 1081020
+layer 15: cold 67953 of 1081020
+layer 16: cold 363436 of 1081020
+layer 17: cold 273446 of 1081020
+layer 18: cold 270600 of 1081020
+layer 19: cold 121613 of 1081020
+layer 20: cold 259346 of 1081020
+layer 21: cold 28280 of 208836
+layer 22: cold 38517 of 208836
+layer 23: cold 14806 of 208836
+layer 24: cold 50952 of 208836
+layer 25: cold 68760 of 208836
+layer 26: cold 55015 of 208836
+layer 27: cold 43624 of 208836
+layer 28: cold 25770 of 208836
+layer 29: cold 36470 of 208836
+layer 30: cold 9173 of 208836
+layer 31: cold 20820 of 208836
+layer 32: cold 9955 of 208836
+layer 33: cold 21845 of 208836
+layer 34: cold 8776 of 208836
+layer 35: cold 6625 of 208836
+layer 36: cold 16422 of 208836
+layer 37: cold 14004 of 208836
+layer 38: cold 8940 of 208836
+layer 39: cold 6251 of 208836
+arm A long C1: cold routes 5,506,067 of 26,669,304 = 20.65%
+
+--- arm A long block C16 (after-c1 -> after-c16); dump times 11:19:01 -> 11:20:42 PT
+layer 0: cold 523966 of 4873674
+layer 1: cold 411940 of 4873674
+layer 2: cold 783442 of 4873674
+layer 3: cold 738379 of 4873674
+layer 4: cold 1171326 of 4873674
+layer 5: cold 908593 of 4873674
+layer 6: cold 1057503 of 4873674
+layer 7: cold 960101 of 4873674
+layer 8: cold 1446678 of 4873674
+layer 9: cold 1529805 of 4873674
+layer 10: cold 1669984 of 4873674
+layer 11: cold 1199178 of 4873674
+layer 12: cold 2040057 of 4873674
+layer 13: cold 461637 of 4873674
+layer 14: cold 1789092 of 4873674
+layer 15: cold 306347 of 4873674
+layer 16: cold 1712178 of 4873674
+layer 17: cold 1276953 of 4873674
+layer 18: cold 1265351 of 4873674
+layer 19: cold 556281 of 4873674
+layer 20: cold 1171531 of 4873674
+layer 21: cold 130892 of 876066
+layer 22: cold 173964 of 876066
+layer 23: cold 65407 of 876066
+layer 24: cold 224856 of 876066
+layer 25: cold 297080 of 876066
+layer 26: cold 232223 of 876066
+layer 27: cold 179971 of 876066
+layer 28: cold 106017 of 876066
+layer 29: cold 154071 of 876066
+layer 30: cold 31969 of 876066
+layer 31: cold 85727 of 876066
+layer 32: cold 36688 of 876066
+layer 33: cold 89091 of 876066
+layer 34: cold 39929 of 876066
+layer 35: cold 28357 of 876066
+layer 36: cold 73709 of 876066
+layer 37: cold 62260 of 876066
+layer 38: cold 39173 of 876066
+layer 39: cold 29031 of 876066
+arm A long C16: cold routes 25,060,737 of 118,992,408 = 21.06%
+
+--- arm A long block C32 (after-c16 -> after-c32); dump times 11:20:42 -> 11:23:02 PT
+layer 0: cold 1032850 of 9561060
+layer 1: cold 813607 of 9561060
+layer 2: cold 1552376 of 9561060
+layer 3: cold 1439941 of 9561060
+layer 4: cold 2317357 of 9561060
+layer 5: cold 1768799 of 9561060
+layer 6: cold 2063712 of 9561060
+layer 7: cold 1835362 of 9561060
+layer 8: cold 2882805 of 9561060
+layer 9: cold 3041804 of 9561060
+layer 10: cold 3303145 of 9561060
+layer 11: cold 2351868 of 9561060
+layer 12: cold 4030910 of 9561060
+layer 13: cold 896646 of 9561060
+layer 14: cold 3527040 of 9561060
+layer 15: cold 606087 of 9561060
+layer 16: cold 3347929 of 9561060
+layer 17: cold 2497211 of 9561060
+layer 18: cold 2460290 of 9561060
+layer 19: cold 1090710 of 9561060
+layer 20: cold 2320443 of 9561060
+layer 21: cold 263120 of 1763976
+layer 22: cold 343118 of 1763976
+layer 23: cold 128582 of 1763976
+layer 24: cold 445000 of 1763976
+layer 25: cold 596444 of 1763976
+layer 26: cold 458024 of 1763976
+layer 27: cold 354683 of 1763976
+layer 28: cold 210068 of 1763976
+layer 29: cold 306948 of 1763976
+layer 30: cold 68518 of 1763976
+layer 31: cold 170654 of 1763976
+layer 32: cold 78513 of 1763976
+layer 33: cold 175053 of 1763976
+layer 34: cold 81304 of 1763976
+layer 35: cold 58624 of 1763976
+layer 36: cold 146628 of 1763976
+layer 37: cold 125212 of 1763976
+layer 38: cold 79447 of 1763976
+layer 39: cold 58048 of 1763976
+arm A long C32: cold routes 49,328,880 of 234,297,804 = 21.05%
+
+--- arm A long block Call (start -> after-c32); dump times 11:16:21 -> 11:23:02 PT
+arm A long all blocks: cold routes 79,895,684 of 379,959,516 = 21.03%
+
+--- arm A short block C1 (start -> after-c1); dump times 11:23:22 -> 11:25:22 PT
+layer 0: cold 16823 of 146256
+layer 1: cold 13809 of 146256
+layer 2: cold 13367 of 146256
+layer 3: cold 19480 of 146256
+layer 4: cold 19081 of 146256
+layer 5: cold 16652 of 146256
+layer 6: cold 18414 of 146256
+layer 7: cold 25816 of 146256
+layer 8: cold 20166 of 146256
+layer 9: cold 26468 of 146256
+layer 10: cold 21351 of 146256
+layer 11: cold 23411 of 146256
+layer 12: cold 22424 of 146256
+layer 13: cold 16832 of 146256
+layer 14: cold 18441 of 146256
+layer 15: cold 11888 of 146256
+layer 16: cold 18132 of 146256
+layer 17: cold 22771 of 146256
+layer 18: cold 17116 of 146256
+layer 19: cold 12627 of 146256
+layer 20: cold 16211 of 146256
+layer 21: cold 20778 of 141552
+layer 22: cold 17073 of 141552
+layer 23: cold 10690 of 141552
+layer 24: cold 20613 of 141552
+layer 25: cold 23095 of 141552
+layer 26: cold 24203 of 141552
+layer 27: cold 18949 of 141552
+layer 28: cold 20335 of 141552
+layer 29: cold 19986 of 141552
+layer 30: cold 15291 of 141552
+layer 31: cold 14597 of 141552
+layer 32: cold 13320 of 141552
+layer 33: cold 12260 of 141552
+layer 34: cold 15424 of 141552
+layer 35: cold 13375 of 141552
+layer 36: cold 8616 of 141552
+layer 37: cold 15589 of 141552
+layer 38: cold 9082 of 141552
+layer 39: cold 6395 of 141552
+arm A short C1: cold routes 690,951 of 5,760,864 = 11.99%
+
+--- arm A short block C16 (after-c1 -> after-c16); dump times 11:25:22 -> 11:26:42 PT
+layer 0: cold 53886 of 531354
+layer 1: cold 41867 of 531354
+layer 2: cold 43332 of 531354
+layer 3: cold 66400 of 531354
+layer 4: cold 61737 of 531354
+layer 5: cold 57437 of 531354
+layer 6: cold 70321 of 531354
+layer 7: cold 86433 of 531354
+layer 8: cold 78808 of 531354
+layer 9: cold 100082 of 531354
+layer 10: cold 89352 of 531354
+layer 11: cold 81917 of 531354
+layer 12: cold 66098 of 531354
+layer 13: cold 55995 of 531354
+layer 14: cold 55678 of 531354
+layer 15: cold 43571 of 531354
+layer 16: cold 70910 of 531354
+layer 17: cold 84579 of 531354
+layer 18: cold 78139 of 531354
+layer 19: cold 44027 of 531354
+layer 20: cold 54156 of 531354
+layer 21: cold 64609 of 512946
+layer 22: cold 58734 of 512946
+layer 23: cold 37962 of 512946
+layer 24: cold 74656 of 512946
+layer 25: cold 85070 of 512946
+layer 26: cold 102331 of 512946
+layer 27: cold 61160 of 512946
+layer 28: cold 69790 of 512946
+layer 29: cold 64845 of 512946
+layer 30: cold 54331 of 512946
+layer 31: cold 56475 of 512946
+layer 32: cold 50072 of 512946
+layer 33: cold 45164 of 512946
+layer 34: cold 54372 of 512946
+layer 35: cold 31652 of 512946
+layer 36: cold 36791 of 512946
+layer 37: cold 39733 of 512946
+layer 38: cold 24526 of 512946
+layer 39: cold 19385 of 512946
+arm A short C16: cold routes 2,416,383 of 20,904,408 = 11.56%
+
+--- arm A short block C32 (after-c16 -> after-c32); dump times 11:26:42 -> 11:28:22 PT
+layer 0: cold 114963 of 1142220
+layer 1: cold 80349 of 1142220
+layer 2: cold 83242 of 1142220
+layer 3: cold 131769 of 1142220
+layer 4: cold 141593 of 1142220
+layer 5: cold 120354 of 1142220
+layer 6: cold 152615 of 1142220
+layer 7: cold 177745 of 1142220
+layer 8: cold 171969 of 1142220
+layer 9: cold 202977 of 1142220
+layer 10: cold 184905 of 1142220
+layer 11: cold 172114 of 1142220
+layer 12: cold 145908 of 1142220
+layer 13: cold 102692 of 1142220
+layer 14: cold 111815 of 1142220
+layer 15: cold 92722 of 1142220
+layer 16: cold 170888 of 1142220
+layer 17: cold 169463 of 1142220
+layer 18: cold 152662 of 1142220
+layer 19: cold 92816 of 1142220
+layer 20: cold 111644 of 1142220
+layer 21: cold 140561 of 1117038
+layer 22: cold 121557 of 1117038
+layer 23: cold 80881 of 1117038
+layer 24: cold 175612 of 1117038
+layer 25: cold 193150 of 1117038
+layer 26: cold 215259 of 1117038
+layer 27: cold 150239 of 1117038
+layer 28: cold 168323 of 1117038
+layer 29: cold 140143 of 1117038
+layer 30: cold 130706 of 1117038
+layer 31: cold 130900 of 1117038
+layer 32: cold 110484 of 1117038
+layer 33: cold 108870 of 1117038
+layer 34: cold 109712 of 1117038
+layer 35: cold 62617 of 1117038
+layer 36: cold 75664 of 1117038
+layer 37: cold 83749 of 1117038
+layer 38: cold 56325 of 1117038
+layer 39: cold 47429 of 1117038
+arm A short C32: cold routes 5,187,386 of 45,210,342 = 11.47%
+
+--- arm A short block Call (start -> after-c32); dump times 11:23:22 -> 11:28:22 PT
+arm A short all blocks: cold routes 8,294,720 of 71,875,614 = 11.54%
+
+--- arm A random block C1 (start -> after-c1); dump times 11:28:42 -> 11:30:42 PT
+layer 0: cold 375519 of 990564
+layer 1: cold 271001 of 990564
+layer 2: cold 419511 of 990564
+layer 3: cold 236653 of 990564
+layer 4: cold 235421 of 990564
+layer 5: cold 149378 of 990564
+layer 6: cold 306482 of 990564
+layer 7: cold 179158 of 990564
+layer 8: cold 59982 of 990564
+layer 9: cold 143868 of 990564
+layer 10: cold 79515 of 990564
+layer 11: cold 233066 of 990564
+layer 12: cold 273199 of 990564
+layer 13: cold 201500 of 990564
+layer 14: cold 250725 of 990564
+layer 15: cold 200897 of 990564
+layer 16: cold 69034 of 990564
+layer 17: cold 41395 of 990564
+layer 18: cold 152935 of 990564
+layer 19: cold 237628 of 990564
+layer 20: cold 151133 of 990564
+layer 21: cold 13023 of 118380
+layer 22: cold 14022 of 118380
+layer 23: cold 20231 of 118380
+layer 24: cold 14182 of 118380
+layer 25: cold 14118 of 118380
+layer 26: cold 17235 of 118380
+layer 27: cold 18742 of 118380
+layer 28: cold 12198 of 118380
+layer 29: cold 13675 of 118380
+layer 30: cold 11906 of 118380
+layer 31: cold 14818 of 118380
+layer 32: cold 10156 of 118380
+layer 33: cold 13031 of 118380
+layer 34: cold 10548 of 118380
+layer 35: cold 17823 of 118380
+layer 36: cold 12222 of 118380
+layer 37: cold 17702 of 118380
+layer 38: cold 37213 of 118380
+layer 39: cold 36761 of 118380
+arm A random C1: cold routes 4,587,606 of 23,051,064 = 19.90%
+
+--- arm A random block C16 (after-c1 -> after-c16); dump times 11:30:42 -> 11:32:22 PT
+layer 0: cold 1802890 of 4660404
+layer 1: cold 1275860 of 4660404
+layer 2: cold 1984262 of 4660404
+layer 3: cold 1101613 of 4660404
+layer 4: cold 1119066 of 4660404
+layer 5: cold 689580 of 4660404
+layer 6: cold 1431033 of 4660404
+layer 7: cold 838565 of 4660404
+layer 8: cold 289912 of 4660404
+layer 9: cold 698333 of 4660404
+layer 10: cold 373355 of 4660404
+layer 11: cold 1107492 of 4660404
+layer 12: cold 1274973 of 4660404
+layer 13: cold 975305 of 4660404
+layer 14: cold 1143294 of 4660404
+layer 15: cold 966368 of 4660404
+layer 16: cold 328984 of 4660404
+layer 17: cold 193875 of 4660404
+layer 18: cold 732773 of 4660404
+layer 19: cold 1149952 of 4660404
+layer 20: cold 741757 of 4660404
+layer 21: cold 84855 of 663072
+layer 22: cold 85659 of 663072
+layer 23: cold 122905 of 663072
+layer 24: cold 83015 of 663072
+layer 25: cold 76709 of 663072
+layer 26: cold 100249 of 663072
+layer 27: cold 107114 of 663072
+layer 28: cold 86605 of 663072
+layer 29: cold 83598 of 663072
+layer 30: cold 86866 of 663072
+layer 31: cold 88724 of 663072
+layer 32: cold 73845 of 663072
+layer 33: cold 81915 of 663072
+layer 34: cold 71977 of 663072
+layer 35: cold 122834 of 663072
+layer 36: cold 89961 of 663072
+layer 37: cold 102274 of 663072
+layer 38: cold 194380 of 663072
+layer 39: cold 228389 of 663072
+arm A random C16: cold routes 22,191,116 of 110,466,852 = 20.09%
+
+--- arm A random block C32 (after-c16 -> after-c32); dump times 11:32:22 -> 11:34:22 PT
+layer 0: cold 3534733 of 9067932
+layer 1: cold 2543919 of 9067932
+layer 2: cold 3857257 of 9067932
+layer 3: cold 2161991 of 9067932
+layer 4: cold 2202593 of 9067932
+layer 5: cold 1359424 of 9067932
+layer 6: cold 2820147 of 9067932
+layer 7: cold 1637596 of 9067932
+layer 8: cold 558153 of 9067932
+layer 9: cold 1386926 of 9067932
+layer 10: cold 738917 of 9067932
+layer 11: cold 2175774 of 9067932
+layer 12: cold 2486207 of 9067932
+layer 13: cold 1951841 of 9067932
+layer 14: cold 2151952 of 9067932
+layer 15: cold 1926384 of 9067932
+layer 16: cold 646005 of 9067932
+layer 17: cold 370948 of 9067932
+layer 18: cold 1435073 of 9067932
+layer 19: cold 2270339 of 9067932
+layer 20: cold 1480702 of 9067932
+layer 21: cold 168408 of 1314312
+layer 22: cold 177485 of 1314312
+layer 23: cold 249664 of 1314312
+layer 24: cold 172553 of 1314312
+layer 25: cold 154128 of 1314312
+layer 26: cold 197844 of 1314312
+layer 27: cold 225150 of 1314312
+layer 28: cold 174464 of 1314312
+layer 29: cold 175913 of 1314312
+layer 30: cold 181395 of 1314312
+layer 31: cold 182486 of 1314312
+layer 32: cold 144623 of 1314312
+layer 33: cold 165719 of 1314312
+layer 34: cold 145609 of 1314312
+layer 35: cold 251433 of 1314312
+layer 36: cold 178146 of 1314312
+layer 37: cold 215938 of 1314312
+layer 38: cold 396648 of 1314312
+layer 39: cold 431852 of 1314312
+arm A random C32: cold routes 43,686,339 of 215,398,500 = 20.28%
+
+--- arm A random block Call (start -> after-c32); dump times 11:28:42 -> 11:34:22 PT
+arm A random all blocks: cold routes 70,465,061 of 348,916,416 = 20.20%
+
+--- arm B long block C1 (start -> after-c1); dump times 11:49:42 -> 11:53:22 PT
+layer 0: cold 115053 of 1083144
+layer 1: cold 91188 of 1083144
+layer 2: cold 178380 of 1083144
+layer 3: cold 168184 of 1083144
+layer 4: cold 257874 of 1083144
+layer 5: cold 193904 of 1083144
+layer 6: cold 231384 of 1083144
+layer 7: cold 213070 of 1083144
+layer 8: cold 320417 of 1083144
+layer 9: cold 335439 of 1083144
+layer 10: cold 366804 of 1083144
+layer 11: cold 263045 of 1083144
+layer 12: cold 446173 of 1083144
+layer 13: cold 102465 of 1083144
+layer 14: cold 393924 of 1083144
+layer 15: cold 68382 of 1083144
+layer 16: cold 364880 of 1083144
+layer 17: cold 274084 of 1083144
+layer 18: cold 271797 of 1083144
+layer 19: cold 121958 of 1083144
+layer 20: cold 260668 of 1083144
+layer 21: cold 28514 of 210960
+layer 22: cold 39565 of 210960
+layer 23: cold 15916 of 210960
+layer 24: cold 52543 of 210960
+layer 25: cold 70620 of 210960
+layer 26: cold 56176 of 210960
+layer 27: cold 45837 of 210960
+layer 28: cold 26400 of 210960
+layer 29: cold 37107 of 210960
+layer 30: cold 9135 of 210960
+layer 31: cold 21128 of 210960
+layer 32: cold 9918 of 210960
+layer 33: cold 21782 of 210960
+layer 34: cold 8772 of 210960
+layer 35: cold 6616 of 210960
+layer 36: cold 16863 of 210960
+layer 37: cold 14359 of 210960
+layer 38: cold 8919 of 210960
+layer 39: cold 6450 of 210960
+arm B long C1: cold routes 5,535,693 of 26,754,264 = 20.69%
+
+--- arm B long block C16 (after-c1 -> after-c16); dump times 11:53:22 -> 11:57:03 PT
+layer 0: cold 523483 of 4879338
+layer 1: cold 412347 of 4879338
+layer 2: cold 783612 of 4879338
+layer 3: cold 739643 of 4879338
+layer 4: cold 1172940 of 4879338
+layer 5: cold 908965 of 4879338
+layer 6: cold 1057405 of 4879338
+layer 7: cold 961440 of 4879338
+layer 8: cold 1448621 of 4879338
+layer 9: cold 1530411 of 4879338
+layer 10: cold 1670512 of 4879338
+layer 11: cold 1202395 of 4879338
+layer 12: cold 2044996 of 4879338
+layer 13: cold 461097 of 4879338
+layer 14: cold 1794225 of 4879338
+layer 15: cold 307079 of 4879338
+layer 16: cold 1715079 of 4879338
+layer 17: cold 1277521 of 4879338
+layer 18: cold 1270003 of 4879338
+layer 19: cold 557597 of 4879338
+layer 20: cold 1172328 of 4879338
+layer 21: cold 129893 of 883266
+layer 22: cold 173718 of 883266
+layer 23: cold 64972 of 883266
+layer 24: cold 226355 of 883266
+layer 25: cold 298895 of 883266
+layer 26: cold 232764 of 883266
+layer 27: cold 179795 of 883266
+layer 28: cold 106370 of 883266
+layer 29: cold 155290 of 883266
+layer 30: cold 31796 of 883266
+layer 31: cold 86163 of 883266
+layer 32: cold 37033 of 883266
+layer 33: cold 89403 of 883266
+layer 34: cold 39838 of 883266
+layer 35: cold 28415 of 883266
+layer 36: cold 74202 of 883266
+layer 37: cold 62363 of 883266
+layer 38: cold 39721 of 883266
+layer 39: cold 29026 of 883266
+arm B long C16: cold routes 25,097,711 of 119,248,152 = 21.05%
+
+--- arm B long block C32 (after-c16 -> after-c32); dump times 11:57:03 -> 12:02:03 PT
+layer 0: cold 1034144 of 9558492
+layer 1: cold 814747 of 9558492
+layer 2: cold 1558616 of 9558492
+layer 3: cold 1442548 of 9558492
+layer 4: cold 2319460 of 9558492
+layer 5: cold 1767702 of 9558492
+layer 6: cold 2064032 of 9558492
+layer 7: cold 1836808 of 9558492
+layer 8: cold 2885882 of 9558492
+layer 9: cold 3044270 of 9558492
+layer 10: cold 3307361 of 9558492
+layer 11: cold 2351083 of 9558492
+layer 12: cold 4037270 of 9558492
+layer 13: cold 896911 of 9558492
+layer 14: cold 3533249 of 9558492
+layer 15: cold 605256 of 9558492
+layer 16: cold 3353393 of 9558492
+layer 17: cold 2500199 of 9558492
+layer 18: cold 2465570 of 9558492
+layer 19: cold 1092061 of 9558492
+layer 20: cold 2322246 of 9558492
+layer 21: cold 263064 of 1762176
+layer 22: cold 344796 of 1762176
+layer 23: cold 130561 of 1762176
+layer 24: cold 447803 of 1762176
+layer 25: cold 599993 of 1762176
+layer 26: cold 461014 of 1762176
+layer 27: cold 353979 of 1762176
+layer 28: cold 212738 of 1762176
+layer 29: cold 307387 of 1762176
+layer 30: cold 67905 of 1762176
+layer 31: cold 171623 of 1762176
+layer 32: cold 77522 of 1762176
+layer 33: cold 176041 of 1762176
+layer 34: cold 80891 of 1762176
+layer 35: cold 57761 of 1762176
+layer 36: cold 147180 of 1762176
+layer 37: cold 125891 of 1762176
+layer 38: cold 80233 of 1762176
+layer 39: cold 58752 of 1762176
+arm B long C32: cold routes 49,397,942 of 234,209,676 = 21.09%
+
+--- arm B long block Call (start -> after-c32); dump times 11:49:42 -> 12:02:03 PT
+arm B long all blocks: cold routes 80,031,346 of 380,212,092 = 21.05%
+
+--- arm B short block C1 (start -> after-c1); dump times 12:02:23 -> 12:04:43 PT
+layer 0: cold 16499 of 149322
+layer 1: cold 13283 of 149322
+layer 2: cold 12940 of 149322
+layer 3: cold 18707 of 149322
+layer 4: cold 19317 of 149322
+layer 5: cold 16212 of 149322
+layer 6: cold 17129 of 149322
+layer 7: cold 26063 of 149322
+layer 8: cold 18782 of 149322
+layer 9: cold 26728 of 149322
+layer 10: cold 20833 of 149322
+layer 11: cold 22318 of 149322
+layer 12: cold 22228 of 149322
+layer 13: cold 16251 of 149322
+layer 14: cold 17641 of 149322
+layer 15: cold 11939 of 149322
+layer 16: cold 18208 of 149322
+layer 17: cold 23615 of 149322
+layer 18: cold 17924 of 149322
+layer 19: cold 12494 of 149322
+layer 20: cold 15562 of 149322
+layer 21: cold 20219 of 144612
+layer 22: cold 16779 of 144612
+layer 23: cold 10239 of 144612
+layer 24: cold 20582 of 144612
+layer 25: cold 22862 of 144612
+layer 26: cold 24869 of 144612
+layer 27: cold 18944 of 144612
+layer 28: cold 20580 of 144612
+layer 29: cold 19900 of 144612
+layer 30: cold 15374 of 144612
+layer 31: cold 14150 of 144612
+layer 32: cold 12466 of 144612
+layer 33: cold 12353 of 144612
+layer 34: cold 15573 of 144612
+layer 35: cold 13213 of 144612
+layer 36: cold 8364 of 144612
+layer 37: cold 15721 of 144612
+layer 38: cold 8994 of 144612
+layer 39: cold 6383 of 144612
+arm B short C1: cold routes 682,238 of 5,883,390 = 11.60%
+
+--- arm B short block C16 (after-c1 -> after-c16); dump times 12:04:43 -> 12:07:23 PT
+layer 0: cold 53053 of 525696
+layer 1: cold 42586 of 525696
+layer 2: cold 44042 of 525696
+layer 3: cold 68120 of 525696
+layer 4: cold 63057 of 525696
+layer 5: cold 56904 of 525696
+layer 6: cold 71070 of 525696
+layer 7: cold 87064 of 525696
+layer 8: cold 79790 of 525696
+layer 9: cold 101912 of 525696
+layer 10: cold 89810 of 525696
+layer 11: cold 82176 of 525696
+layer 12: cold 67052 of 525696
+layer 13: cold 57091 of 525696
+layer 14: cold 56269 of 525696
+layer 15: cold 45722 of 525696
+layer 16: cold 73882 of 525696
+layer 17: cold 84295 of 525696
+layer 18: cold 79919 of 525696
+layer 19: cold 45882 of 525696
+layer 20: cold 55716 of 525696
+layer 21: cold 66464 of 507288
+layer 22: cold 60862 of 507288
+layer 23: cold 40642 of 507288
+layer 24: cold 74338 of 507288
+layer 25: cold 83413 of 507288
+layer 26: cold 103154 of 507288
+layer 27: cold 63215 of 507288
+layer 28: cold 73081 of 507288
+layer 29: cold 67460 of 507288
+layer 30: cold 56007 of 507288
+layer 31: cold 57783 of 507288
+layer 32: cold 52118 of 507288
+layer 33: cold 46047 of 507288
+layer 34: cold 55427 of 507288
+layer 35: cold 33997 of 507288
+layer 36: cold 38556 of 507288
+layer 37: cold 42671 of 507288
+layer 38: cold 26596 of 507288
+layer 39: cold 21972 of 507288
+arm B short C16: cold routes 2,469,215 of 20,678,088 = 11.94%
+
+--- arm B short block C32 (after-c16 -> after-c32); dump times 12:07:23 -> 12:11:24 PT
+layer 0: cold 113843 of 1129038
+layer 1: cold 79330 of 1129038
+layer 2: cold 81917 of 1129038
+layer 3: cold 132396 of 1129038
+layer 4: cold 141107 of 1129038
+layer 5: cold 120462 of 1129038
+layer 6: cold 152119 of 1129038
+layer 7: cold 176679 of 1129038
+layer 8: cold 169357 of 1129038
+layer 9: cold 199855 of 1129038
+layer 10: cold 182818 of 1129038
+layer 11: cold 171115 of 1129038
+layer 12: cold 143194 of 1129038
+layer 13: cold 102739 of 1129038
+layer 14: cold 110099 of 1129038
+layer 15: cold 93606 of 1129038
+layer 16: cold 165983 of 1129038
+layer 17: cold 165156 of 1129038
+layer 18: cold 151097 of 1129038
+layer 19: cold 92868 of 1129038
+layer 20: cold 112052 of 1129038
+layer 21: cold 138987 of 1103856
+layer 22: cold 119346 of 1103856
+layer 23: cold 80260 of 1103856
+layer 24: cold 173221 of 1103856
+layer 25: cold 192231 of 1103856
+layer 26: cold 212240 of 1103856
+layer 27: cold 149465 of 1103856
+layer 28: cold 168531 of 1103856
+layer 29: cold 141310 of 1103856
+layer 30: cold 131187 of 1103856
+layer 31: cold 130848 of 1103856
+layer 32: cold 111843 of 1103856
+layer 33: cold 111523 of 1103856
+layer 34: cold 107915 of 1103856
+layer 35: cold 63070 of 1103856
+layer 36: cold 76928 of 1103856
+layer 37: cold 85541 of 1103856
+layer 38: cold 57629 of 1103856
+layer 39: cold 47392 of 1103856
+arm B short C32: cold routes 5,157,259 of 44,683,062 = 11.54%
+
+--- arm B short block Call (start -> after-c32); dump times 12:02:23 -> 12:11:24 PT
+arm B short all blocks: cold routes 8,308,712 of 71,244,540 = 11.66%
+
+--- arm B random block C1 (start -> after-c1); dump times 12:11:44 -> 12:14:24 PT
+layer 0: cold 391791 of 1013352
+layer 1: cold 282793 of 1013352
+layer 2: cold 418937 of 1013352
+layer 3: cold 235208 of 1013352
+layer 4: cold 233360 of 1013352
+layer 5: cold 147946 of 1013352
+layer 6: cold 305116 of 1013352
+layer 7: cold 184826 of 1013352
+layer 8: cold 63701 of 1013352
+layer 9: cold 157754 of 1013352
+layer 10: cold 84623 of 1013352
+layer 11: cold 240119 of 1013352
+layer 12: cold 276001 of 1013352
+layer 13: cold 213355 of 1013352
+layer 14: cold 237529 of 1013352
+layer 15: cold 213422 of 1013352
+layer 16: cold 74540 of 1013352
+layer 17: cold 47916 of 1013352
+layer 18: cold 159844 of 1013352
+layer 19: cold 259588 of 1013352
+layer 20: cold 165284 of 1013352
+layer 21: cold 25008 of 141168
+layer 22: cold 23947 of 141168
+layer 23: cold 35455 of 141168
+layer 24: cold 23593 of 141168
+layer 25: cold 20797 of 141168
+layer 26: cold 22132 of 141168
+layer 27: cold 30864 of 141168
+layer 28: cold 23951 of 141168
+layer 29: cold 27742 of 141168
+layer 30: cold 34976 of 141168
+layer 31: cold 32156 of 141168
+layer 32: cold 30017 of 141168
+layer 33: cold 30173 of 141168
+layer 34: cold 30068 of 141168
+layer 35: cold 44297 of 141168
+layer 36: cold 36014 of 141168
+layer 37: cold 37614 of 141168
+layer 38: cold 50360 of 141168
+layer 39: cold 57934 of 141168
+arm B random C1: cold routes 5,010,751 of 23,962,584 = 20.91%
+
+--- arm B random block C16 (after-c1 -> after-c16); dump times 12:14:24 -> 12:17:24 PT
+layer 0: cold 1796011 of 4660812
+layer 1: cold 1272779 of 4660812
+layer 2: cold 1960889 of 4660812
+layer 3: cold 1100049 of 4660812
+layer 4: cold 1113842 of 4660812
+layer 5: cold 687704 of 4660812
+layer 6: cold 1427881 of 4660812
+layer 7: cold 837290 of 4660812
+layer 8: cold 288040 of 4660812
+layer 9: cold 696474 of 4660812
+layer 10: cold 378772 of 4660812
+layer 11: cold 1102301 of 4660812
+layer 12: cold 1267151 of 4660812
+layer 13: cold 972660 of 4660812
+layer 14: cold 1152735 of 4660812
+layer 15: cold 956731 of 4660812
+layer 16: cold 330994 of 4660812
+layer 17: cold 190176 of 4660812
+layer 18: cold 732907 of 4660812
+layer 19: cold 1140117 of 4660812
+layer 20: cold 739621 of 4660812
+layer 21: cold 90846 of 668088
+layer 22: cold 85789 of 668088
+layer 23: cold 128066 of 668088
+layer 24: cold 91417 of 668088
+layer 25: cold 82702 of 668088
+layer 26: cold 104920 of 668088
+layer 27: cold 115425 of 668088
+layer 28: cold 89111 of 668088
+layer 29: cold 90727 of 668088
+layer 30: cold 91548 of 668088
+layer 31: cold 92864 of 668088
+layer 32: cold 75468 of 668088
+layer 33: cold 85099 of 668088
+layer 34: cold 77030 of 668088
+layer 35: cold 128569 of 668088
+layer 36: cold 92788 of 668088
+layer 37: cold 106641 of 668088
+layer 38: cold 207303 of 668088
+layer 39: cold 227376 of 668088
+arm B random C16: cold routes 22,208,813 of 110,570,724 = 20.09%
+
+--- arm B random block C32 (after-c16 -> after-c32); dump times 12:17:24 -> 12:21:45 PT
+layer 0: cold 3520757 of 9080052
+layer 1: cold 2536545 of 9080052
+layer 2: cold 3837791 of 9080052
+layer 3: cold 2139748 of 9080052
+layer 4: cold 2148090 of 9080052
+layer 5: cold 1363687 of 9080052
+layer 6: cold 2832242 of 9080052
+layer 7: cold 1664501 of 9080052
+layer 8: cold 567350 of 9080052
+layer 9: cold 1381882 of 9080052
+layer 10: cold 729434 of 9080052
+layer 11: cold 2173718 of 9080052
+layer 12: cold 2465279 of 9080052
+layer 13: cold 1934134 of 9080052
+layer 14: cold 2188023 of 9080052
+layer 15: cold 1919283 of 9080052
+layer 16: cold 645360 of 9080052
+layer 17: cold 378974 of 9080052
+layer 18: cold 1442520 of 9080052
+layer 19: cold 2265534 of 9080052
+layer 20: cold 1475510 of 9080052
+layer 21: cold 185999 of 1333344
+layer 22: cold 178553 of 1333344
+layer 23: cold 261498 of 1333344
+layer 24: cold 180556 of 1333344
+layer 25: cold 163592 of 1333344
+layer 26: cold 204503 of 1333344
+layer 27: cold 232093 of 1333344
+layer 28: cold 175665 of 1333344
+layer 29: cold 177283 of 1333344
+layer 30: cold 181655 of 1333344
+layer 31: cold 201178 of 1333344
+layer 32: cold 153194 of 1333344
+layer 33: cold 173453 of 1333344
+layer 34: cold 161508 of 1333344
+layer 35: cold 265366 of 1333344
+layer 36: cold 200752 of 1333344
+layer 37: cold 226047 of 1333344
+layer 38: cold 412399 of 1333344
+layer 39: cold 446479 of 1333344
+arm B random C32: cold routes 43,792,135 of 216,014,628 = 20.27%
+
+--- arm B random block Call (start -> after-c32); dump times 12:11:44 -> 12:21:45 PT
+arm B random all blocks: cold routes 71,011,699 of 350,547,936 = 20.26%

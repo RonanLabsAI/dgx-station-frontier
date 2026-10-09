@@ -1,0 +1,225 @@
+# DeepSeek-V4.1-Flash, one Station (right), same-session sidecar A/B on PUBLIC REAL TEXT, arm B: GB300 + Grace cold experts (MEGA_PEER=0, MEGA_COLD_TRT=1, rowmap-mix-v1), RTX PRO 6000 empty.
+# 2026-10-09 11:49-12:21 PT. Three prompt sets back to back on one boot: long (CNN/DailyMail, 8K in, 1,024 forced out),
+# short (ShareGPT first turns, natural output <= 1,024), random (8,192 random ids, 1,024 forced; control).
+# decode = C x 1000 / mean TPOT; out_tput = vLLM output token throughput; prefix_hit and DSpark acceptance
+# from /metrics deltas around each measured run; > 2% prefix hit would have been retried on a new slice.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- config.txt (image, server cmd; env filtered to the MEGA_* / VLLM_EXP_* entries; GPUs)
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063 vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+repodigests [vllm/vllm-openai@sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063]
+cmd ["--membind=0","vllm","serve","--model","/model","--served-model-name","deepseek-v4.1-flash","--trust-remote-code","--tensor-parallel-size","1","--moe-backend","deep_gemm_mega_moe","--enable-expert-parallel","--engram-config","{\"cpu_offload\": true}","--max-model-len","131072","--max-num-seqs","32","--max-num-batched-tokens","8192","--gpu-memory-utilization","0.95","--kv-cache-dtype","fp8_ds_mla","--tool-call-parser","deepseek_v41","--reasoning-parser","deepseek_v41","--enable-auto-tool-choice","--long-prefill-token-threshold","6144","--enable-prefix-caching","--default-chat-template-kwargs","{\"thinking\": false}","--speculative-config","{\"method\":\"dspark\",\"num_speculative_tokens\":5,\"num_speculative_tokens_per_batch_size\":[[1,4,5],[5,8,3],[9,32,3]],\"draft_sample_method\":\"probabilistic\"}","--cudagraph-capture-sizes","1","2","4","6","8","12","16","18","20","24","28","32","36","40","48","56","64","72","80","96","128","--host","0.0.0.0","--port","8009"]
+env (selected) MEGA_HOOK=/w/mega_peer_hook.py MEGA_ROWMAP=/w/rowmap-mix-v1.json MEGA_COLD_TRT=1 MEGA_LL_GEMM=1 MEGA_PEER=0 MEGA_FUSED_SEND=0 MEGA_MHC_OVERLAP=1 MEGA_COUNT=/prof/route-counts.json
+name, uuid, power.limit [W], driver_version
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, <gpu-uuid>, 300.00 W, 595.99.02
+NVIDIA GB300, <gpu-uuid>, 1300.00 W, 595.99.02
+GPU 0: NVIDIA GB300 (UUID: <gpu-uuid>)
+pool manifest sha256 f1a6e0ceb671e10b3b23129a78878099d3a9f61b0b9703c69b6e1eed8d2d6ac7
+
+--- tokenize-check.json (server tokenization of the pre-rendered chat header: 11 ids, special tokens intact)
+{"count":11,"max_model_len":131072,"tokens":[0,128803,3085,344,223,20,13,20,33,128804,128822],"token_strs":null}
+
+--- long/summary.txt
+== 2026-10-09 11:49:18 PDT dsv41-rtb :8009 deepseek-v4.1-flash ds=long nonce=571758000 image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+snap long-start: 6,024,144 cumulative routes, dump time 11:49:42, flush #12
+long decode-c1-r1 try1 seed 571758002 warmseed 571758001: decode_agg 143.06 tok/s (C1 x 1000/meanTPOT 6.99 ms) | out_tput 136.80 | meanTTFT 331.04 ms | in 40955 out 5120 tok in 37.43 s | dspark_acc_len 2.894 draft_acc 37.9% | failed 0 | prefix_hit 0.00%
+long decode-c1-r2 try1 seed 571758004 warmseed 571758003: decode_agg 140.65 tok/s (C1 x 1000/meanTPOT 7.11 ms) | out_tput 134.71 | meanTTFT 327.79 ms | in 40955 out 5120 tok in 38.01 s | dspark_acc_len 2.761 draft_acc 35.2% | failed 0 | prefix_hit 0.00%
+long decode-c1-r3 try1 seed 571758006 warmseed 571758005: decode_agg 146.84 tok/s (C1 x 1000/meanTPOT 6.81 ms) | out_tput 140.32 | meanTTFT 332.68 ms | in 40955 out 5120 tok in 36.49 s | dspark_acc_len 2.936 draft_acc 38.7% | failed 0 | prefix_hit 0.00%
+snap long-after-c1: 32,778,408 cumulative routes, dump time 11:53:22, flush #13
+long decode-c16-r1 try1 seed 571758008 warmseed 571758007: decode_agg 507.61 tok/s (C16 x 1000/meanTPOT 31.52 ms) | out_tput 482.00 | meanTTFT 1255.75 ms | in 655268 out 81920 tok in 169.96 s | dspark_acc_len 2.651 draft_acc 55.0% | failed 0 | prefix_hit 0.00%
+snap long-after-c16: 152,026,560 cumulative routes, dump time 11:57:03, flush #14
+long decode-c32-r1 try1 seed 571758010 warmseed 571758009: decode_agg 692.19 tok/s (C32 x 1000/meanTPOT 46.23 ms) | out_tput 654.70 | meanTTFT 1970.17 ms | in 1310531 out 163840 tok in 250.25 s | dspark_acc_len 2.649 draft_acc 54.9% | failed 0 | prefix_hit 0.00%
+snap long-after-c32: 386,236,236 cumulative routes, dump time 12:02:03, flush #15
+DONE long 2026-10-09 12:02:07
+--- long/decode-c1-r1.log (vllm bench serve)
+Maximum request concurrency: 1
+Successful requests:                     5
+Failed requests:                         0
+Maximum request concurrency:             1
+Benchmark duration (s):                  37.43
+Total input tokens:                      40955
+Total generated tokens:                  5120
+Output token throughput (tok/s):         136.80
+Mean TTFT (ms):                          331.04
+Mean TPOT (ms):                          6.99
+--- long/decode-c1-r2.log (vllm bench serve)
+Maximum request concurrency: 1
+Successful requests:                     5
+Failed requests:                         0
+Maximum request concurrency:             1
+Benchmark duration (s):                  38.01
+Total input tokens:                      40955
+Total generated tokens:                  5120
+Output token throughput (tok/s):         134.71
+Mean TTFT (ms):                          327.79
+Mean TPOT (ms):                          7.11
+--- long/decode-c1-r3.log (vllm bench serve)
+Maximum request concurrency: 1
+Successful requests:                     5
+Failed requests:                         0
+Maximum request concurrency:             1
+Benchmark duration (s):                  36.49
+Total input tokens:                      40955
+Total generated tokens:                  5120
+Output token throughput (tok/s):         140.32
+Mean TTFT (ms):                          332.68
+Mean TPOT (ms):                          6.81
+--- long/decode-c16-r1.log (vllm bench serve)
+Maximum request concurrency: 16
+Successful requests:                     80
+Failed requests:                         0
+Maximum request concurrency:             16
+Benchmark duration (s):                  169.96
+Total input tokens:                      655268
+Total generated tokens:                  81920
+Output token throughput (tok/s):         482.00
+Mean TTFT (ms):                          1255.75
+Mean TPOT (ms):                          31.52
+--- long/decode-c32-r1.log (vllm bench serve)
+Maximum request concurrency: 32
+Successful requests:                     160
+Failed requests:                         0
+Maximum request concurrency:             32
+Benchmark duration (s):                  250.25
+Total input tokens:                      1310531
+Total generated tokens:                  163840
+Output token throughput (tok/s):         654.70
+Mean TTFT (ms):                          1970.17
+Mean TPOT (ms):                          46.23
+
+--- short/summary.txt
+== 2026-10-09 12:02:07 PDT dsv41-rtb :8009 deepseek-v4.1-flash ds=short nonce=572527000 image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+snap short-start: 386,302,740 cumulative routes, dump time 12:02:23, flush #16
+short decode-c1-r1 try1 seed 572527002 warmseed 572527001: decode_agg 156.25 tok/s (C1 x 1000/meanTPOT 6.4 ms) | out_tput 151.59 | meanTTFT 71.64 ms | in 218 out 3234 tok in 21.33 s | dspark_acc_len 2.651 draft_acc 33.0% | failed 0 | prefix_hit 0.00%
+short decode-c1-r2 try1 seed 572527004 warmseed 572527003: decode_agg 152.21 tok/s (C1 x 1000/meanTPOT 6.57 ms) | out_tput 132.73 | meanTTFT 99.10 ms | in 700 out 3290 tok in 24.79 s | dspark_acc_len 2.448 draft_acc 29.0% | failed 0 | prefix_hit 0.00%
+short decode-c1-r3 try1 seed 572527006 warmseed 572527005: decode_agg 161.55 tok/s (C1 x 1000/meanTPOT 6.19 ms) | out_tput 175.08 | meanTTFT 78.55 ms | in 461 out 3421 tok in 19.54 s | dspark_acc_len 2.911 draft_acc 38.2% | failed 0 | prefix_hit 0.00%
+snap short-after-c1: 392,186,130 cumulative routes, dump time 12:04:43, flush #17
+short decode-c16-r1 try1 seed 572527008 warmseed 572527007: decode_agg 472.26 tok/s (C16 x 1000/meanTPOT 33.88 ms) | out_tput 445.60 | meanTTFT 301.49 ms | in 7049 out 49294 tok in 110.62 s | dspark_acc_len 2.548 draft_acc 51.0% | failed 0 | prefix_hit 0.00%
+snap short-after-c16: 412,864,218 cumulative routes, dump time 12:07:23, flush #18
+short decode-c32-r1 try1 seed 572527010 warmseed 572527009: decode_agg 630.42 tok/s (C32 x 1000/meanTPOT 50.76 ms) | out_tput 584.20 | meanTTFT 428.16 ms | in 11931 out 109417 tok in 187.29 s | dspark_acc_len 2.550 draft_acc 51.5% | failed 0 | prefix_hit 0.00%
+snap short-after-c32: 457,547,280 cumulative routes, dump time 12:11:24, flush #19
+DONE short 2026-10-09 12:11:24
+--- short/decode-c1-r1.log (vllm bench serve)
+Maximum request concurrency: 1
+Successful requests:                     5
+Failed requests:                         0
+Maximum request concurrency:             1
+Benchmark duration (s):                  21.33
+Total input tokens:                      218
+Total generated tokens:                  3234
+Output token throughput (tok/s):         151.59
+Mean TTFT (ms):                          71.64
+Mean TPOT (ms):                          6.40
+--- short/decode-c1-r2.log (vllm bench serve)
+Maximum request concurrency: 1
+Successful requests:                     5
+Failed requests:                         0
+Maximum request concurrency:             1
+Benchmark duration (s):                  24.79
+Total input tokens:                      700
+Total generated tokens:                  3290
+Output token throughput (tok/s):         132.73
+Mean TTFT (ms):                          99.10
+Mean TPOT (ms):                          6.57
+--- short/decode-c1-r3.log (vllm bench serve)
+Maximum request concurrency: 1
+Successful requests:                     5
+Failed requests:                         0
+Maximum request concurrency:             1
+Benchmark duration (s):                  19.54
+Total input tokens:                      461
+Total generated tokens:                  3421
+Output token throughput (tok/s):         175.08
+Mean TTFT (ms):                          78.55
+Mean TPOT (ms):                          6.19
+--- short/decode-c16-r1.log (vllm bench serve)
+Maximum request concurrency: 16
+Successful requests:                     80
+Failed requests:                         0
+Maximum request concurrency:             16
+Benchmark duration (s):                  110.62
+Total input tokens:                      7049
+Total generated tokens:                  49294
+Output token throughput (tok/s):         445.60
+Mean TTFT (ms):                          301.49
+Mean TPOT (ms):                          33.88
+--- short/decode-c32-r1.log (vllm bench serve)
+Maximum request concurrency: 32
+Successful requests:                     160
+Failed requests:                         0
+Maximum request concurrency:             32
+Benchmark duration (s):                  187.29
+Total input tokens:                      11931
+Total generated tokens:                  109417
+Output token throughput (tok/s):         584.20
+Mean TTFT (ms):                          428.16
+Mean TPOT (ms):                          50.76
+
+--- random/summary.txt
+== 2026-10-09 12:11:24 PDT dsv41-rtb :8009 deepseek-v4.1-flash ds=random nonce=573084000 image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+snap random-start: 457,613,784 cumulative routes, dump time 12:11:44, flush #20
+random decode-c1-r1 try1 seed 573084002 warmseed 573084001: decode_agg 182.15 tok/s (C1 x 1000/meanTPOT 5.49 ms) | out_tput 172.35 | meanTTFT 327.17 ms | in 40960 out 5120 tok in 29.71 s | dspark_acc_len 4.216 draft_acc 64.3% | failed 0 | prefix_hit 0.00%
+random decode-c1-r2 try1 seed 573084004 warmseed 573084003: decode_agg 171.82 tok/s (C1 x 1000/meanTPOT 5.82 ms) | out_tput 163.02 | meanTTFT 328.61 ms | in 40960 out 5120 tok in 31.41 s | dspark_acc_len 4.094 draft_acc 61.9% | failed 0 | prefix_hit 0.00%
+random decode-c1-r3 try1 seed 573084006 warmseed 573084005: decode_agg 261.10 tok/s (C1 x 1000/meanTPOT 3.83 ms) | out_tput 241.40 | meanTTFT 324.84 ms | in 40960 out 5120 tok in 21.21 s | dspark_acc_len 5.325 draft_acc 86.5% | failed 0 | prefix_hit 0.00%
+snap random-after-c1: 481,576,368 cumulative routes, dump time 12:14:24, flush #21
+random decode-c16-r1 try1 seed 573084008 warmseed 573084007: decode_agg 737.33 tok/s (C16 x 1000/meanTPOT 21.7 ms) | out_tput 670.37 | meanTTFT 1317.95 ms | in 655360 out 81920 tok in 122.20 s | dspark_acc_len 3.761 draft_acc 91.8% | failed 0 | prefix_hit 0.00%
+snap random-after-c16: 592,147,092 cumulative routes, dump time 12:17:24, flush #22
+random decode-c32-r1 try1 seed 573084010 warmseed 573084009: decode_agg 930.50 tok/s (C32 x 1000/meanTPOT 34.39 ms) | out_tput 831.77 | meanTTFT 2014.00 ms | in 1310720 out 163840 tok in 196.98 s | dspark_acc_len 3.736 draft_acc 91.1% | failed 0 | prefix_hit 0.62%
+snap random-after-c32: 808,161,720 cumulative routes, dump time 12:21:45, flush #23
+DONE random 2026-10-09 12:21:45
+--- random/decode-c1-r1.log (vllm bench serve)
+Maximum request concurrency: 1
+Successful requests:                     5
+Failed requests:                         0
+Maximum request concurrency:             1
+Benchmark duration (s):                  29.71
+Total input tokens:                      40960
+Total generated tokens:                  5120
+Output token throughput (tok/s):         172.35
+Mean TTFT (ms):                          327.17
+Mean TPOT (ms):                          5.49
+--- random/decode-c1-r2.log (vllm bench serve)
+Maximum request concurrency: 1
+Successful requests:                     5
+Failed requests:                         0
+Maximum request concurrency:             1
+Benchmark duration (s):                  31.41
+Total input tokens:                      40960
+Total generated tokens:                  5120
+Output token throughput (tok/s):         163.02
+Mean TTFT (ms):                          328.61
+Mean TPOT (ms):                          5.82
+--- random/decode-c1-r3.log (vllm bench serve)
+Maximum request concurrency: 1
+Successful requests:                     5
+Failed requests:                         0
+Maximum request concurrency:             1
+Benchmark duration (s):                  21.21
+Total input tokens:                      40960
+Total generated tokens:                  5120
+Output token throughput (tok/s):         241.40
+Mean TTFT (ms):                          324.84
+Mean TPOT (ms):                          3.83
+--- random/decode-c16-r1.log (vllm bench serve)
+Maximum request concurrency: 16
+Successful requests:                     80
+Failed requests:                         0
+Maximum request concurrency:             16
+Benchmark duration (s):                  122.20
+Total input tokens:                      655360
+Total generated tokens:                  81920
+Output token throughput (tok/s):         670.37
+Mean TTFT (ms):                          1317.95
+Mean TPOT (ms):                          21.70
+--- random/decode-c32-r1.log (vllm bench serve)
+Maximum request concurrency: 32
+Successful requests:                     160
+Failed requests:                         0
+Maximum request concurrency:             32
+Benchmark duration (s):                  196.98
+Total input tokens:                      1310720
+Total generated tokens:                  163840
+Output token throughput (tok/s):         831.77
+Mean TTFT (ms):                          2014.00
+Mean TPOT (ms):                          34.39

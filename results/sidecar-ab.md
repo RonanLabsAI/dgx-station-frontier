@@ -183,6 +183,111 @@ the three C1 repetitions are pooled. tok/J = tok/s / mean W over the same window
   TTFT; output tok/J is the self-consistent wall-time figure. Moving every window by half a second either way changes
   each mean by under 1.2%.
 
+### Real text
+
+The rows above use random token ids. On this recipe the RTX PRO 6000 holds the 99 coldest experts of every layer, and
+random ids might route very differently from real traffic, so the gap could be smaller on real text. Here the same two
+arms run again, back to back on one boot each (2026-10-09, arm A 11:15-11:36 PT, arm B 11:49-12:21 PT), on public
+real text. Each arm also reruns the random-id control on the same boot.
+
+- **Prompts** (reproducible; built by
+  [`bench/realtext/build_realtext_pool.py`](../recipes/dsv41-flash-sidecar/bench/realtext/build_realtext_pool.py), seed
+  `20261009`, every prompt's source ids and every slice's sha256 in
+  [`manifest.json`](../recipes/dsv41-flash-sidecar/bench/realtext/manifest.json)):
+  - **long**: [CNN/DailyMail](https://huggingface.co/datasets/abisee/cnn_dailymail) 3.0.0 test articles (revision
+    `96df5e68`), concatenated to `8,190`-`8,191` tokens with a fixed summarise-and-compare instruction, `1,024` forced
+    output tokens;
+  - **short**: the first human turn of [ShareGPT V3](https://huggingface.co/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered)
+    conversations (revision `192ab218`), `12`-`498` tokens, natural output (EOS honoured) up to `1,024` tokens.
+
+  Both are rendered in DeepSeek-V4.1 chat format with thinking off and sent pre-rendered (`--skip-chat-template`). The
+  server tokenizes the chat header to the expected special-token ids (receipts).
+- **Hygiene:** every invocation, warm-ups included, gets its own disjoint prompt slice and its own seed. No two prompts
+  share their first `64` tokens. Both arms use the same slices. Every measured run had a prefix-cache hit of `0.00%`,
+  except the random-id C32 run at `0.62%` in both arms (the shared speculative-decoding block noted above). No run
+  needed a retry.
+- **Cold-route share** comes from original-el8's on-device route counter (`MEGA_COUNT`, on in both arms). Snapshots are
+  taken around each concurrency block, and the share is the fraction of routed (token, expert) pairs that land on
+  `rowmap-mix-v1`'s cold list. Uniform routing would put `25.8` percent of routes there. Every per-layer count is in the
+  [route-count receipt](../logs/dsv41-flash-sidecar/realtext-ab-routes.log).
+- **Power** is the same 1 s sampling, restricted to each measured run's wall window. Warm-ups and gaps are excluded.
+  Bench tool: [`bench/realtext/realtext_bench.sh`](../recipes/dsv41-flash-sidecar/bench/realtext/realtext_bench.sh). The
+  image lacks the `vllm[bench]` extra, so `pandas` 2.3.3 is put on the bench client's `PYTHONPATH`.
+
+<!-- results -->
+| Measurement | A: sidecar | B: Grace only | A / B | Receipts |
+|---|---|---|---|---|
+| Real text, long (`8K` news in, `1,024` out), C1 decode tok/s per user, mean of 3 reps | 274.35 | 143.52 | 1.91x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Real text, long (`8K` news in, `1,024` out), C1 output tok/s per user, mean of 3 reps | 259.61 | 137.28 | 1.89x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Real text, long (`8K` news in, `1,024` out), C16 decode tok/s, aggregate | 1,447.96 | 507.61 | 2.85x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Real text, long (`8K` news in, `1,024` out), C16 output tok/s, aggregate | 1,334.60 | 482.00 | 2.77x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Real text, long (`8K` news in, `1,024` out), C32 decode tok/s, aggregate | 1,865.89 | 692.19 | 2.70x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Real text, long (`8K` news in, `1,024` out), C32 output tok/s, aggregate | 1,722.66 | 654.70 | 2.63x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Real text, short (chat prompts, natural out), C1 decode tok/s per user, mean of 3 reps | 267.56 | 156.67 | 1.71x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Real text, short (chat prompts, natural out), C1 output tok/s per user, mean of 3 reps | 252.40 | 153.13 | 1.65x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Real text, short (chat prompts, natural out), C16 decode tok/s, aggregate | 1,532.57 | 472.26 | 3.25x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Real text, short (chat prompts, natural out), C16 output tok/s, aggregate | 1,360.49 | 445.60 | 3.05x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Real text, short (chat prompts, natural out), C32 decode tok/s, aggregate | 1,921.92 | 630.42 | 3.05x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Real text, short (chat prompts, natural out), C32 output tok/s, aggregate | 1,752.23 | 584.20 | 3.00x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Random ids (control, same boot), C1 decode tok/s per user, mean of 3 reps | 539.06 | 205.02 | 2.63x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Random ids (control, same boot), C1 output tok/s per user, mean of 3 reps | 484.81 | 192.26 | 2.52x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Random ids (control, same boot), C16 decode tok/s, aggregate | 2,133.33 | 737.33 | 2.89x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Random ids (control, same boot), C16 output tok/s, aggregate | 1,845.69 | 670.37 | 2.75x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Random ids (control, same boot), C32 decode tok/s, aggregate | 2,595.30 | 930.50 | 2.79x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Random ids (control, same boot), C32 output tok/s, aggregate | 2,304.34 | 831.77 | 2.77x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log) |
+| Real text, long (`8K` news in, `1,024` out), cold-route share, all blocks, % | 21.03 | 21.05 | | [route counts](../logs/dsv41-flash-sidecar/realtext-ab-routes.log) |
+| Real text, short (chat prompts, natural out), cold-route share, all blocks, % | 11.54 | 11.66 | | [route counts](../logs/dsv41-flash-sidecar/realtext-ab-routes.log) |
+| Random ids (control, same boot), cold-route share, all blocks, % | 20.2 | 20.26 | | [route counts](../logs/dsv41-flash-sidecar/realtext-ab-routes.log) |
+<!-- /results -->
+
+<!-- results -->
+| Measurement | A: sidecar | B: Grace only (GB300 only / incl. idle RTX) | A / B (GB300 only / incl. idle RTX) | Receipts |
+|---|---|---|---|---|
+| Real text, long (`8K` news in, `1,024` out), C1, GPU total W | 571.49 | 387.88 / 407.80 | | [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Real text, long (`8K` news in, `1,024` out), C1, decode tok/J | 0.480 | 0.370 / 0.352 | 1.30x / 1.36x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log), [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Real text, long (`8K` news in, `1,024` out), C16, GPU total W | 975.82 | 481.06 / 500.02 | | [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Real text, long (`8K` news in, `1,024` out), C16, decode tok/J | 1.484 | 1.055 / 1.015 | 1.41x / 1.46x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log), [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Real text, long (`8K` news in, `1,024` out), C32, GPU total W | 1,009.65 | 494.85 / 514.37 | | [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Real text, long (`8K` news in, `1,024` out), C32, decode tok/J | 1.848 | 1.399 / 1.346 | 1.32x / 1.37x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log), [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Real text, short (chat prompts, natural out), C1, GPU total W | 532.06 | 379.62 / 399.69 | | [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Real text, short (chat prompts, natural out), C1, decode tok/J | 0.503 | 0.413 / 0.392 | 1.22x / 1.28x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log), [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Real text, short (chat prompts, natural out), C16, GPU total W | 956.35 | 456.65 / 476.08 | | [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Real text, short (chat prompts, natural out), C16, decode tok/J | 1.603 | 1.034 / 0.992 | 1.55x / 1.62x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log), [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Real text, short (chat prompts, natural out), C32, GPU total W | 971.61 | 454.76 / 474.48 | | [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Real text, short (chat prompts, natural out), C32, decode tok/J | 1.978 | 1.386 / 1.329 | 1.43x / 1.49x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log), [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Random ids (control, same boot), C1, GPU total W | 491.78 | 344.79 / 364.55 | | [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Random ids (control, same boot), C1, decode tok/J | 1.096 | 0.595 / 0.562 | 1.84x / 1.95x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log), [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Random ids (control, same boot), C16, GPU total W | 825.03 | 432.58 / 451.94 | | [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Random ids (control, same boot), C16, decode tok/J | 2.586 | 1.704 / 1.631 | 1.52x / 1.58x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log), [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Random ids (control, same boot), C32, GPU total W | 862.32 | 452.27 / 471.69 | | [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+| Random ids (control, same boot), C32, decode tok/J | 3.010 | 2.057 / 1.973 | 1.46x / 1.53x | [A](../logs/dsv41-flash-sidecar/realtext-ab-a.log), [B](../logs/dsv41-flash-sidecar/realtext-ab-b.log), [power](../logs/dsv41-flash-sidecar/realtext-ab-power.log) |
+<!-- /results -->
+
+Notes on the real-text rows:
+
+- **The sidecar still matters on real text.** At C16 and C32 the real-text ratio matches or beats the random-id ratio:
+  2.85x / 2.70x on long news prompts and 3.25x / 3.05x on short chat prompts, against 2.89x / 2.79x on random ids from
+  the same boots. At C1 it is smaller, 1.91x (long) and 1.71x (short), against 2.63x on random ids.
+- **Real traffic is not 5% cold on this map.** The counter puts 21.03% of routes on the cold experts for the long news
+  prompts (mostly prefill tokens) and 11.54% for the short chat prompts (mostly decode tokens). Random ids are not
+  uniform either: 20.2%, not 25.8. The two arms agree to within a few hundredths of a point, as they should, since
+  routing is the model's and not the tier's. So the RTX PRO 6000 serves roughly one routed token in nine on chat-style
+  decode and one in five on long-context prefill.
+- **Real text decodes about half as fast at C1, in both arms.** DSpark's mean acceptance length falls from about 3.8-5.8
+  on random ids to about 2.4-3.0 on real text (every run's figure is in the receipts). A: 274.35 decode tok/s on long
+  real text vs 539.06 on random ids. B: 143.52 vs 205.02. This is a speculative-decoding effect, separate from the
+  expert tier.
+- **The route counter costs little.** Arm A's random-id control on this boot gives 539.06 / 2,133.33 / 2,595.30 decode
+  tok/s at C1 / C16 / C32, against 528.68 / 2,048.66 / 2,616.52 in the random-id rows above (counter off). B's C1
+  random-id mean (205.02) sits below its earlier 268.73. B's three C1 repetitions spread widely (DSpark acceptance
+  `62-87%`), so read B's random C1 loosely.
+- **Energy per token** at C32 is 1.32x (long) and 1.43x (short) in the sidecar's favour, B counted GB300 only, or
+  1.37x and 1.49x when B is charged for its idle card. The same caveats as above apply: GPU board power only, and the
+  decode tok/J window includes prefill.
+- **Outputs.** One fixed long prompt, 200 tokens per arm, gave coherent summaries of the same articles in both arms
+  (in the run directories, not published). The wording differs, because DSpark's draft sampling is probabilistic. The
+  short-prompt runs generated nearly the same token totals in A and B (natural lengths; receipts).
+
 ## 3. Takeaways
 
 - **The sidecar is a throughput tier.** For a mixture-of-experts model that spills out of HBM, the RTX PRO 6000 as a
@@ -196,6 +301,7 @@ the three C1 repetitions are pooled. tok/J = tok/s / mean W over the same window
 - **On one Station the sidecar is worth more, and at every concurrency.** When the model fits one GB300 plus Grace,
   the RTX PRO 6000 serves the cold tail instead of a warm middle tier, and that tail is read on every step: C1 decode
   doubles (1.97x) and C16 / C32 aggregate decode rises 2.83x / 2.82x over reading the same experts from Grace.
+- **Real text keeps the gain.** On public news and chat prompts the sidecar gives 2.70x-3.25x the C16 / C32 decode rate of Grace-only and 1.71x-1.91x at C1. About 11.54% (chat) to 21.03% (long news) of routes still land on the cold experts, so the cold tier carries real work on real traffic.
 - **Prefill gains less** (1.45x at 8K, 1.46x at 64K): long prompts batch the expert reads, so Grace bandwidth hurts
   them less than it hurts decode.
 - **The power cost is modest.** In the decode window the GB300 averages 495.9 W with the sidecar vs 397.2 W without,
