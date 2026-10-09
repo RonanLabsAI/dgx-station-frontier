@@ -65,6 +65,42 @@ What these say:
   of `out_of_sequence` on the other. A full matrix of probes with and without TC 106, including an 8-channel, 4-QP
   stress run, added none. TC 106 stays the default because it is the only lossless class.
 
+## Fabric note: prefill chunk size, the one-rail bound, clean decode absolutes (2026-10-09)
+
+**Chunked prefill.** We swept SGLang's `--chunked-prefill-size` on the fused GLM-5.3 two-Station server (rail 1 only,
+Data Direct + tuner3 + `TC 106`, a fresh boot per point, `--max-prefill-tokens 65536`). The server was our fused
+one-shot build: the stock image above plus two local patches for the decode-path small all-reduce, not in this
+release. Large prefill all-reduces still go through NCCL, and the `8192` point reproduces the stock arm's 11,173
+tok/s within a tenth of a percent.
+
+<!-- results -->
+| `--chunked-prefill-size` | `64K` prefill, C1, tok/s (median of `3`) | `64K x 4` concurrent, tok/s | `8K` prefill, C1, tok/s | `Rail 1` transmit while busy / peak, GB/s | Receipt |
+|---|---|---|---|---|---|
+| `8192` (the setting in use) | 11,169 | 11,175 | 9,337 | 21.7 / 23.7 | [log](../../logs/fabric-data-direct/fused-glm-clean-rerun.log) |
+| `16384` | 11,420 | 11,436 | 11,668 | 22.4 / 25.1 | [log](../../logs/fabric-data-direct/fused-glm-clean-rerun.log) |
+| **`32768`** | **11,854** (+6.1%) | 11,843 | 11,687 (+25.2%) | 23.1 / 25.5 | [log](../../logs/fabric-data-direct/fused-glm-clean-rerun.log) |
+| `65536` | out of memory on the first `64K` request (`6.56 GiB` allocation at memory fraction `0.93`) | | | | [log](../../logs/fabric-data-direct/fused-glm-clean-rerun.log) |
+<!-- /results -->
+
+- **`32768` is the best setting:** +6.1% on `64K`-token prefill, and C1 decode unchanged (+0.1%, inside run-to-run
+  noise; [log](../../logs/fabric-data-direct/fused-glm-clean-rerun.log)). Our launchers still use `8192`.
+- **Prefill is bound by NCCL throughput on one rail, not by the line.** Rail 1 is busy for the whole prefill at about
+  23.1 GB/s ([log](../../logs/fabric-data-direct/fused-glm-clean-rerun.log)), 0.46x of the `400G` line rate (`50 GB/s`), and the chunk size barely moves it. About `157`
+  all-reduces of `64K x 6144 x 2 B` per prefill come to roughly `126 GB`; at that rate that is about the measured
+  prefill time. **A second rail is the main lever**; more NCCL channels or queue pairs for the large all-reduces is the
+  other (nccl-tests reaches 48.73 GB/s bus bandwidth at `2 GiB` on this one rail, [log](../../logs/fabric-data-direct/nccl-tests-2GiB.log)).
+
+**Clean decode absolutes (stock fused launcher).** The same server as the stock column's Data Direct + tuner3 arm,
+benched on catid's shape instead of `flash_bench`: random ids, 8,192 in / 1,024 out, `2 x C` requests, a fresh seed per
+run, decode = C x 1000 / mean TPOT. Every prefill batch of the session logged zero cached tokens. These are not
+comparable with the `flash_bench` rows above (short prose prompt, 256 output tokens).
+
+<!-- results -->
+| Fused GLM-5.3, stock launcher, catid shape | C1 | C8 | C16 | C32 | Receipt |
+|---|---|---|---|---|---|
+| Decode tok/s (aggregate) | 84.8 | 422.6 | 588.0 | 977.1 | [log](../../logs/fabric-data-direct/fused-glm-clean-rerun.log) |
+<!-- /results -->
+
 ## Hardware and software
 
 | Item | Value |

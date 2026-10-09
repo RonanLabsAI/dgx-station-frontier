@@ -61,7 +61,8 @@ What the comparisons mean:
 Result pages:
 
 - [How much does an RTX PRO 6000 expert sidecar add to a DGX Station GB300?](results/sidecar-ab.md) Same-session A/B
-  with the sidecar on and off: DS-V4-Pro across both Stations, and DS-V4.1-Flash on one Station (pending).
+  with the sidecar on and off: DS-V4-Pro across both Stations, and DS-V4.1-Flash on one Station (sidecar vs Grace
+  only, decode and prefill, with power).
 
 ## Methodology
 
@@ -89,11 +90,14 @@ the C1 means, which reuse one prompt set by design and read a few percent high. 
 - **Withdrawn:** "DS-V4.1 64K-token prefill at C1 probably beats el8's
   [44.5K](https://github.com/original-el8/dgx-station-gb300-research) tok/s." Our
   [49.8K](logs/withdrawn/dsv41-prefill-64k-c1.log) tok/s included one cached prompt out of four, worth roughly a fifth of the figure.
-  The clean estimate is about 40-44K, which does not beat it (and the prompt shapes differed anyway).
+  The clean rerun (2026-10-09, fresh seeds, zero prefix hits) measured
+  [38.6K](logs/dsv41-flash-sidecar/sidecar-ab-a.log) tok/s, which does not beat it (and the prompt shapes differed anyway).
 - **Withdrawn:** "MiMo-V2.6-Pro on one Station beats J-M's
   [63.0](https://x.com/JamesMeadlock/status/2102538822601052422) tok/s at C16." Our
   [65.38](logs/withdrawn/mimo-pro-1s-c16.log) tok/s ran with half of its prompt tokens served from the prefix cache. The clean
-  estimate is about 55-58. That recipe is not in this release.
+  rerun (2026-10-09) measured [53.26](logs/withdrawn/mimo-pro-1s-c16-clean.log) tok/s output
+  ([59.67](logs/withdrawn/mimo-pro-1s-c16-clean.log) tok/s decode), below 63.0: the beat is refuted. That recipe is not in
+  this release.
 - **Corrected:** an early DS-V4.1 C1 gap between two expert maps (one run each) was speculative-decoding acceptance
   noise. Four alternating boots with three repetitions each showed no difference. We now quote C1 only as a mean of at
   least three repetitions.

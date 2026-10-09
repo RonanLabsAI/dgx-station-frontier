@@ -1,0 +1,41 @@
+# CLEAN RERUN of the withdrawn MiMo-V2.6-Pro one-Station C16 row (2026-10-09 00:11-00:35 PT, same launcher with
+# MAXSEQ=16). Fresh seed per invocation, separate warm-up seed, --num-warmups 0, prefix hit from /metrics.
+# decode = C x 1000 / mean TPOT; out_tput = vLLM output token throughput.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- summary.txt
+== 2026-10-09 00:11:31 PDT mimo26-pro-m5b-c :30007 mimo26-pro mode=decode nonce=529891000 image=vllm/vllm-openai:nightly-d05da62e9ccdf8e342b15bf6785d83224cc165af
+decode-c1-r1 seed 529891002 warmseed 529891001: decode_agg 29.37 tok/s (C1 x 1000/meanTPOT 34.05 ms) | out_tput 25.01 | meanTTFT 6116.37 ms | failed 0 | prefix_hit 0.00%
+decode-c1-r2 seed 529891004 warmseed 529891003: decode_agg 29.81 tok/s (C1 x 1000/meanTPOT 33.55 ms) | out_tput 25.48 | meanTTFT 5871.30 ms | failed 0 | prefix_hit 0.00%
+decode-c8-r1 seed 529891006 warmseed 529891005: decode_agg 49.24 tok/s (C8 x 1000/meanTPOT 162.47 ms) | out_tput 44.09 | meanTTFT 19041.01 ms | failed 0 | prefix_hit 0.00%
+decode-c16-r1 seed 529891008 warmseed 529891007: decode_agg 59.67 tok/s (C16 x 1000/meanTPOT 268.12 ms) | out_tput 53.26 | meanTTFT 31407.21 ms | failed 0 | prefix_hit 0.00%
+DONE 2026-10-09 00:34:55
+--- decode-c16-r1.log (vllm bench serve; seed=529891008, num_warmups=0)
+Maximum request concurrency: 16
+Successful requests:                     32        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  615.20    
+Total input tokens:                      262144    
+Total generated tokens:                  32768     
+Output token throughput (tok/s):         53.26     
+Total token throughput (tok/s):          479.37    
+Mean TTFT (ms):                          31407.21  
+Mean TPOT (ms):                          268.12    
+--- decode-c8-r1.log (vllm bench serve; seed=529891006, num_warmups=0)
+Maximum request concurrency: 8
+Successful requests:                     16        
+Failed requests:                         0         
+Maximum request concurrency:             8         
+Benchmark duration (s):                  371.62    
+Total input tokens:                      131072    
+Total generated tokens:                  16384     
+Output token throughput (tok/s):         44.09     
+Total token throughput (tok/s):          396.79    
+Mean TTFT (ms):                          19041.01  
+Mean TPOT (ms):                          162.47    
+--- versions.txt (server /metrics prefix-cache counters at the end of the session; GPU)
+GPU 0: NVIDIA GB300 (UUID: <gpu-uuid>)
+vllm:prefix_cache_queries_total{engine="0",model_name="mimo26-pro"} 0.0
+vllm:prefix_cache_hits_total{engine="0",model_name="mimo26-pro"} 0.0

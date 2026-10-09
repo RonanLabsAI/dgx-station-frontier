@@ -78,6 +78,10 @@ Reading the numbers:
 - The one-Station receipt predates our bench-hygiene rules; the audit found its decode windows clean (the only
   prefix-cache hits were warm-up copies hitting each other). Its prefill figures are **not** published here: see the
   withdrawn claims in the top-level README.
+- **Clean same-session rerun (2026-10-09), sidecar vs Grace only:** see
+  [`results/sidecar-ab.md`](../../results/sidecar-ab.md) section 2, which adds clean prefill and power. It reports both
+  output tok/s (this README's metric) and decode tok/s (C x 1000 / mean TPOT, higher because it excludes TTFT); compare
+  the C1 means above with its output row, not its decode row.
 
 ## Hardware and software
 

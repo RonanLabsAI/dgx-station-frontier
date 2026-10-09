@@ -89,22 +89,60 @@ So at C1 the levers are kernel fusion and rank-balanced placement, not more expe
 
 ## 2. DeepSeek-V4.1-Flash on one Station: sidecar vs Grace only
 
-**Status: [pending same-session run 2026-10-09].** One Station, run back to back in one session: Recipe A is the
-GB300 with its RTX PRO 6000 serving the cold experts through the b12x sidecar
-([`recipes/dsv41-flash-sidecar/`](../recipes/dsv41-flash-sidecar/)); Recipe B is the same server with the cold experts
-read from Grace memory by the GB300, and the RTX PRO 6000 idle. Same image, same expert map, same server flags (32
-sequences, DSpark speculative decoding on, prefix caching on), same bench script, a fresh seed per run and a zero
-prefix-cache hit on every reported run.
+**Model and placement.** DeepSeek-V4.1-Flash on one Station (the right one), run back to back in one session on
+2026-10-09: arm A 00:13-00:21 PT, then arm B 00:37-00:47 PT. Nothing else ran on the Station. Recipe:
+[`recipes/dsv41-flash-sidecar/`](../recipes/dsv41-flash-sidecar/).
 
-| Measurement | A: GB300 + RTX PRO 6000 sidecar | B: GB300 + Grace only | Change | Receipts |
+| | A: GB300 + RTX PRO 6000 sidecar | B: GB300 + Grace only |
+|---|---|---|
+| GB300 HBM | dense weights, KV, the hot experts (285 of 384 per layer, el8's `rowmap-mix-v1`), DeepGEMM MegaMoE | same |
+| Cold experts (99 per layer) | on the RTX PRO 6000, b12x sidecar (`MEGA_PEER=2`) | read by the GB300 from pinned Grace memory in TRT-LLM layout (`MEGA_PEER=0`, `MEGA_COLD_TRT=1`); the RTX PRO 6000 holds nothing |
+| Receipt | [sidecar-ab-a.log](../logs/dsv41-flash-sidecar/sidecar-ab-a.log) | [sidecar-ab-b.log](../logs/dsv41-flash-sidecar/sidecar-ab-b.log) |
+
+Both arms: the same container image (vLLM nightly `af7f9488`, pinned by digest), weights revision, expert map and
+server flags (`32` sequences, context `131072`, DSpark speculative decoding `5/3/3`, prefix caching on). The bench is
+`vllm bench serve` with random ids, 8,192 in / 1,024 forced out, temperature 0, `5 x C` requests, a fresh seed for
+every invocation, the warm-up on its own seed, and `--num-warmups 0`.
+
+Two throughput metrics, labelled on every line because they differ:
+
+- **decode tok/s** = C x 1000 / mean TPOT: generation speed once the prompt is in (the metric of section 1);
+- **output tok/s** = vLLM's output token throughput: output tokens / wall time, so it also pays for prefill (TTFT).
+  The DS-V4.1 recipe README reports this one.
+
+<!-- results -->
+| Measurement | A: sidecar | B: Grace only | A / B | Receipts |
 |---|---|---|---|---|
-| Decode, C1, tok/s per user (mean of 3 reps) | [pending same-session run 2026-10-09] | [pending same-session run 2026-10-09] | | |
-| Decode, C16, tok/s aggregate | [pending same-session run 2026-10-09] | [pending same-session run 2026-10-09] | | |
-| Decode, C32, tok/s aggregate | [pending same-session run 2026-10-09] | [pending same-session run 2026-10-09] | | |
-| Prefill, 8K-token prompt, C1, tok/s | [pending same-session run 2026-10-09] | [pending same-session run 2026-10-09] | | |
-| Prefill, 64K-token prompt, C1, tok/s | [pending same-session run 2026-10-09] | [pending same-session run 2026-10-09] | | |
-| Prefix-cache hit, every reported run | [pending same-session run 2026-10-09] | [pending same-session run 2026-10-09] | | |
-| Peak power draw, GB300 / RTX PRO 6000 | [pending same-session run 2026-10-09] | [pending same-session run 2026-10-09] | | |
+| C1 decode tok/s per user, mean of 3 reps | 528.68 | 268.73 | 1.97x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log) |
+| C1 output tok/s per user, mean of the same 3 reps | 474.42 | 247.07 | | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log) |
+| C16 decode tok/s, aggregate | 2,048.66 | 722.67 | 2.83x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log) |
+| C16 output tok/s, aggregate | 1,738.98 | 645.97 | 2.69x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log) |
+| C32 decode tok/s, aggregate | 2,616.52 | 927.54 | 2.82x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log) |
+| C32 output tok/s, aggregate | 2,311.39 | 848.95 | 2.72x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log) |
+| Prefill, `8K`-token prompt, C1, tok/s | 36.0K | 24.8K | 1.45x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log) |
+| Prefill, `64K`-token prompt, C1, tok/s | 38.6K | 26.5K | 1.46x | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log) |
+| Prefill, `8K` / `64K`-token prompts, C16, tok/s (A only) | 46.6K / 45.9K | | | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log) |
+| Highest prefix-cache hit of any reported run, % (C32; every other run had none) | 0.62 | 0.62 | | [A](../logs/dsv41-flash-sidecar/sidecar-ab-a.log), [B](../logs/dsv41-flash-sidecar/sidecar-ab-b.log) |
+| GB300 power in the decode window, mean / peak, W | 495.9 / 878.4 | 397.2 / 694.6 | | [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+| RTX PRO 6000 power in the decode window, mean / peak, W | 144.7 / 241.31 | 19.5 / 24.22 | | [power](../logs/dsv41-flash-sidecar/sidecar-ab-power.log) |
+<!-- /results -->
+
+Notes on the table:
+
+- **C1 is noisy.** DSpark acceptance on random ids moves single repetitions by about a tenth in A and a fifth in B
+  (A: 534.76 / 483.09 / 568.18; B: 332.23 / 239.23 / 234.74 decode tok/s, all in the receipts). Read the means.
+- **Which C1 to compare with what.** The recipe README's C1 figures (389.3 single shot; 445 / 452 as DP2 means) are
+  output tok/s, from other boots, and the DP2 means reuse one prompt set, so they read a few percent high. Their
+  like-for-like here is the output row (474.42), not the decode row (528.68).
+- **C16 against the recipe's headline.** The same harness gave 1,855.6 output tok/s at C16 on 2026-10-07; this
+  session's arm A gives 1,738.98. Both runs are clean; the gap is session-to-session and DSpark variance.
+- **The C32 prefix hit** (0.62% in both arms, under the 2% bar) is one shared speculative-decoding prefix block, not
+  a measured prompt being reused.
+- **Power:** 1 s samples of both GPUs over the decode runs (C1 x3, C16, C32), every sample in the receipt. In B the RTX
+  PRO 6000 is empty, so its row is idle draw.
+- **The 64K-token prefill at C1 is the clean rerun** of a withdrawn figure. At 38.6K tok/s it stays below el8's
+  published [44.5K](https://github.com/original-el8/dgx-station-gb300-research) tok/s, so that withdrawal stands (and the
+  prompt shapes differ: el8's is `16K` tokens).
 
 ## 3. Takeaways
 
@@ -116,8 +154,13 @@ prefix-cache hit on every reported run.
   remain, not by expert memory.
 - **The gain depends on traffic.** The warm set is chosen from routing counts, so traffic that routes like the
   calibration set gains more than uniformly random token ids.
-- **Section 2 will show the one-Station case,** where the model fits one GB300 plus Grace and the sidecar's job is the
-  cold tail rather than a warm middle tier.
+- **On one Station the sidecar is worth more, and at every concurrency.** When the model fits one GB300 plus Grace,
+  the RTX PRO 6000 serves the cold tail instead of a warm middle tier, and that tail is read on every step: C1 decode
+  doubles (1.97x) and C16 / C32 aggregate decode rises 2.83x / 2.82x over reading the same experts from Grace.
+- **Prefill gains less** (1.45x at 8K, 1.46x at 64K): long prompts batch the expert reads, so Grace bandwidth hurts
+  them less than it hurts decode.
+- **The power cost is modest.** In the decode window the GB300 averages 495.9 W with the sidecar vs 397.2 W without,
+  and the RTX PRO 6000 adds 144.7 W, for 2.8x the C32 decode throughput: far less energy per token.
 
 ## Credits
 
