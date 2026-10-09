@@ -21,11 +21,11 @@ Shape: 8,192 random-token prompt, 1,024 forced output tokens, temperature 0, `C`
 <!-- results -->
 | Configuration | C1 per user | C16 | C32 | C64 | Receipt |
 |---|---|---|---|---|---|
-| One Station, `max-num-seqs 32`, warm boot, first bench | 389.3 | 1,855.6 | 2,170.5 | 2,274.2 (capped: `32` sequences) | [log](../../logs/dsv41-flash-sidecar/one-station-c1-c64.log) |
+| One Station, `max-num-seqs 32`, warm boot, first bench | 389.3 | 1,855.6 | 2,170.5 | 2,274.2 (capped at `32` sequences — not a C64 measurement) | [log](../../logs/dsv41-flash-sidecar/one-station-c1-c64.log) |
+| **One Station, uncapped** (`max-num-seqs 64`, CUDA graphs to `256`; DP2 config run alone, other Station idle; left / right) | | 1,807.25 / 1,995.02 | 2,261.28 / 2,382.88 | **3,159.86 / 3,047.45** | [left](../../logs/dsv41-flash-sidecar/dp2-left.log), [right](../../logs/dsv41-flash-sidecar/dp2-right.log) |
 | DP2, left copy (both benched simultaneously), `max-num-seqs 64` | 431.26 | 1,836.68 | 2,186.54 | 2,906.39 | [log](../../logs/dsv41-flash-sidecar/dp2-left.log) |
 | DP2, right copy | 417.68 | 1,933.80 | 2,361.30 | 2,867.89 | [log](../../logs/dsv41-flash-sidecar/dp2-right.log) |
 | **DP2 total (sum of both copies)** | | **3,770** | **4,548** | **5,774** | [left](../../logs/dsv41-flash-sidecar/dp2-left.log), [right](../../logs/dsv41-flash-sidecar/dp2-right.log) |
-| Same config, one copy alone (left / right), other Station idle | | 1,807.25 / 1,995.02 | 2,261.28 / 2,382.88 | 3,159.86 / 3,047.45 | [left](../../logs/dsv41-flash-sidecar/dp2-left.log), [right](../../logs/dsv41-flash-sidecar/dp2-right.log) |
 | C1 per user, mean of three warm repetitions (left / right) | 445 / 452 | | | | [left](../../logs/dsv41-flash-sidecar/dp2-left.log), [right](../../logs/dsv41-flash-sidecar/dp2-right.log) |
 <!-- /results -->
 
@@ -50,7 +50,31 @@ Reading the numbers:
 - **C1 is noisy.** DSpark acceptance varies run to run, and single-shot C1 tracks it closely. Quote C1 as a mean of at
   least three repetitions. The means above reuse one prompt set across repetitions (TTFT is prefix-warm), so they read
   a few percent high; the cold single runs on the same boots are the 431.26 / 417.68 tok/s in the first table.
-- **One-Station C64 in the first row is capped** by `--max-num-seqs 32`. The DP2 rows use 64 sequences.
+- **The first row's C64 is capped:** that server ran `--max-num-seqs 32`, so at C64 half the requests queue. It is
+  not a C64 measurement. The uncapped one-Station C64 is the second row (3,160 / 3,047 tok/s), from the same config
+  as DP2 with the other Station idle (fresh seed offset, prefix cache clean between phases).
+- **One Station vs catid's two-Station TP2.** At C16 one Station leads catid's one model across two GB300s by
+  41.7% / 56.4% (left / right; catid TP2 C16 is [1,275.5](https://github.com/catid/dgx_station_benchmarks) tok/s, and
+  its best two-Station C16, PP2, is [1,677.7](https://github.com/catid/dgx_station_benchmarks) tok/s). At C64 it trails
+  catid's TP2 ([3,401.6](https://github.com/catid/dgx_station_benchmarks) tok/s) by 7.1% / 10.4%. Our reading, not a
+  profiled result: at C16 a decode step is bound by reading weights and expert rows, and moving 99 of 384 experts per
+  layer to the RTX PRO 6000 (its own memory bandwidth) shortens that read, while one Station pays no cross-Station
+  all-reduce per layer. At C64 the step is compute- and batch-bound: the expert GEMMs grow with the batch, and two full
+  GB300s carry twice the tensor throughput of one GB300 plus a sidecar that only holds the cold experts.
+- **Equal hardware (two Stations vs two Stations):**
+
+<!-- results -->
+| Concurrency | catid, one model across two Stations, tok/s | DP2, one copy per Station, total tok/s | DP2 / catid | Receipt |
+|---|---|---|---|---|
+| C16 | 1,678 (best two-Station C16, PP2) | 3,770 | 2.25x | [catid](https://github.com/catid/dgx_station_benchmarks), [left](../../logs/dsv41-flash-sidecar/dp2-left.log), [right](../../logs/dsv41-flash-sidecar/dp2-right.log) |
+| C32 | 2,117 (TP2) | 4,548 | 2.15x | [catid](https://github.com/catid/dgx_station_benchmarks), [left](../../logs/dsv41-flash-sidecar/dp2-left.log), [right](../../logs/dsv41-flash-sidecar/dp2-right.log) |
+| C64 | 3,402 (TP2) | 5,774 | 1.7x | [catid](https://github.com/catid/dgx_station_benchmarks), [left](../../logs/dsv41-flash-sidecar/dp2-left.log), [right](../../logs/dsv41-flash-sidecar/dp2-right.log) |
+<!-- /results -->
+
+  catid numbers are cited from [dgx_station_benchmarks](https://github.com/catid/dgx_station_benchmarks) @`ff8a496e`
+  (`deepseek-v4.1-flash/notes/README.md`); nothing from that repo is copied here. DP2 also uses both RTX PRO 6000s,
+  which catid's runs do not.
+
 - The one-Station receipt predates our bench-hygiene rules; the audit found its decode windows clean (the only
   prefix-cache hits were warm-up copies hitting each other). Its prefill figures are **not** published here: see the
   withdrawn claims in the top-level README.
