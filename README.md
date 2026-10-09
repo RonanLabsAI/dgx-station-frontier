@@ -14,7 +14,7 @@ Five recipes and a microbenchmark atlas (the Nemotron recipe was added after the
 | [`recipes/nemotron-ultra/`](recipes/nemotron-ultra/) | NVIDIA Nemotron 3 Ultra 550B-A55B NVFP4 (general and IOI competitive-coding checkpoints) on one Station with routed experts in Grace memory, and on two Stations with every weight in HBM. Stock vLLM, no patches |
 | [`recipes/fabric-data-direct/`](recipes/fabric-data-direct/) | The cross-Station fabric: Data Direct inside containers, a per-message-size NCCL tuner, the lossless traffic class, and what small-message latency does and does not allow |
 | [`atlas/microbench/`](atlas/microbench/) | C2C, HBM, Grace STREAM, RTX PRO 6000 to Grace, CPU vs GPU expert compute, GEMM power |
-| [`articles/`](articles/) | Plain-English write-ups of the results above. First: [Where should your experts live?](articles/where-should-your-experts-live/) (Grace vs HBM vs RTX PRO 6000) |
+| [`articles/`](articles/) | Plain-English write-ups of the results above. [Where should your experts live?](articles/where-should-your-experts-live/) (Grace vs HBM vs RTX PRO 6000); [What does an expert sidecar actually do?](articles/what-does-an-expert-sidecar-do/) |
 
 ## Hardware
 
