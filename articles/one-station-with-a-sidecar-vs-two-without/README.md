@@ -55,7 +55,7 @@ None of this means splitting is a mistake. It wins when a model does not fit one
 
 ![Bar chart, NVIDIA's 550B IOI coding model, decode tok/s. One Station keeps 100 GiB of experts in Grace; two Stations hold every weight in HBM. 1 user: 39.8 vs 99.1 (2.5x). 16 users: 118.1 vs 685.5 (5.8x). 32 users: 146.1 vs 889.1 (6.1x).](img/3-split-wins.png)
 
-NVIDIA's 550B IOI coding model is the example. On one Station, 100 GiB of its experts have to live in Grace memory, and it runs at 39.8 tok/s for one user. Split across two Stations, every weight fits in HBM, and it runs at 99.1, 2.5 times faster, and 6.1 times faster at 32 users. (The two-Station run also used a faster MoE kernel, so not all of that gain is the split.) DeepSeek-V4-Pro, at 1.6 trillion parameters, does not fit one Station at all, so for it two Stations are the only option.
+NVIDIA's 550B IOI coding model is the example. On one Station, 100 GiB of its experts have to live in Grace memory, and it runs at 39.8 tok/s for one user. Split across two Stations, every weight fits in HBM, and it runs at 99.1, 2.5 times faster, and 6.1 times faster at 32 users. (The two-Station run also used a faster MoE kernel, so not all of that gain is the split.) DeepSeek-V4-Pro, at 1.6 trillion parameters, does not fit one Station at its released precision, so for that version two Stations are the only option. (A 2-bit version does fit one Station; antirez ran one in August.)
 
 ## Which setup for which job?
 
@@ -87,3 +87,5 @@ Rows are in [`results.jsonl`](../../results.jsonl). Published two-Station figure
 | IOI model 39.8 / 99.1, 118.1 / 685.5, 146.1 / 889.1 | `nemo-cc-1s-c1`, `-c16`, `-c32`; `nemo-cc-2s-c1`, `-c16`, `-c32`; [`recipes/nemotron-ultra/`](../../recipes/nemotron-ultra/) |
 
 Figures: drawn from the values above. Cover art generated with Grok Imagine; title set by us.
+
+**Correction (2026-10-09):** the first version said DeepSeek-V4-Pro "does not fit one Station at all". It does not fit at its released precision, but a 2-bit version does: [@antirez ran one on a single DGX Station](https://x.com/antirez/status/2089060410359972091) in August 2026.

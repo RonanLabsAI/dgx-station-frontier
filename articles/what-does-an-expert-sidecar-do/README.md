@@ -57,7 +57,7 @@ el8 built the sidecar and proved it on one Station with DeepSeek-V4.1-Flash. Eve
 
 ![Comparison table. el8's published work: one Station and one 6000, DeepSeek-V4.1-Flash, HBM plus 6000 tiers, W4A8 kernels (his September write-up used an unreleased b12x branch), timeout plus counter, up to 32 users. RonanLabs, October 2026: two Stations running one model with a 6000 sidecar on each, DeepSeek-V4-Pro at 1.6T parameters, six memory tiers serving one model, public b12x plus W4A16 and a b12x bug fix, a handshake that refuses a mismatched sidecar, 64 users on one Station at 3,047 to 3,160 tok/s, and a same-session on/off A/B with power and an in-serving trace.](img/5-advances.png)
 
-- **Two Stations, one model, a sidecar on each.** DeepSeek-V4-Pro has 1.6 trillion parameters, too big for one Station. We split it across both and gave each GB300 its own 6000 holding the 2,400 warmest experts that did not fit in HBM. That is six memory tiers serving one model: two HBMs, two 6000s and two Graces. When we searched on October 6 we found no other public V4-Pro run on fewer than four GB300s.
+- **Two Stations, one model, a sidecar on each.** DeepSeek-V4-Pro has 1.6 trillion parameters, too big for one Station at its released precision. We split it across both and gave each GB300 its own 6000 holding the 2,400 warmest experts that did not fit in HBM. That is six memory tiers serving one model: two HBMs, two 6000s and two Graces. Others have run V4-Pro on less hardware: antirez ran a 2-bit version on a single Station in August. Ours runs the released precision in vLLM across two Stations, serving 16 users at once.
 - **A sidecar that matches the reference path.** We send 16-bit rows instead of 8-bit ones, so the 6000 can run the same W4A16 math as vLLM's own kernel. The two agree to a cosine of 0.999992.
 - **A bug fix in b12x.** On V4-Pro's expert shapes, b12x's W4A16 path returned NaN: when some routes were masked out it summed rows it had never written. The fix is a few lines, it is in the repo, and it is going upstream to FlashInfer, where b12x now lives.
 - **A handshake.** A sidecar loaded with a different expert map would silently compute the wrong experts. In our version the GB300 checks the sidecar's map before it trusts it, and refuses a mismatch.
@@ -76,7 +76,7 @@ On DeepSeek-V4.1-Flash, one Station, the 6000 holds the cold tail. With it, deco
 
 On DeepSeek-V4-Pro across two Stations, the model is far bigger than the 6000s, so they hold a middle tier of warm experts and Grace keeps the long tail. There the sidecars added 52% at 16 users on real text and 39% on random tokens, but only 6 to 8% for one user. At one user that model's step is mostly hundreds of tiny kernels and network round trips between the Stations, and no memory tier touches those.
 
-One caveat on the V4.1 number. In that setup the 6000 holds the least-used experts, and our benchmark uses random token ids, which spread routes almost evenly. If they were perfectly even, about a quarter of routes (99 of 384) would land on the 6000's experts. On real text with a good map, el8 measured about 5% of decode routes landing on those experts. The 2.8x is what the sidecar buys when it is hit a lot. On real traffic the gap is likely smaller. We have not measured it yet, and it is the next run.
+Does it hold on real traffic? We checked with public news articles and real chat prompts, same Station, same session. The sidecar was 2.7 to 3.25 times faster at 16 and 32 users and 1.7 to 1.9 times faster for one user. Real text sent 11 to 21% of routes to the 6000's experts, about as many as random tokens do, so the earlier worry that real traffic would barely touch them did not hold up.
 
 ## Will it pay for your model?
 
@@ -106,10 +106,11 @@ Our rows are in [`results.jsonl`](../../results.jsonl). el8's figures are from
 | On/off 1.97x / 2.83x / 2.82x (V4.1); +52% / +39% at 16 users, +8% / +6% at 1 user (V4-Pro) | `dsv41-ab-ratio-*-decode`; `dsv4pro-e3-vs-e2-real-c16`, `dsv4pro-e3-vs-e2-catid-c16`, `dsv4pro-sidecar-ab-real-c1-gain`, `dsv4pro-sidecar-ab-catid-c1-gain` |
 | V4-Pro 16 users real text 152 to 231 tok/s | `dsv4pro-e2-real-c16`, `dsv4pro-e3a16-real-c16` |
 | 64 users on one Station 3,047-3,160 tok/s | `dsv41-solo-right-c64`, `dsv41-solo-left-c64` |
-| About a quarter of random-token routes on the 6000 | 99 / 384 if routing were perfectly even. Arithmetic, not measured |
-| About 5% of real-text decode routes on those experts | el8 `m3/DETAILS.md` (Choosing the hot set): 5.4% out of sample |
+| Real text: 2.7-3.25x at 16-32 users, 1.7-1.9x at 1 user; 11-21% of routes on the 6000 | `rt-*` rows (public CNN/DailyMail 8K and ShareGPT prompts, same session); [`results/sidecar-ab.md`](../../results/sidecar-ab.md) "Real text" |
 | ~~No other public V4-Pro run on fewer than four GB300s~~ WITHDRAWN 2026-10-09: @antirez ran V4-Pro (Q2 quant, DwarfStar) on one DGX Station at ~45-50 tok/s on 2026-08-16 | https://x.com/antirez/status/2089060410359972091 |
 
 Figures: drawn from the values above. Cover art generated with Grok Imagine; title set by us.
 
 **Correction (2026-10-09):** this article said we found no other public DeepSeek-V4-Pro run on fewer than four GB300s. That was wrong: [@antirez ran V4-Pro as a 2-bit quant on one DGX Station](https://x.com/antirez/status/2089060410359972091) in August 2026, at about 45 tok/s. Our run differs in using the released precision (MXFP4 experts + FP8) in vLLM across two Stations with 16 concurrent users.
+
+**Correction (2026-10-09, later the same day):** the first version said that on real traffic the gap would "likely" be smaller, because el8 measured about 5% of real-text decode routes on the 6000's experts. We then measured it on public real text: 11 to 21% of routes, and the sidecar stayed 2.7 to 3.25 times faster at 16 and 32 users (1.7 to 1.9 times for one user). The paragraph now says so.
