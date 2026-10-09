@@ -1,0 +1,31 @@
+# DeepSeek-V4-Pro-0813 E3-A16 = E2 + an RTX PRO 6000 warm-expert sidecar per Station (2,400 experts per EP rank, W4A16 on
+# the b12x W4A16 fix, fork commit dce2933e). 2026-10-08 07:40-08:17 PT. Rowmaps fitted to a private workload (not published).
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- E3-A16 bench/summary.txt (C16 rep1 hit 3.03% -> excluded, replaced by rep4)
+== 2026-10-08 07:49:30 seedbase 4100
+catid C1 rep1 seed 4111: decode_agg 37.31 (TPOT 26.80 ms) failed 0 hit 0.00% (0/24576 tok)
+catid C1 rep2 seed 4112: decode_agg 37.68 (TPOT 26.54 ms) failed 0 hit 0.00% (0/24576 tok)
+catid C1 rep3 seed 4113: decode_agg 37.74 (TPOT 26.50 ms) failed 0 hit 0.00% (0/24576 tok)
+catid C16 rep1 seed 4261: decode_agg 162.95 (TPOT 98.19 ms) failed 0 hit 3.03% (7936/262144 tok) CONTAMINATED
+catid C16 rep2 seed 4262: decode_agg 165.43 (TPOT 96.72 ms) failed 0 hit 0.00% (0/262144 tok)
+catid C16 rep3 seed 4263: decode_agg 161.5 (TPOT 99.07 ms) failed 0 hit 0.00% (0/262144 tok)
+real C1 rep1: {"C": 1, "n": 3, "mean_tpot_ms": 22.8, "decode_agg": 43.86, "median_ttft_s": 0.1, "mean_chunks": 1020.0, "wall_s": 70.0} hit 0.00% (0/82 tok)
+real C1 rep2: {"C": 1, "n": 3, "mean_tpot_ms": 22.79, "decode_agg": 43.88, "median_ttft_s": 0.09, "mean_chunks": 1018.6666666666666, "wall_s": 69.9} hit 0.00% (0/82 tok)
+real C1 rep3: {"C": 1, "n": 3, "mean_tpot_ms": 22.7, "decode_agg": 44.05, "median_ttft_s": 0.1, "mean_chunks": 1021.0, "wall_s": 69.8} hit 0.00% (0/82 tok)
+real C16 rep1: {"C": 16, "n": 32, "mean_tpot_ms": 69.35, "decode_agg": 230.7, "median_ttft_s": 0.47, "mean_chunks": 1020.625, "wall_s": 142.7} hit 0.00% (0/924 tok)
+real C16 rep2: {"C": 16, "n": 32, "mean_tpot_ms": 69.31, "decode_agg": 230.84, "median_ttft_s": 0.46, "mean_chunks": 1020.3125, "wall_s": 142.5} hit 0.00% (0/924 tok)
+real C16 rep3: {"C": 16, "n": 32, "mean_tpot_ms": 69.35, "decode_agg": 230.72, "median_ttft_s": 0.44, "mean_chunks": 1020.5, "wall_s": 142.6} hit 0.00% (0/924 tok)
+DONE 08:16:48
+catid C16 rep4 (replaces rep1) seed 4277: decode_agg 166.89 TPOT 95.87 hit 7936 921655 -> 7936 1183799
+--- gsm8k-run.log (tail)
+{"n": 200, "correct": 195, "acc": 97.5, "runaways": 0, "errors": 0, "wall_s": 576, "median_ctoks": 238, "effort": "high"}
+--- cos-gate.json (sidecar warm rows vs marlin on the same experts, real prompts)
+{"rank0": {"checks": 183, "layers_checked": 61, "missing_layers": [], "timeouts_in_checks": 0, "cos_min": 0.999992, "cos_mean": 0.999993, "worst_layer": 1, "pass": true}, "rank1": {"checks": 183, "layers_checked": 61, "missing_layers": [], "timeouts_in_checks": 0, "cos_min": 0.999992, "cos_mean": 0.999993, "worst_layer": 1, "pass": true}, "PASS": true}
+--- tf-e3a16-vs-e1-c1.json summary
+{"positions": 3944, "flips": 154, "flip_pct": 3.905, "cont_positions": 3405, "cont_flips": 106, "cont_flip_pct": 3.113, "free_identical": 6, "n_prompts": 32}
+--- e3-stats-rank0.json peer counters (rank 0)
+{"published": 3086539, "completed": 3086539, "timeouts": 0, "rows": 42881748, "tokens": 94510838, "wait_ns": 16051676384, "waits": 2064819}
+--- e3-rank0.txt
+e3hook=1 rowmap=<private-domain-rowmap> enable=1 check=3 count=1 pin=split e2rowmap=<private-domain-rowmap>

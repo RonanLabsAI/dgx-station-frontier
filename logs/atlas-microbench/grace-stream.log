@@ -1,0 +1,19 @@
+# STREAM (src/stream.c, OpenMP, doubles) on Grace, 2026-10-06 PT.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- stream-t24.log
+threads=24 n=400000000 (3.0 GiB/array)
+RESULT stream_Triad_GBps 297.9
+--- stream-t36.log
+threads=36 n=400000000 (3.0 GiB/array)
+RESULT stream_Triad_GBps 297.4
+--- stream-t48.log
+threads=48 n=400000000 (3.0 GiB/array)
+RESULT stream_Triad_GBps 305.4
+--- stream-t64.log
+threads=64 n=400000000 (3.0 GiB/array)
+RESULT stream_Triad_GBps 297.6
+--- stream-t72.log
+threads=72 n=400000000 (3.0 GiB/array)
+RESULT stream_Triad_GBps 277.5

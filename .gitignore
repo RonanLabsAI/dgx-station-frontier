@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.nsys-rep
+*.sqlite
+gsm8k_test.jsonl
+# never commit rowmaps or routing counts fitted to private traffic
+*private*

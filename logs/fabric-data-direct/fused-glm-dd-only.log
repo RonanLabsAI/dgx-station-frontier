@@ -1,0 +1,29 @@
+# GLM-5.3 NVFP4, SGLang TP2+EP2 across both Stations (one 400G rail), earlier session 2026-10-07 01:48-02:25 PT:
+# Data Direct WITHOUT a tuner. Same harness as fused-glm-dd-ab.log; fresh boot per arm.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- dd0/flash_bench.log (no Data Direct)
+[fused-dd0] conc= 1:    79.2 agg tok/s   79.23 per-stream  (reps 79/79/79 spread 0%; warm-pass 79)
+[fused-dd0] conc= 2:   141.2 agg tok/s   70.58 per-stream  (reps 141/141/142 spread 1%; warm-pass 133)
+[fused-dd0] conc= 4:   249.4 agg tok/s   62.35 per-stream  (reps 249/250/249 spread 1%; warm-pass 237)
+[fused-dd0] conc= 8:   412.3 agg tok/s   51.53 per-stream  (reps 412/413/411 spread 0%; warm-pass 391)
+[fused-dd0] conc=16:   597.9 agg tok/s   37.37 per-stream  (reps 594/596/604 spread 2%; warm-pass 556)
+[fused-dd0] conc=32:   993.7 agg tok/s   31.05 per-stream  (reps 979/1000/1002 spread 2%; warm-pass 986)
+--- dd0/prefill.log (no Data Direct)
+[fused-dd0] PREFILL 8192 median 7,192 tok/s
+[fused-dd0] PREFILL 65536 median 7,980 tok/s
+[fused-dd0] PREFILL-CONC 65536x4: 271725 tok in 33.59s -> 8,090 tok/s agg
+[fused-dd0] PREFILL-CONC 8192x16: 136453 tok in 16.18s -> 8,432 tok/s agg
+--- dd1-notuner/flash_bench.log (Data Direct overlay only, no tuner, no extra env)
+[fused-dd1-notuner] conc= 1:    80.4 agg tok/s   80.45 per-stream  (reps 80/81/80 spread 0%; warm-pass 80)
+[fused-dd1-notuner] conc= 2:   140.9 agg tok/s   70.43 per-stream  (reps 139/142/142 spread 2%; warm-pass 137)
+[fused-dd1-notuner] conc= 4:   253.0 agg tok/s   63.26 per-stream  (reps 254/252/253 spread 1%; warm-pass 240)
+[fused-dd1-notuner] conc= 8:   420.7 agg tok/s   52.59 per-stream  (reps 420/421/422 spread 0%; warm-pass 402)
+[fused-dd1-notuner] conc=16:   610.2 agg tok/s   38.14 per-stream  (reps 614/609/607 spread 1%; warm-pass 583)
+[fused-dd1-notuner] conc=32:   912.9 agg tok/s   28.53 per-stream  (reps 909/915/914 spread 1%; warm-pass 893)
+--- dd1-notuner/prefill.log (Data Direct overlay only, no tuner, no extra env)
+[fused-dd1-notuner] PREFILL 8192 median 9,214 tok/s
+[fused-dd1-notuner] PREFILL 65536 median 11,047 tok/s
+[fused-dd1-notuner] PREFILL-CONC 65536x4: 271451 tok in 24.31s -> 11,166 tok/s agg
+[fused-dd1-notuner] PREFILL-CONC 8192x16: 136774 tok in 11.59s -> 11,805 tok/s agg

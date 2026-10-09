@@ -1,0 +1,31 @@
+# WITHDRAWN as a comparison claim (prefix-cache audit 2026-10-08). DS-V4.1 one-Station 64K prefill at C1: vLLM's
+# --num-warmups replays the first measured prompt, so 1 of the 4 measured prompts was a prefix-cache hit (~+23%).
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- A-peer2/prefill-65536-c1.json (first run) (vllm bench serve result JSON, selected keys; 'date' is UTC)
+date: 20261007-063614
+max_concurrency: 1
+num_prompts: 4
+completed: 4
+failed: 0
+total_input_tokens: 262144
+total_output_tokens: 4
+duration: 5.26522678200854
+total_token_throughput: 49788.548690014395
+output_throughput: 0.759701370065984
+mean_ttft_ms: 1316.1075024836464
+mean_tpot_ms: 0.0
+--- A-mix-rerun/prefill-65536-c1.json (warm rerun) (vllm bench serve result JSON, selected keys; 'date' is UTC)
+date: 20261007-080243
+max_concurrency: 1
+num_prompts: 4
+completed: 4
+failed: 0
+total_input_tokens: 262144
+total_output_tokens: 4
+duration: 5.22113006899599
+total_token_throughput: 50209.053698294556
+output_throughput: 0.7661176693820979
+mean_ttft_ms: 1305.07361976197
+mean_tpot_ms: 0.0

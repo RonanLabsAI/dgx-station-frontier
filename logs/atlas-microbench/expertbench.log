@@ -1,0 +1,19 @@
+# Expert FFN (SwiGLU, H 7168, I 2048, bf16) from HBM, from Grace via GPU zero-copy over C2C, and on the Grace CPU, 2026-10-06 PT.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- expertbench.log
+torch 2.13.0+cu130 gpu NVIDIA GB300 cpu threads 72
+zerocopy_matches_hbm True
+RESULT expert_gpu_hbm_B1 ms_per_expert 0.094 eff_GBps 937.0 tok_expert_per_s 10638
+RESULT expert_gpu_hbm_B4 ms_per_expert 0.094 eff_GBps 935.0 tok_expert_per_s 42460
+RESULT expert_gpu_hbm_B16 ms_per_expert 0.094 eff_GBps 934.7 tok_expert_per_s 169786
+RESULT expert_gpu_hbm_B64 ms_per_expert 0.090 eff_GBps 976.5 tok_expert_per_s 709502
+RESULT expert_gpu_zerocopy_c2c_B1 ms_per_expert 0.272 eff_GBps 323.9 tok_expert_per_s 3678
+RESULT expert_gpu_zerocopy_c2c_B4 ms_per_expert 0.273 eff_GBps 322.6 tok_expert_per_s 14652
+RESULT expert_gpu_zerocopy_c2c_B16 ms_per_expert 0.274 eff_GBps 321.4 tok_expert_per_s 58385
+RESULT expert_gpu_zerocopy_c2c_B64 ms_per_expert 0.420 eff_GBps 209.7 tok_expert_per_s 152356
+RESULT expert_cpu_bf16_B1 ms_per_expert 2.061 eff_GBps 42.7 tok_expert_per_s 485
+RESULT expert_cpu_bf16_B4 ms_per_expert 1.939 eff_GBps 45.4 tok_expert_per_s 2063
+RESULT expert_cpu_bf16_B16 ms_per_expert 1.893 eff_GBps 46.5 tok_expert_per_s 8451
+RESULT expert_cpu_bf16_B64 ms_per_expert 2.989 eff_GBps 29.5 tok_expert_per_s 21410

@@ -1,0 +1,15 @@
+# membench on the RTX PRO 6000 (PCIe to Grace), 256 MiB buffers, 20 reps, 2026-10-06 PT.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- rtx-membench-256m.log
+device=NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition SMs=188 cc=12.0 size=256 MiB reps=20 pageableAccess=0 usesHostPT=0 concManaged=1 hostPtrRegistered=1
+RESULT memcpy_H2D_pinned_GBps 55.1
+RESULT memcpy_D2H_pinned_GBps 57.2
+RESULT memcpy_H2D_pageable_GBps 16.9
+RESULT memcpy_D2H_pageable_GBps 14.9
+RESULT zerocopy_kernel_read_pinned_GBps 52.9
+RESULT zerocopy_kernel_write_pinned_GBps 52.7
+RESULT hbm_kernel_read_GBps 1630.6
+RESULT hbm_kernel_write_GBps 1629.0
+RESULT hbm_D2D_copy_GBps_rw 737.3 (read+write 1474.6)

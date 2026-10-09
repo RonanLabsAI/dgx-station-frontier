@@ -1,0 +1,27 @@
+# DeepSeek-V4-Pro-0813 E2 = E1 + pin-hot-experts split (hot rows in HBM, cold rows in Grace) with a usage-aware rowmap
+# fitted to a PRIVATE workload (map not published). Matched rerun 2026-10-08 08:38 PT, same harness as E3.
+# Every catid run has its own seed and 0.00% prefix-cache hit (measured from /metrics).
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- E2-only matched rerun bench/summary.txt
+== 2026-10-08 08:38:28 seedbase 5100
+catid C1 rep1 seed 5111: decode_agg 35.45 (TPOT 28.21 ms) failed 0 hit 0.00% (0/24576 tok)
+catid C1 rep2 seed 5112: decode_agg 35.19 (TPOT 28.42 ms) failed 0 hit 0.00% (0/24576 tok)
+catid C1 rep3 seed 5113: decode_agg 35.31 (TPOT 28.32 ms) failed 0 hit 0.00% (0/24576 tok)
+catid C16 rep1 seed 5261: decode_agg 119.24 (TPOT 134.18 ms) failed 0 hit 0.00% (0/262144 tok)
+catid C16 rep2 seed 5262: decode_agg 118.06 (TPOT 135.53 ms) failed 0 hit 0.00% (0/262144 tok)
+catid C16 rep3 seed 5263: decode_agg 117.61 (TPOT 136.04 ms) failed 0 hit 0.00% (0/262144 tok)
+real C1 rep1: {"C": 1, "n": 3, "mean_tpot_ms": 24.72, "decode_agg": 40.44, "median_ttft_s": 0.14, "mean_chunks": 1021.0, "wall_s": 76.1} hit 0.00% (0/82 tok)
+real C1 rep2: {"C": 1, "n": 3, "mean_tpot_ms": 24.71, "decode_agg": 40.47, "median_ttft_s": 0.14, "mean_chunks": 1018.6666666666666, "wall_s": 75.9} hit 0.00% (0/82 tok)
+real C1 rep3: {"C": 1, "n": 3, "mean_tpot_ms": 24.63, "decode_agg": 40.6, "median_ttft_s": 0.14, "mean_chunks": 1021.3333333333334, "wall_s": 75.8} hit 0.00% (0/82 tok)
+real C16 rep1: {"C": 16, "n": 32, "mean_tpot_ms": 105.35, "decode_agg": 151.88, "median_ttft_s": 0.71, "mean_chunks": 1020.15625, "wall_s": 216.5} hit 0.00% (0/924 tok)
+real C16 rep2: {"C": 16, "n": 32, "mean_tpot_ms": 105.1, "decode_agg": 152.24, "median_ttft_s": 0.7, "mean_chunks": 1020.0625, "wall_s": 216.0} hit 0.00% (0/924 tok)
+real C16 rep3: {"C": 16, "n": 32, "mean_tpot_ms": 105.31, "decode_agg": 151.94, "median_ttft_s": 0.7, "mean_chunks": 1020.09375, "wall_s": 216.4} hit 0.00% (0/924 tok)
+DONE 09:14:17
+--- e3-rank0.txt (E3 hook off for this arm)
+e3hook=0 rowmap=rowmap-e3-gsm-v1.json enable=1 check=0 count=0 pin=split e2rowmap=<private-domain-rowmap>
+--- E2 GSM8K-200 summary (2026-10-07 21:5x PT boot)
+{"n": 200, "correct": 195, "acc": 97.5, "runaways": 2, "errors": 0, "wall_s": 904, "median_ctoks": 243, "effort": "high"}
+--- tf-e2-vs-e1-c1.json summary (teacher-forced top-1 flips vs the E1 reference)
+{"positions": 3944, "flips": 153, "flip_pct": 3.879, "cont_positions": 3405, "cont_flips": 105, "cont_flip_pct": 3.084, "free_identical": 5, "n_prompts": 32}

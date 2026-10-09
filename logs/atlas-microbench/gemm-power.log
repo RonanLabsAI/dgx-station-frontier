@@ -1,0 +1,18 @@
+# Dense bf16 8192^3 GEMM on the GB300 with the RTX PRO 6000 idle vs loaded (src/gemmload.py, src/rtxload.sh) and
+# nvidia-smi power sampling (index 1 = GB300, 0 = RTX PRO 6000). 2026-10-06 21:21-21:23 PT.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- gemm-rtxidle.log
+RESULT gemm_bf16_8192_TFLOPS 1030
+--- gemm-rtxload.log
+RESULT gemm_bf16_8192_TFLOPS 1033
+--- power-g-phases.txt (epoch seconds, phase)
+1791346889.171037073 idle_idle
+1791346904.176261946 gb300idle_rtxload
+1791346924.177888894 gb300gemm_rtxload
+1791346957.739755240 gb300gemm_rtxidle
+1791346991.181075893 end
+--- power-g.csv: first GB300 sample (shows power.limit) and the peak GB300 sample
+2026/10/06 21:21:29.210,  1,  147.24 W,  1300.00 W,  22 MiB,  0 %
+2026/10/06 21:22:49.583,  1,  1081.46 W,  1300.00 W,  1318 MiB,  100 %

@@ -1,0 +1,63 @@
+# GLM-5.3 NVFP4, SGLang TP2+EP2 across both Stations over one 400G rail: same-session A/B of the Data Direct block,
+# each arm a fresh boot. 2026-10-07 14:59-15:37 PT. Decode harness: J-M-Recipes flash_bench.py (MIT, not vendored;
+# PROSE prompt with a uuid nonce, 256 output tokens). Prefill: scripts/prefill_bench.py (unique-prefix prompts).
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- dd0/flash_bench.log (DD=0 (stock launch))
+[dd0] PROSE 300 tok 3.75s -> 80.1 tok/s; tail: 'flagellation; it is calibration. The best engineers are those who know precisely'
+[dd0] conc= 1:    79.3 agg tok/s   79.29 per-stream  (reps 79/79/79 spread 0%; warm-pass 79)
+[dd0] conc= 2:   139.9 agg tok/s   69.93 per-stream  (reps 141/138/141 spread 2%; warm-pass 136)
+[dd0] conc= 4:   249.1 agg tok/s   62.28 per-stream  (reps 249/248/251 spread 1%; warm-pass 236)
+[dd0] conc= 8:   410.4 agg tok/s   51.30 per-stream  (reps 410/409/412 spread 1%; warm-pass 391)
+[dd0] conc=16:   600.3 agg tok/s   37.52 per-stream  (reps 595/601/605 spread 2%; warm-pass 557)
+[dd0] conc=32:  1000.2 agg tok/s   31.26 per-stream  (reps 1000/998/1003 spread 0%; warm-pass 965)
+--- dd0/prefill.log (DD=0 (stock launch))
+[dd0] PREFILL target 8192: prompt_tokens 8559 latency 1.105s -> 7,743 tok/s
+[dd0] PREFILL target 8192: prompt_tokens 8471 latency 1.189s -> 7,124 tok/s
+[dd0] PREFILL target 8192: prompt_tokens 8536 latency 1.197s -> 7,131 tok/s
+[dd0] PREFILL 8192 median 7,131 tok/s
+[dd0] PREFILL target 65536: prompt_tokens 67916 latency 8.446s -> 8,042 tok/s
+[dd0] PREFILL target 65536: prompt_tokens 67927 latency 8.456s -> 8,033 tok/s
+[dd0] PREFILL target 65536: prompt_tokens 67798 latency 8.440s -> 8,033 tok/s
+[dd0] PREFILL 65536 median 8,033 tok/s
+[dd0] PREFILL-CONC 65536x4: 271382 tok in 33.14s -> 8,190 tok/s agg
+[dd0] PREFILL-CONC 8192x16: 136361 tok in 16.23s -> 8,400 tok/s agg
+--- dd1/flash_bench.log (Data Direct + tuner2)
+[dd1] PROSE 300 tok 4.15s -> 72.3 tok/s; tail: 'Third, the practice builds intellectual humility. Engineering culture can reward'
+[dd1] conc= 1:    80.7 agg tok/s   80.71 per-stream  (reps 81/81/81 spread 0%; warm-pass 81)
+[dd1] conc= 2:   145.3 agg tok/s   72.66 per-stream  (reps 144/147/145 spread 1%; warm-pass 130)
+[dd1] conc= 4:   250.1 agg tok/s   62.52 per-stream  (reps 251/249/250 spread 1%; warm-pass 236)
+[dd1] conc= 8:   397.2 agg tok/s   49.66 per-stream  (reps 396/397/399 spread 1%; warm-pass 379)
+[dd1] conc=16:   632.5 agg tok/s   39.53 per-stream  (reps 630/633/634 spread 1%; warm-pass 609)
+[dd1] conc=32:  1065.1 agg tok/s   33.28 per-stream  (reps 1062/1068/1065 spread 1%; warm-pass 1038)
+--- dd1/prefill.log (Data Direct + tuner2)
+[dd1] PREFILL target 8192: prompt_tokens 8579 latency 0.923s -> 9,298 tok/s
+[dd1] PREFILL target 8192: prompt_tokens 8571 latency 0.916s -> 9,353 tok/s
+[dd1] PREFILL target 8192: prompt_tokens 8534 latency 0.910s -> 9,382 tok/s
+[dd1] PREFILL 8192 median 9,353 tok/s
+[dd1] PREFILL target 65536: prompt_tokens 67984 latency 6.092s -> 11,160 tok/s
+[dd1] PREFILL target 65536: prompt_tokens 67901 latency 6.077s -> 11,174 tok/s
+[dd1] PREFILL target 65536: prompt_tokens 68058 latency 6.095s -> 11,167 tok/s
+[dd1] PREFILL 65536 median 11,167 tok/s
+[dd1] PREFILL-CONC 65536x4: 271486 tok in 24.04s -> 11,292 tok/s agg
+[dd1] PREFILL-CONC 8192x16: 136754 tok in 11.46s -> 11,931 tok/s agg
+--- dd1-tuner3/flash_bench.log (Data Direct + tuner3)
+[dd1t3] PROSE 300 tok 3.68s -> 81.5 tok/s; tail: 'nd a dangerous one is not the absence of mistakes but the discipline of learning'
+[dd1t3] conc= 1:    80.7 agg tok/s   80.70 per-stream  (reps 81/81/81 spread 0%; warm-pass 81)
+[dd1t3] conc= 2:   143.2 agg tok/s   71.60 per-stream  (reps 144/144/141 spread 2%; warm-pass 139)
+[dd1t3] conc= 4:   249.6 agg tok/s   62.41 per-stream  (reps 249/249/251 spread 1%; warm-pass 236)
+[dd1t3] conc= 8:   414.4 agg tok/s   51.80 per-stream  (reps 413/415/415 spread 1%; warm-pass 396)
+[dd1t3] conc=16:   634.5 agg tok/s   39.66 per-stream  (reps 635/636/633 spread 1%; warm-pass 602)
+[dd1t3] conc=32:  1068.7 agg tok/s   33.40 per-stream  (reps 1069/1068/1070 spread 0%; warm-pass 1043)
+--- dd1-tuner3/prefill.log (Data Direct + tuner3)
+[dd1t3] PREFILL target 8192: prompt_tokens 8492 latency 0.922s -> 9,209 tok/s
+[dd1t3] PREFILL target 8192: prompt_tokens 8461 latency 0.919s -> 9,209 tok/s
+[dd1t3] PREFILL target 8192: prompt_tokens 8598 latency 0.917s -> 9,375 tok/s
+[dd1t3] PREFILL 8192 median 9,209 tok/s
+[dd1t3] PREFILL target 65536: prompt_tokens 67972 latency 6.094s -> 11,155 tok/s
+[dd1t3] PREFILL target 65536: prompt_tokens 68095 latency 6.095s -> 11,173 tok/s
+[dd1t3] PREFILL target 65536: prompt_tokens 68034 latency 6.086s -> 11,179 tok/s
+[dd1t3] PREFILL 65536 median 11,173 tok/s
+[dd1t3] PREFILL-CONC 65536x4: 271395 tok in 24.04s -> 11,291 tok/s agg
+[dd1t3] PREFILL-CONC 8192x16: 136301 tok in 11.41s -> 11,943 tok/s agg

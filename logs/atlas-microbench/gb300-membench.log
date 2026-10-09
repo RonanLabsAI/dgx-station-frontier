@@ -1,0 +1,21 @@
+# membench (src/membench.cu) on the GB300, 8 GiB buffers, 10 reps, 2026-10-06 21:19 PT.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- gb300-membench-8g.log
+device=NVIDIA GB300 SMs=152 cc=10.3 size=8192 MiB reps=10 pageableAccess=1 usesHostPT=1 concManaged=1 hostPtrRegistered=1
+RESULT memcpy_H2D_pinned_GBps 353.6
+RESULT memcpy_D2H_pinned_GBps 375.1
+RESULT memcpy_H2D_pageable_GBps 312.5
+RESULT memcpy_D2H_pageable_GBps 368.7
+RESULT zerocopy_kernel_read_pinned_GBps 352.8
+RESULT zerocopy_kernel_write_pinned_GBps 367.6
+RESULT ats_kernel_read_pageable_malloc_GBps 326.1
+RESULT hbm_kernel_read_GBps 6481.2
+RESULT hbm_kernel_write_GBps 6540.8
+RESULT hbm_D2D_copy_GBps_rw 3201.7 (read+write 6403.4)
+RESULT managed_first_gpu_read_after_cpu_init_GBps 7.7
+RESULT managed_steady_gpu_read_GBps 6451.4
+RESULT managed_gpu_read_prefCPU_accessedBy_GBps 91.0
+RESULT managed_prefetch_H2D_GBps 78.4
+RESULT managed_prefetch_D2H_GBps 82.8

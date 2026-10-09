@@ -1,0 +1,81 @@
+# Small-collective latency between two DGX Stations. LAM = graph-captured all-reduce, p50 per op of 20 back-to-back replays
+# of 100 captured ops, max over ranks, microseconds. nccl-tests rows: out-of-place time column (us). 2026-10-07 01:4x PT.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- E2-lam-ovl.log (torch, Data Direct, NCCL auto)
+# 2026-10-07 01:43:04 PDT lam_probe.py env: 
+LAM    8192 B  graph p50(max-rank)   30.53 us  min   30.40 us  | eager p50  114.05 us
+LAM   12288 B  graph p50(max-rank)   31.07 us  min   30.78 us  | eager p50  112.32 us
+LAM   14336 B  graph p50(max-rank)   31.67 us  min   31.42 us  | eager p50  106.53 us
+LAM   16384 B  graph p50(max-rank)   32.12 us  min   31.93 us  | eager p50  108.29 us
+LAM   65536 B  graph p50(max-rank)   37.90 us  min   37.56 us  | eager p50  107.74 us
+LAM   98304 B  graph p50(max-rank)   40.15 us  min   39.94 us  | eager p50  101.86 us
+LAM  131072 B  graph p50(max-rank)   44.39 us  min   44.01 us  | eager p50  104.35 us
+LAM  196608 B  graph p50(max-rank)   55.68 us  min   55.28 us  | eager p50  106.18 us
+LAM  229376 B  graph p50(max-rank)   60.52 us  min   60.12 us  | eager p50  106.24 us
+LAM  262144 B  graph p50(max-rank)   65.18 us  min   64.80 us  | eager p50  105.76 us
+LAM  524288 B  graph p50(max-rank)  101.30 us  min  100.88 us  | eager p50  144.06 us
+--- E2-lampy2-ovl.log (pynccl (SGLang engine path), DD, auto)
+# 2026-10-07 01:44:51 PDT lam_pynccl.py env: 
+LAMPY    8192 B  graph p50(max-rank)   32.31 us  min   32.23 us
+LAMPY   12288 B  graph p50(max-rank)   32.48 us  min   32.45 us
+LAMPY   14336 B  graph p50(max-rank)   32.88 us  min   32.84 us
+LAMPY   16384 B  graph p50(max-rank)   33.98 us  min   33.95 us
+LAMPY   65536 B  graph p50(max-rank)   39.17 us  min   39.11 us
+LAMPY   98304 B  graph p50(max-rank)   41.41 us  min   41.37 us
+LAMPY  131072 B  graph p50(max-rank)   45.33 us  min   45.24 us
+LAMPY  196608 B  graph p50(max-rank)   57.17 us  min   57.10 us
+LAMPY  229376 B  graph p50(max-rank)   62.91 us  min   62.85 us
+LAMPY  262144 B  graph p50(max-rank)   67.18 us  min   67.07 us
+LAMPY  524288 B  graph p50(max-rank)  103.57 us  min  103.47 us
+--- E1-lam-ovl.log (torch, DD, Ring/Simple/8ch/4QP)
+# 2026-10-07 01:43:08 PDT lam_probe.py env: NCCL_ALGO=Ring NCCL_PROTO=Simple NCCL_MIN_NCHANNELS=8 NCCL_MAX_NCHANNELS=8 NCCL_IB_QPS_PER_CONNECTION=4 NCCL_IB_SPLIT_DATA_ON_QPS=1
+LAM    8192 B  graph p50(max-rank)   46.47 us  min   46.21 us  | eager p50  118.11 us
+LAM   12288 B  graph p50(max-rank)   47.58 us  min   47.41 us  | eager p50  106.05 us
+LAM   14336 B  graph p50(max-rank)   47.62 us  min   47.30 us  | eager p50  105.31 us
+LAM   16384 B  graph p50(max-rank)   47.50 us  min   47.27 us  | eager p50  101.12 us
+LAM   65536 B  graph p50(max-rank)   53.50 us  min   53.24 us  | eager p50  103.49 us
+LAM   98304 B  graph p50(max-rank)   57.25 us  min   57.12 us  | eager p50  105.54 us
+LAM  131072 B  graph p50(max-rank)   63.38 us  min   62.83 us  | eager p50  108.06 us
+LAM  196608 B  graph p50(max-rank)   78.18 us  min   77.33 us  | eager p50  118.37 us
+LAM  229376 B  graph p50(max-rank)   85.12 us  min   84.33 us  | eager p50  128.29 us
+LAM  262144 B  graph p50(max-rank)   92.63 us  min   92.17 us  | eager p50  138.21 us
+LAM  524288 B  graph p50(max-rank)   94.20 us  min   93.62 us  | eager p50  139.39 us
+--- E11-lam-ovl.log (torch, DD, tuner2.csv)
+# 2026-10-07 01:43:12 PDT lam_probe.py env: NCCL_TUNER_PLUGIN=/dd/libnccl-tuner-example.so NCCL_TUNER_CONFIG_FILE=/dd/tuner2.csv NCCL_IB_QPS_PER_CONNECTION=4 NCCL_IB_SPLIT_DATA_ON_QPS=1
+LAM    8192 B  graph p50(max-rank)   30.53 us  min   30.16 us  | eager p50  119.78 us
+LAM   12288 B  graph p50(max-rank)   30.81 us  min   30.41 us  | eager p50  115.81 us
+LAM   14336 B  graph p50(max-rank)   31.13 us  min   30.72 us  | eager p50  106.30 us
+LAM   16384 B  graph p50(max-rank)   31.37 us  min   31.00 us  | eager p50  110.43 us
+LAM   65536 B  graph p50(max-rank)   38.53 us  min   38.22 us  | eager p50  109.82 us
+LAM   98304 B  graph p50(max-rank)   45.55 us  min   45.30 us  | eager p50  107.39 us
+LAM  131072 B  graph p50(max-rank)   47.60 us  min   47.46 us  | eager p50  110.30 us
+LAM  196608 B  graph p50(max-rank)   47.98 us  min   47.82 us  | eager p50  108.45 us
+LAM  229376 B  graph p50(max-rank)   47.89 us  min   47.61 us  | eager p50  108.70 us
+LAM  262144 B  graph p50(max-rank)   47.83 us  min   47.62 us  | eager p50  108.64 us
+LAM  524288 B  graph p50(max-rank)   53.58 us  min   53.44 us  | eager p50  107.14 us
+--- E2-lampy-viampi.log (pynccl under mpirun, DD, auto)
+LAMPY    8192 B  graph p50(max-rank)   32.32 us  min   32.27 us
+LAMPY   12288 B  graph p50(max-rank)   32.22 us  min   32.17 us
+LAMPY   14336 B  graph p50(max-rank)   32.72 us  min   32.68 us
+LAMPY   16384 B  graph p50(max-rank)   33.98 us  min   33.96 us
+LAMPY   65536 B  graph p50(max-rank)   39.41 us  min   39.35 us
+LAMPY   98304 B  graph p50(max-rank)   41.99 us  min   41.95 us
+LAMPY  131072 B  graph p50(max-rank)   46.22 us  min   46.20 us
+LAMPY  196608 B  graph p50(max-rank)   57.10 us  min   57.06 us
+LAMPY  229376 B  graph p50(max-rank)   62.63 us  min   62.53 us
+LAMPY  262144 B  graph p50(max-rank)   66.65 us  min   66.56 us
+LAMPY  524288 B  graph p50(max-rank)  103.17 us  min  103.13 us
+--- nccl-tests small, E2 (DD auto)
+# 2026-10-07 01:41:46 PDT SET=E2  args=-b 8K -e 512K -f 2 -g 1 -d bfloat16 -w 200 -n 100 -G 20 -c 0 -a 3
+       16384          8192  bfloat16     sum      -1    20.84    0.79    0.79    N/A    20.81    0.79    0.79    N/A
+      262144        131072  bfloat16     sum      -1    50.50    5.19    5.19    N/A    50.59    5.18    5.18    N/A
+--- nccl-tests small, E10 (DD, LL128 4 channels)
+# 2026-10-07 01:42:18 PDT SET=E10 -x NCCL_PROTO=LL128 -x NCCL_ALGO=Ring -x NCCL_MIN_NCHANNELS=4 -x NCCL_MAX_NCHANNELS=4 args=-b 8K -e 512K -f 2 -g 1 -d bfloat16 -w 200 -n 100 -G 20 -c 0 -a 3
+       16384          8192  bfloat16     sum      -1    27.25    0.60    0.60    N/A    27.29    0.60    0.60    N/A
+      262144        131072  bfloat16     sum      -1    33.52    7.82    7.82    N/A    32.81    7.99    7.99    N/A
+--- nccl-tests small, E11 (DD + tuner2)
+# 2026-10-07 01:42:54 PDT SET=E11 -x NCCL_TUNER_PLUGIN=/dd/libnccl-tuner-example.so -x NCCL_TUNER_CONFIG_FILE=/dd/tuner2.csv -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 args=-b 8K -e 512K -f 2 -g 1 -d bfloat16 -w 200 -n 100 -G 20 -c 0 -a 3
+       16384          8192  bfloat16     sum      -1    19.22    0.85    0.85    N/A    19.18    0.85    0.85    N/A
+      262144        131072  bfloat16     sum      -1    35.09    7.47    7.47    N/A    35.08    7.47    7.47    N/A

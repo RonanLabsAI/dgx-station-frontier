@@ -1,0 +1,21 @@
+# nccl-tests all_reduce_perf across two DGX Stations, one 400G rail (RoCEv2), NCCL 2.30.7, 2026-10-07 ~01:4x PT.
+# Columns: size count type redop root | out-of-place time algbw busbw #wrong | in-place time algbw busbw #wrong.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- E0_all_reduce_perf_big.log (no Data Direct, NCCL auto)
+# 2026-10-07 01:40:49 PDT SET=E0  args=-b 64M -e 2G -f 2 -g 1 -w 5 -n 20 -c 1
+  2147483648     536870912     float     sum      -1  80662.9   26.62   26.62       0  80776.9   26.59   26.59       0
+# Avg bus bandwidth    : 25.6286 
+--- E2_all_reduce_perf_big.log (Data Direct overlay, NCCL auto)
+# 2026-10-07 01:41:28 PDT SET=E2  args=-b 64M -e 2G -f 2 -g 1 -w 5 -n 20 -c 1
+  2147483648     536870912     float     sum      -1  50704.5   42.35   42.35       0  50699.9   42.36   42.36       0
+# Avg bus bandwidth    : 42.2133 
+--- E1_all_reduce_perf_big.log (Data Direct + Ring/Simple/8 channels/4 QPs)
+# 2026-10-07 01:41:35 PDT SET=E1 -x NCCL_ALGO=Ring -x NCCL_PROTO=Simple -x NCCL_MIN_NCHANNELS=8 -x NCCL_MAX_NCHANNELS=8 -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 args=-b 64M -e 2G -f 2 -g 1 -w 5 -n 20 -c 1
+  2147483648     536870912     float     sum      -1  44069.0   48.73   48.73       0  44096.3   48.70   48.70       0
+# Avg bus bandwidth    : 47.2609 
+--- E11_all_reduce_perf_big.log (Data Direct + tuner2.csv + 4 QPs)
+# 2026-10-07 01:42:33 PDT SET=E11 -x NCCL_TUNER_PLUGIN=/dd/libnccl-tuner-example.so -x NCCL_TUNER_CONFIG_FILE=/dd/tuner2.csv -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 args=-b 64M -e 2G -f 2 -g 1 -w 5 -n 20 -c 1
+  2147483648     536870912     float     sum      -1  45665.7   47.03   47.03       0  45840.3   46.85   46.85       0
+# Avg bus bandwidth    : 44.7334

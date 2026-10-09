@@ -1,0 +1,22 @@
+# torch.distributed NCCL all_reduce of 128 MB between the two GB300s inside the SGLang dev container, 2026-10-07 01:4x PT.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- E0-probe.log (no Data Direct)
+# 2026-10-07 01:40:31 PDT probe_dd.py env: 
+station-left:17:17 [0] NCCL INFO dlvsym failed on mlx5dv_get_data_direct_sysfs_path - /usr/lib/aarch64-linux-gnu/libmlx5.so: undefined symbol: mlx5dv_get_data_direct_sysfs_path, version MLX5_1.25 version MLX5_1.25
+station-left:17:17 [0] NCCL INFO dlvsym failed on mlx5dv_reg_dmabuf_mr - /usr/lib/aarch64-linux-gnu/libmlx5.so: undefined symbol: mlx5dv_reg_dmabuf_mr, version MLX5_1.25 version MLX5_1.25
+rank0 allreduce 128MB avg 5.39 ms  busbw ~190 Gb/s (23.7 GB/s busbw)
+rank0 allreduce 128MB avg 5.41 ms  busbw ~189 Gb/s (23.7 GB/s busbw)
+rank0 allreduce 128MB avg 5.41 ms  busbw ~189 Gb/s (23.7 GB/s busbw)
+--- E2-probe-ovl.log (Data Direct, NCCL auto)
+# 2026-10-07 01:41:12 PDT probe_dd.py env: 
+station-left:17:17 [0] NCCL INFO NET/IB: Data Direct DMA Interface is detected for device mlx5_1
+rank0 allreduce 128MB avg 3.19 ms  busbw ~321 Gb/s (40.1 GB/s busbw)
+rank0 allreduce 128MB avg 3.19 ms  busbw ~321 Gb/s (40.1 GB/s busbw)
+rank0 allreduce 128MB avg 3.19 ms  busbw ~321 Gb/s (40.1 GB/s busbw)
+--- E1-probe-ovl.log (Data Direct + Ring/Simple/8ch/4QP)
+# 2026-10-07 01:41:21 PDT probe_dd.py env: NCCL_ALGO=Ring NCCL_PROTO=Simple NCCL_MIN_NCHANNELS=8 NCCL_MAX_NCHANNELS=8 NCCL_IB_QPS_PER_CONNECTION=4 NCCL_IB_SPLIT_DATA_ON_QPS=1
+rank0 allreduce 128MB avg 2.92 ms  busbw ~351 Gb/s (43.8 GB/s busbw)
+rank0 allreduce 128MB avg 2.91 ms  busbw ~351 Gb/s (43.9 GB/s busbw)
+rank0 allreduce 128MB avg 2.92 ms  busbw ~350 Gb/s (43.8 GB/s busbw)

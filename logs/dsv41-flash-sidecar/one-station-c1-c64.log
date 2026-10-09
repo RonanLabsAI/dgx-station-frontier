@@ -1,0 +1,80 @@
+# DeepSeek-V4.1-Flash, ONE DGX Station: GB300 hot experts + RTX PRO 6000 cold-expert sidecar (b12x master 2cc7f66a),
+# el8 rowmap-mix-v1, max-num-seqs 32. Fresh warm boot, first bench on the boot, 2026-10-07 00:55 PT.
+# Shape: 8,192 random-token input, 1,024 forced output, T=0, C warm-ups + 5xC requests (vllm bench serve).
+# Prefix-cache audit of this run: 17.1% overall = warm-up copies hitting each other; measured window ~1 prompt in 5C.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- decode-c1.json (vllm bench serve result JSON, selected keys; 'date' is UTC)
+date: 20261007-075552
+max_concurrency: 1
+num_prompts: 5
+completed: 5
+failed: 0
+total_input_tokens: 40960
+total_output_tokens: 5120
+duration: 13.150723840983119
+total_token_throughput: 3503.9896326007224
+output_throughput: 389.3321814000803
+mean_ttft_ms: 206.64699961198494
+mean_tpot_ms: 2.3688606416350475
+spec_decode_acceptance_length: 4.475567190226876
+--- decode-c16.json (vllm bench serve result JSON, selected keys; 'date' is UTC)
+date: 20261007-075655
+max_concurrency: 16
+num_prompts: 80
+completed: 80
+failed: 0
+total_input_tokens: 655360
+total_output_tokens: 81920
+duration: 44.14665269001853
+total_token_throughput: 16700.699941554063
+output_throughput: 1855.6333268393405
+mean_ttft_ms: 882.9199791878636
+mean_tpot_ms: 7.379907999547281
+spec_decode_acceptance_length: 3.7579425113464446
+--- decode-c32.json (vllm bench serve result JSON, selected keys; 'date' is UTC)
+date: 20261007-075835
+max_concurrency: 32
+num_prompts: 160
+completed: 160
+failed: 0
+total_input_tokens: 1310720
+total_output_tokens: 163840
+duration: 75.4841821390437
+total_token_throughput: 19534.68870185047
+output_throughput: 2170.5209668722746
+mean_ttft_ms: 1233.8153868313384
+mean_tpot_ms: 12.467673578456864
+spec_decode_acceptance_length: 3.704388303882135
+--- decode-c64.json (vllm bench serve result JSON, selected keys; 'date' is UTC)
+date: 20261007-080152
+max_concurrency: 64
+num_prompts: 320
+completed: 320
+failed: 0
+total_input_tokens: 2621440
+total_output_tokens: 327680
+duration: 144.08698566700332
+total_token_throughput: 20467.636173718387
+output_throughput: 2274.181797079821
+mean_ttft_ms: 13872.436408435533
+mean_tpot_ms: 13.131175965657262
+spec_decode_acceptance_length: 3.7452447592391613
+--- gpu-before.csv
+name, power.limit [W], power.draw [W], memory.used [MiB]
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 300.00 W, 21.36 W, 73361 MiB
+NVIDIA GB300, 1300.00 W, 211.12 W, 242162 MiB
+--- power-during.csv
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 79.44 W
+NVIDIA GB300, 211.51 W
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 166.62 W
+NVIDIA GB300, 576.59 W
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 159.26 W
+NVIDIA GB300, 473.57 W
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 173.22 W
+NVIDIA GB300, 582.28 W
+--- spec-accept.txt
+(APIServer pid=1) INFO 10-07 08:01:33 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 3.80, Accepted throughput: 1943.90 tokens/s, Drafted throughput: 2085.90 tokens/s, Accepted: 19439 tokens, Drafted: 20859 tokens, Per-position acceptance rate: 0.952, 0.929, 0.915, 0.000, 0.000, Avg Draft acceptance rate: 93.2%
+(APIServer pid=1) INFO 10-07 08:01:43 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 3.79, Accepted throughput: 1745.99 tokens/s, Drafted throughput: 1878.97 tokens/s, Accepted: 17462 tokens, Drafted: 18792 tokens, Per-position acceptance rate: 0.956, 0.928, 0.903, 0.000, 0.000, Avg Draft acceptance rate: 92.9%
+(APIServer pid=1) INFO 10-07 08:01:53 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 3.97, Accepted throughput: 1660.27 tokens/s, Drafted throughput: 1683.07 tokens/s, Accepted: 16603 tokens, Drafted: 16831 tokens, Per-position acceptance rate: 0.992, 0.986, 0.981, 0.006, 0.006, Avg Draft acceptance rate: 98.6%

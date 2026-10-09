@@ -1,0 +1,16 @@
+# perftest 25.10 on rail 1 (GID 3, RoCEv2), 2026-10-07 01:4x PT.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- ibwbw-gpudd.log (ib_write_bw --write_with_imm, GPU memory, Data Direct, 4 QPs)
+ 65536      4486839          0.00               392.06 		     0.747804
+--- ibwlat-host.log (ib_write_lat, host memory)
+ #bytes #iterations    t_min[usec]    t_max[usec]  t_typical[usec]    t_avg[usec]    t_stdev[usec]   99% percentile[usec]   99.9% percentile[usec] 
+ 2       2000          1.58           2.42         1.62     	       1.63        	0.00   		1.90    		2.38   
+ 8       2000          1.58           2.21         1.60     	       1.61        	0.00   		1.66    		2.18   
+--- ibwlat-gpudd.log (write_with_imm latency, GPU memory, Data Direct)
+ #bytes #iterations    t_min[usec]    t_max[usec]  t_typical[usec]    t_avg[usec]    t_stdev[usec]   99% percentile[usec]   99.9% percentile[usec] 
+ 2       2000          2.14           2.83         2.21     	       2.23        	0.00   		2.50    		2.83   
+ 8       2000          2.14           2.72         2.21     	       2.21        	0.00   		2.30    		2.67   
+--- cnt1-left.txt (rdma statistic after the first session; 0 before)
+link mlx5_1/1 rx_write_requests 410320012 rx_read_requests 1169812 rx_atomic_requests 0 rx_dct_connect 0 out_of_buffer 0 out_of_sequence 0 duplicate_request 0 rnr_nak_retry_err 0 packet_seq_err 12053 implied_nak_seq_err 0 local_ack_timeout_err 0 resp_local_length_error 0 resp_cqe_error 0 req_cqe_error 0 req_remote_invalid_request 0 req_remote_access_errors 0 resp_remote_access_errors 0 resp_cqe_flush_error 0 req_cqe_flush_error 0 req_transport_retries_exceeded 0 req_rnr_retries_exceeded 0 roce_adp_retrans 1 roce_adp_retrans_to 0 roce_slow_restart 0 roce_slow_restart_cnps 1 roce_slow_restart_trans 0 rp_cnp_ignored 0 rp_cnp_handled 11954 np_ecn_marked_roce_packets 0 np_cnp_sent 0 rx_icrc_encapsulated 0

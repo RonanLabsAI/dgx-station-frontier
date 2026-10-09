@@ -1,0 +1,44 @@
+dgx-station-frontier
+Copyright 2026 RonanLabs
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE), except where a file says otherwise.
+Files we wrote carry "Copyright 2026 RonanLabs. SPDX-License-Identifier: Apache-2.0" (or have no third-party header).
+
+Third-party material included in this repository
+------------------------------------------------
+
+1. DGX Station GB300 serving research (original-el8/dgx-station-gb300-research, commit 7699ae54)
+   Copyright 2026 Jason Cook. Apache License 2.0. https://github.com/original-el8/dgx-station-gb300-research
+   Derived files (modified; each carries a header naming its source file):
+     recipes/dsv4-pro-two-stations/hook/e3_hook.py          <- deepseek-v4.1-flash/m3/hook/mega_peer_hook.py
+     recipes/dsv4-pro-two-stations/hook/peer_tier_v4.py     <- deepseek-v4.1-flash/m3/hook/peer_tier2.py
+     recipes/dsv4-pro-two-stations/sidecar/peer_server_v4.py <- deepseek-v4.1-flash/m3/sidecar/peer_server2.py
+     recipes/dsv4-pro-two-stations/hook/sitecustomize.py    <- deepseek-v4.1-flash/m3/hook/sitecustomize.py
+   The el8 repository's own NOTICE also covers J-M-Recipes (MIT) material in sitecustomize.py; see item 2.
+
+2. J-M-Recipes/recipes (commit 71ea3eef). Copyright 2026 J&M Recipes. MIT License.
+   https://github.com/J-M-Recipes/recipes
+   Derived files (modified): recipes/dsv4-pro-two-stations/hook/dsv4pro_pin_hook.py (port of pin_hot_experts_hook v15)
+   and, through item 1, recipes/dsv4-pro-two-stations/hook/sitecustomize.py.
+   The MIT licence text is in recipes/dsv4-pro-two-stations/licenses/J-M-Recipes-MIT.txt.
+
+Third-party software used but NOT included
+------------------------------------------
+
+- original-el8 M3 hook, sidecar and rowmap-mix-v1 (Apache-2.0): the DS-V4.1 recipe mounts an unmodified clone at run time.
+- b12x (local-inference-lab/b12x, Apache-2.0), master 2cc7f66a; and our fork commit dce2933e with a W4A16 fix, for E3-A16.
+- vLLM (Apache-2.0), SGLang (Apache-2.0), FlashInfer (Apache-2.0): used as the container images named in results.jsonl.
+- NCCL and nccl-tests (BSD-3-Clause, NVIDIA): NCCL from the images; the example tuner plugin built from the NCCL source.
+- perftest (linux-rdma, BSD/GPL dual): host package.
+- J-M-Recipes flash_bench.py (MIT): the decode harness behind logs/fabric-data-direct/fused-glm-*.log; not vendored.
+- GSM8K test set (openai/grade-school-math, MIT): downloaded at run time, not vendored.
+
+Referenced, nothing copied
+--------------------------
+
+- catid/dgx_station_benchmarks (Christopher Taylor). That repository carries no licence. We quote its published numbers
+  for comparison and credit it for the benchmark shape and the Data Direct container overlay. No file, script or text
+  from it is included; the Data Direct helper in recipes/fabric-data-direct was written from our own notes.
+
+Model weights are not included. DeepSeek-V4.1-Flash, DeepSeek-V4-Pro-0813 and GLM-5.3 are used under their own licences;
+check each model card before redistributing anything derived from them.

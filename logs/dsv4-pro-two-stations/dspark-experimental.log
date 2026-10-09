@@ -1,0 +1,37 @@
+# EXPERIMENTAL, NOT SERVABLE. DeepSeek-V4-Pro E3-A16 + bundled DSpark drafter (K=5), multi-node. 2026-10-08 12:55-13:43 PT.
+# The engine hung on thinking-mode GSM8K traffic (ranks desynchronised); quality is therefore unreceipted.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- E3-A16 + DSpark K=5 bench/summary.txt
+== 2026-10-08 12:55:46 seedbase 6100
+catid C1 rep1 seed 6111: decode_agg 21.78 (TPOT 45.92 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.026 accept_rate 0.005 drafts 2991
+catid C1 rep2 seed 6112: decode_agg 21.48 (TPOT 46.55 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.018 accept_rate 0.004 drafts 3016
+catid C1 rep3 seed 6113: decode_agg 21.59 (TPOT 46.31 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.018 accept_rate 0.004 drafts 3015
+catid C16 rep1 seed 6261: decode_agg 73.71 (TPOT 217.07 ms) failed 0 hit 0.00% (0/262144 tok) acc_len 1.062 accept_rate 0.012 drafts 30822
+catid C16 rep2 seed 6262: decode_agg 71.56 (TPOT 223.58 ms) failed 0 hit 0.00% (0/262144 tok) acc_len 1.027 accept_rate 0.005 drafts 31889
+catid C16 rep3 seed 6263: decode_agg 71.05 (TPOT 225.18 ms) failed 0 hit 0.00% (0/262144 tok) acc_len 1.017 accept_rate 0.003 drafts 32175
+real C1 rep1: {"C": 1, "n": 3, "offset": 0, "mean_tpot_ms": 13.22, "decode_agg": 75.67, "median_ttft_s": 0.14, "mean_tokens": 1024.0, "tok_per_chunk": 2.858, "wall_s": 41.0} hit 0.00% (0/82 tok) acc_len 2.867 accept_rate 0.373 drafts 1072
+real C1 rep2: {"C": 1, "n": 3, "offset": 0, "mean_tpot_ms": 12.86, "decode_agg": 77.74, "median_ttft_s": 0.14, "mean_tokens": 1024.0, "tok_per_chunk": 2.929, "wall_s": 39.9} hit 0.00% (0/82 tok) acc_len 2.940 accept_rate 0.388 drafts 1046
+real C1 rep3: {"C": 1, "n": 3, "offset": 0, "mean_tpot_ms": 12.62, "decode_agg": 79.27, "median_ttft_s": 0.12, "mean_tokens": 1024.0, "tok_per_chunk": 3.0, "wall_s": 39.1} hit 0.00% (0/82 tok) acc_len 3.015 accept_rate 0.403 drafts 1021
+real C16 rep1: {"C": 16, "n": 32, "offset": 0, "mean_tpot_ms": 58.82, "decode_agg": 272.0, "median_ttft_s": 0.62, "mean_tokens": 1024.0, "tok_per_chunk": 2.857, "wall_s": 126.5} hit 0.00% (0/924 tok) acc_len 2.865 accept_rate 0.373 drafts 11441
+real C16 rep2: {"C": 16, "n": 32, "offset": 0, "mean_tpot_ms": 58.92, "decode_agg": 271.57, "median_ttft_s": 0.62, "mean_tokens": 1024.0, "tok_per_chunk": 2.846, "wall_s": 127.1} hit 0.00% (0/924 tok) acc_len 2.854 accept_rate 0.371 drafts 11485
+real C16 rep3: {"C": 16, "n": 32, "offset": 0, "mean_tpot_ms": 59.48, "decode_agg": 269.01, "median_ttft_s": 0.63, "mean_tokens": 1024.0, "tok_per_chunk": 2.833, "wall_s": 127.0} hit 0.00% (0/924 tok) acc_len 2.840 accept_rate 0.368 drafts 11542
+DONE 13:36:48
+--- gate.txt
+{
+ "rank0": {
+  "checks": 183,
+  "layers_checked": 61,
+  "missing_layers": [],
+  "below_0.999": {},
+  "timeouts_in_checks": 0,
+  "cos_min": 0.999992,
+  "cos_mean": 0.999993,
+  "worst_layer": 1,
+  "pass": true
+ },
+--- flips.log (summary)
+{"positions": 3944, "flips": 153, "flip_pct": 3.879, "cont_positions": 3405, "cont_flips": 105, "cont_flip_pct": 3.084, "free_identical": 7, "n_prompts": 32}
+--- gsm8k-run.log: GSM8K-200 thinking C16 -> engine hang, all 200 requests errored
+{"n": 200, "correct": 0, "acc": 0.0, "runaways": 0, "errors": 200, "wall_s": 301, "median_ctoks": 0, "effort": "high"}

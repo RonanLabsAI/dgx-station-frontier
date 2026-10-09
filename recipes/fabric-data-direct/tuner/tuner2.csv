@@ -1,0 +1,7 @@
+allreduce,0,65536,ring,ll,2,2,2,-1,-1
+allreduce,65537,1048576,ring,ll128,4,2,2,-1,-1
+allreduce,1048577,4294967295,ring,simple,8,2,2,-1,-1
+allgather,0,65536,ring,ll,2,2,2,-1,-1
+allgather,65537,1048576,ring,ll128,4,2,2,-1,-1
+reducescatter,0,65536,ring,ll,2,2,2,-1,-1
+reducescatter,65537,1048576,ring,ll128,4,2,2,-1,-1

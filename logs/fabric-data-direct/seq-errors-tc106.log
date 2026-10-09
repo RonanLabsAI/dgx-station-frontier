@@ -1,0 +1,16 @@
+# RDMA error counter before/after each arm (left Station, rail 1), torch 128 MB probe and nccl-tests with and without
+# NCCL_IB_TC=106. 2026-10-07 14:53-15:05 PT. The counter started at 12,053 from the earlier session and never moved.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- rdma-left.log (packet_seq_err field per snapshot)
+## 2026-10-07 14:54:31 PDT pre torch-noTC r1  ->  packet_seq_err=12053
+## 2026-10-07 14:54:41 PDT post torch-noTC r1  ->  packet_seq_err=12053
+## 2026-10-07 14:54:44 PDT post torch-TC106 r1  ->  packet_seq_err=12053
+## 2026-10-07 14:54:44 PDT pre torch-noTC r2  ->  packet_seq_err=12053
+## 2026-10-07 14:54:46 PDT post torch-noTC r2  ->  packet_seq_err=12053
+## 2026-10-07 14:54:49 PDT post torch-TC106 r2  ->  packet_seq_err=12053
+## 2026-10-07 14:55:03 PDT post nt-noTC-auto  ->  packet_seq_err=12053
+## 2026-10-07 14:55:18 PDT post nt-TC106-auto  ->  packet_seq_err=12053
+## 2026-10-07 14:55:31 PDT post nt-noTC-tuner2  ->  packet_seq_err=12053
+## 2026-10-07 14:55:44 PDT post nt-TC106-tuner2  ->  packet_seq_err=12053

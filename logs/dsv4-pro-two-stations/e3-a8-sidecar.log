@@ -1,0 +1,30 @@
+# DeepSeek-V4-Pro-0813 E3-A8 = E2 + RTX PRO 6000 warm tier with the sidecar in W4A8-MX mode on PUBLIC b12x master 2cc7f66a
+# (no fix needed). 2026-10-08 06:43-07:30 PT. Rowmaps fitted to a private workload (not published).
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- E3-A8 bench-run.log (bench_e3.sh output)
+== 2026-10-08 06:52:24 seedbase 3100
+catid C1 rep1 seed 3111: decode_agg 37.37 (TPOT 26.76 ms) failed 0 hit 0.00% (0/24576 tok)
+catid C1 rep2 seed 3112: decode_agg 37.75 (TPOT 26.49 ms) failed 0 hit 0.00% (0/24576 tok)
+catid C1 rep3 seed 3113: decode_agg 37.92 (TPOT 26.37 ms) failed 0 hit 0.00% (0/24576 tok)
+catid C16 rep1 seed 3261: decode_agg 162.44 (TPOT 98.50 ms) failed 0 hit 0.00% (0/262144 tok)
+catid C16 rep2 seed 3262: decode_agg 166.98 (TPOT 95.82 ms) failed 0 hit 0.00% (0/262144 tok)
+catid C16 rep3 seed 3263: decode_agg 168.92 (TPOT 94.72 ms) failed 0 hit 0.00% (0/262144 tok)
+real C1 rep1: {"C": 1, "n": 3, "mean_tpot_ms": 22.77, "decode_agg": 43.92, "median_ttft_s": 0.1, "mean_chunks": 1022.3333333333334, "wall_s": 70.1} hit 0.00% (0/82 tok)
+real C1 rep2: {"C": 1, "n": 3, "mean_tpot_ms": 22.85, "decode_agg": 43.76, "median_ttft_s": 0.1, "mean_chunks": 1020.0, "wall_s": 70.2} hit 0.00% (0/82 tok)
+real C1 rep3: {"C": 1, "n": 3, "mean_tpot_ms": 22.79, "decode_agg": 43.89, "median_ttft_s": 0.1, "mean_chunks": 1022.6666666666666, "wall_s": 70.1} hit 0.00% (0/82 tok)
+real C16 rep1: {"C": 16, "n": 32, "mean_tpot_ms": 68.5, "decode_agg": 233.56, "median_ttft_s": 0.47, "mean_chunks": 1020.53125, "wall_s": 141.0} hit 0.00% (0/924 tok)
+real C16 rep2: {"C": 16, "n": 32, "mean_tpot_ms": 68.7, "decode_agg": 232.88, "median_ttft_s": 0.45, "mean_chunks": 1019.78125, "wall_s": 141.2} hit 0.00% (0/924 tok)
+real C16 rep3: {"C": 16, "n": 32, "mean_tpot_ms": 68.77, "decode_agg": 232.67, "median_ttft_s": 0.48, "mean_chunks": 1019.875, "wall_s": 141.4} hit 0.00% (0/924 tok)
+DONE 07:19:26
+--- gsm8k-run.log (tail)
+{"n": 200, "correct": 193, "acc": 96.5, "runaways": 1, "errors": 0, "wall_s": 760, "median_ctoks": 236, "effort": "high"}
+--- cos-gate.json (A8 sidecar vs W4A16 marlin; fails the 0.999 bar, passes the agreed A8 bar of 0.998)
+{"rank0": {"checks": 183, "layers_checked": 61, "missing_layers": [], "timeouts_in_checks": 0, "cos_min": 0.998945, "cos_mean": 0.999272, "worst_layer": 47, "pass": false}, "rank1": {"checks": 183, "layers_checked": 61, "missing_layers": [], "timeouts_in_checks": 0, "cos_min": 0.998963, "cos_mean": 0.999274, "worst_layer": 44, "pass": false}, "PASS": false}
+--- tf-e3a8-vs-e1-c1.json summary
+{"positions": 3944, "flips": 136, "flip_pct": 3.448, "cont_positions": 3405, "cont_flips": 90, "cont_flip_pct": 2.643, "free_identical": 8, "n_prompts": 32}
+--- e3-stats-rank0.json peer counters (rank 0)
+{"published": 3216225, "completed": 3216225, "timeouts": 0, "rows": 35158154, "tokens": 78805412, "wait_ns": 21074390528, "waits": 2151114}
+--- e3-rank0.txt
+e3hook=1 rowmap=<private-domain-rowmap> enable=1 check=3 count=1 pin=split e2rowmap=<private-domain-rowmap>

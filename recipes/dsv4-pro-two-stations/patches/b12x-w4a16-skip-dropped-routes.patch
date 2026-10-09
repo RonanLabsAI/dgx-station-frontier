@@ -1,0 +1,93 @@
+# b12x W4A16 fix used for E3-A16. Apply to local-inference-lab/b12x master 2cc7f66a:
+#   git -C <b12x checkout> apply <this file>
+# Copyright 2026 RonanLabs. Apache-2.0 (same licence as b12x). Offered upstream separately; see the recipe README.
+#
+# Route packing drops topk ids < 0, so FC2 never writes those rows of the
+# per-route output buffer. The map-free top-k sum still read and summed
+# every slot, so masked/padded routes added stale scratch to the output:
+# garbage with arbitrary scratch, NaN when the scratch held NaN bytes.
+# Pass the (int32) route ids to the plain sum and skip negative ids, as the
+# Hadamard and expert-map sum paths already do.
+
+diff --git a/b12x/moe/_shared/kernels/w4a16/kernel.py b/b12x/moe/_shared/kernels/w4a16/kernel.py
+index f0648b6d..10f60f78 100644
+--- a/b12x/moe/_shared/kernels/w4a16/kernel.py
++++ b/b12x/moe/_shared/kernels/w4a16/kernel.py
+@@ -10166,13 +10166,18 @@ class W4A16TopKSumKernel:
+             for route in cutlass.range_constexpr(self.topk):
+                 row = token * Int32(self.topk) + Int32(route)
+                 valid_route = Int32(1)
++                raw_expert = route_expert_ids_flat[row].to(Int32)
+                 if cutlass.const_expr(self.use_expert_map):
+-                    raw_expert = route_expert_ids_flat[row].to(Int32)
+                     expert = Int32(-1)
+                     if raw_expert >= Int32(0) and raw_expert < route_num_experts:
+                         expert = expert_map_flat[raw_expert].to(Int32)
+                     if expert < Int32(0) or expert >= weight_num_experts:
+                         valid_route = Int32(0)
++                elif raw_expert < Int32(0):
++                    # Route packing drops negative (padding / masked) routes,
++                    # so FC2 never writes their rows: reading them sums stale
++                    # scratch into the output (NaN when it holds NaN bytes).
++                    valid_route = Int32(0)
+                 if valid_route != Int32(0):
+                     route_value = fc2_flat[Int64(row) * Int64(self.hidden_size) + Int64(col)].to(
+                         cutlass.Float32
+@@ -12925,6 +12930,7 @@ def _w4a16_topk_sum_launch_op(
+     hidden_size: int,
+     element_dtype: str,
+     stream_int: int,
++    route_expert_ids: torch.Tensor,
+ ) -> None:
+     _w4a16_topk_sum_launch_flat(
+         fc2_out=fc2_out,
+@@ -12934,6 +12940,7 @@ def _w4a16_topk_sum_launch_op(
+         hidden_size=hidden_size,
+         element_dtype=element_dtype,
+         stream_int=stream_int,
++        route_expert_ids=route_expert_ids,
+     )
+ 
+ 
+@@ -12946,6 +12953,7 @@ def _w4a16_topk_sum_launch_fake(
+     hidden_size: int,
+     element_dtype: str,
+     stream_int: int,
++    route_expert_ids: torch.Tensor,
+ ) -> None:
+     return None
+ 
+@@ -14785,6 +14793,11 @@ def run_w4a16_moe(
+     sum_uses_map = sum_expert_map is not None and (
+         full_rotation or use_direct_topk_routes
+     )
++    # The plain (map-free) top-k sum is planned with int32 route ids; it reads
++    # them only to skip negative (dropped) routes.
++    sum_route_ids = (
++        topk_ids if topk_ids.dtype == torch.int32 else topk_ids.to(torch.int32)
++    )
+     if topk_sum_launch is not None:
+         expected_sum = (
+             topk,
+@@ -14833,7 +14846,9 @@ def run_w4a16_moe(
+             topk_weights=(
+                 topk_weights if (full_rotation or _FP32_TOPK_WEIGHTS) else None
+             ),
+-            route_expert_ids=topk_ids,
++            route_expert_ids=(
++                topk_ids if full_rotation or sum_uses_map else sum_route_ids
++            ),
+             expert_map=sum_expert_map if sum_uses_map else None,
+             svh_table=svh_table if full_rotation else None,
+             launcher=topk_sum_launch,
+@@ -14847,6 +14862,7 @@ def run_w4a16_moe(
+             hidden_size,
+             element_dtype,
+             int(stream),
++            sum_route_ids,
+         )
+     return output
+ 
+-- 
+2.43.0
+

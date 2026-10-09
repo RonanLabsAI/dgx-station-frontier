@@ -1,0 +1,85 @@
+# DeepSeek-V4-Pro-0813 (rev 72e1d323) E1 = stock vLLM, TP2+EP2 across two DGX Stations over one 400G rail,
+# marlin MXFP4 MoE, 200 GiB/rank of routed experts in Grace via UVA offload. 2026-10-07 19:21-20:00 PT.
+# Decode tok/s = C x 1000 / mean TPOT. C16 reps reuse C1's 3 prompts (same seed): 9.1% hit, effect on TPOT << 1%.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- E1 bench progress.txt (catid shape, 3 reps per C)
+Successful requests:                     4         
+Failed requests:                         0         
+== C1 rep1 19:38:17
+Successful requests:                     3         
+Failed requests:                         0         
+Output token throughput (tok/s):         34.46     
+Median TTFT (ms):                        2672.79   
+Mean TPOT (ms):                          26.43     
+decode_agg C1 rep1 = 37.84 tok/s (C x 1000/meanTPOT)
+== C1 rep2 19:39:55
+Successful requests:                     3         
+Failed requests:                         0         
+Output token throughput (tok/s):         34.47     
+Median TTFT (ms):                        2672.03   
+Mean TPOT (ms):                          26.43     
+decode_agg C1 rep2 = 37.84 tok/s (C x 1000/meanTPOT)
+== C1 rep3 19:41:33
+Successful requests:                     3         
+Failed requests:                         0         
+Output token throughput (tok/s):         34.46     
+Median TTFT (ms):                        2669.34   
+Mean TPOT (ms):                          26.44     
+decode_agg C1 rep3 = 37.82 tok/s (C x 1000/meanTPOT)
+== C16 rep1 19:43:12
+Successful requests:                     32        
+Failed requests:                         0         
+Output token throughput (tok/s):         98.00     
+Median TTFT (ms):                        15778.23  
+Mean TPOT (ms):                          147.33    
+decode_agg C16 rep1 = 108.60 tok/s (C x 1000/meanTPOT)
+== C16 rep2 19:48:56
+Successful requests:                     32        
+Failed requests:                         0         
+Output token throughput (tok/s):         98.00     
+Median TTFT (ms):                        13159.62  
+Mean TPOT (ms):                          148.58    
+decode_agg C16 rep2 = 107.69 tok/s (C x 1000/meanTPOT)
+== C16 rep3 19:54:41
+Successful requests:                     32        
+Failed requests:                         0         
+Output token throughput (tok/s):         101.82    
+Median TTFT (ms):                        13157.52  
+Mean TPOT (ms):                          142.45    
+decode_agg C16 rep3 = 112.32 tok/s (C x 1000/meanTPOT)
+DONE 20:00:13
+--- E1 GSM8K-200 summary (thinking, effort high, greedy, C16)
+{"n": 200, "correct": 196, "acc": 98.0, "runaways": 0, "errors": 0, "wall_s": 1346, "median_ctoks": 244, "effort": "high"}
+--- launch-rank0.txt
+launched 2026-10-07 19:21:44 PDT host=station-left rank=0 gpu=GPU-<uuid> image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+model=/models/hf/deepseek-ai__DeepSeek-V4-Pro-0813 mode=tp moe=marlin pin=alloc offgb=200 ctx=131072 seqs=16 mbt=8192 util=0.95 dd=1 tuner=tuner3.csv
+args: serve /model --served-model-name deepseek-v4-pro --trust-remote-code --tokenizer-mode deepseek_v4 --reasoning-parser deepseek_v4 --tool-call-parser deepseek_v4 --enable-auto-tool-choice --distributed-executor-backend mp --nnodes 2 --node-rank 0 --master-addr <rail-ip-rank0> --master-port 29614 --disable-custom-all-reduce --moe-backend marlin --offload-backend uva --cpu-offload-gb 200 --cpu-offload-params routed_experts.w13_weight routed_experts.w2_weight --max-model-len 131072 --max-num-seqs 16 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.95 --no-enable-flashinfer-autotune --tensor-parallel-size 2 --pipeline-parallel-size 1 --enable-expert-parallel --language-model-only --host 0.0.0.0 --port 8010
+--- image-digest-rank0.txt
+sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+--- server-rank0.log (cold boot) and the warm reboot, grep (vLLM timestamps are UTC; 02:xx UTC = 19:xx PT)
+== dsv4pro-1007-1921-e1
+station-left:623:623 [0] NCCL INFO NET/IB: Data Direct DMA Interface is detected for device mlx5_1
+(Worker_TP0_EP0 pid=623) INFO 10-08 02:23:02 [uva.py:68] Total CPU offloaded parameters: 200.81
+(Worker_TP0_EP0 pid=623) INFO 10-08 02:28:28 [gpu_worker.py:692] Available KV cache memory: 34.98 GiB
+(EngineCore pid=404) INFO 10-08 02:28:28 [kv_cache_utils.py:2408] GPU KV cache size: 476,607 tokens, Maximum concurrency for 131,072 tokens per request: 3.64x
+(APIServer pid=1) INFO 10-08 02:37:06 [entry.py:136] Starting vLLM server on http://0.0.0.0:8010
+INFO:     Application startup complete.
+launched 2026-10-07 19:21:44 PDT host=station-left rank=0 gpu=GPU-<uuid> image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+== dsv4pro-1007-2023-e1warm
+station-left:749:749 [0] NCCL INFO NET/IB: Data Direct DMA Interface is detected for device mlx5_1
+(Worker_TP0_EP0 pid=749) INFO 10-08 03:25:18 [uva.py:68] Total CPU offloaded parameters: 200.81
+(Worker_TP0_EP0 pid=749) INFO 10-08 03:29:32 [gpu_worker.py:692] Available KV cache memory: 34.98 GiB
+(EngineCore pid=404) INFO 10-08 03:29:32 [kv_cache_utils.py:2408] GPU KV cache size: 476,607 tokens, Maximum concurrency for 131,072 tokens per request: 3.64x
+(APIServer pid=1) INFO 10-08 03:29:50 [entry.py:136] Starting vLLM server on http://0.0.0.0:8010
+INFO:     Application startup complete.
+launched 2026-10-07 20:23:59 PDT host=station-left rank=0 gpu=GPU-<uuid> image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+--- E1 real-text C1 rep1 (realbench summary; prompts private, ~40 tokens each): {"C": 1, "n": 3, "mean_tpot_ms": 26.43, "decode_agg": 37.83, "median_ttft_s": 0.18, "mean_chunks": 1019.6666666666666, "wall_s": 81.4}
+--- E1 real-text C1 rep2 (realbench summary; prompts private, ~40 tokens each): {"C": 1, "n": 3, "mean_tpot_ms": 26.37, "decode_agg": 37.92, "median_ttft_s": 0.18, "mean_chunks": 1021.3333333333334, "wall_s": 81.3}
+--- E1 real-text C1 rep3 (realbench summary; prompts private, ~40 tokens each): {"C": 1, "n": 3, "mean_tpot_ms": 26.38, "decode_agg": 37.9, "median_ttft_s": 0.18, "mean_chunks": 1021.0, "wall_s": 81.3}
+--- E1 real-text C16 rep1 (realbench summary; prompts private, ~40 tokens each): {"C": 16, "n": 32, "mean_tpot_ms": 139.18, "decode_agg": 114.96, "median_ttft_s": 1.08, "mean_chunks": 1020.96875, "wall_s": 286.4}
+--- E1 real-text C16 rep2 (realbench summary; prompts private, ~40 tokens each): {"C": 16, "n": 32, "mean_tpot_ms": 139.06, "decode_agg": 115.06, "median_ttft_s": 0.96, "mean_chunks": 1020.8125, "wall_s": 285.9}
+--- E1 real-text C16 rep3 (realbench summary; prompts private, ~40 tokens each): {"C": 16, "n": 32, "mean_tpot_ms": 139.48, "decode_agg": 114.71, "median_ttft_s": 1.08, "mean_chunks": 1019.9375, "wall_s": 286.7}
+--- tf-e1-vs-e1-c1.json summary (E1 against its own reference, same server, sequential = the run-to-run floor)
+{"positions": 3944, "flips": 127, "flip_pct": 3.22, "cont_positions": 3405, "cont_flips": 91, "cont_flip_pct": 2.673, "free_identical": 11, "n_prompts": 32}

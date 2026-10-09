@@ -1,0 +1,113 @@
+# DeepSeek-V4.1-Flash DP2 = two INDEPENDENT copies of the one-Station recipe, one per Station; this file = right Station.
+# No cross-Station traffic: one prompt never spans Stations. 2026-10-08 03:34-03:44 PT, max-num-seqs 64,
+# CUDA-graph sizes up to 256, el8 rowmap-mix-v1, fresh seed offset for this phase (no cross-phase prefix reuse).
+# Decode prefix-cache hit from /metrics: 16.55% = warm-up copies hitting each other (see Methodology).
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Times are Pacific (PT) unless the line says otherwise.
+
+--- DP2-sim-cg256/phase.out (both Stations benched at the same time; C1/C4 lines = c1c4.sh, rep0 discarded, reps 1-3 reuse one prompt set)
+start 03:34:52
+DP2-sim-cg256 rep0 C1 424.40 tpot=2.11 ttft=251.32 draft_acc_before=[0.0 0.0] after=[5105.0 4105.0]
+DP2-sim-cg256 rep0 C4 1066.81 tpot=3.13 ttft=473.42 draft_acc_before=[5105.0 4105.0] after=[24515.0 20736.0]
+DP2-sim-cg256 rep1 C1 422.97 tpot=2.30 ttft=72.95 draft_acc_before=[24515.0 20736.0] after=[29975.0 24769.0]
+DP2-sim-cg256 rep1 C4 1257.23 tpot=2.72 ttft=268.62 draft_acc_before=[29975.0 24769.0] after=[49115.0 41444.0]
+DP2-sim-cg256 rep2 C1 454.21 tpot=2.13 ttft=72.68 draft_acc_before=[49115.0 41444.0] after=[54345.0 45526.0]
+DP2-sim-cg256 rep2 C4 1165.02 tpot=3.06 ttft=207.79 draft_acc_before=[54345.0 45526.0] after=[74365.0 62032.0]
+DP2-sim-cg256 rep3 C1 480.09 tpot=2.01 ttft=72.73 draft_acc_before=[74365.0 62032.0] after=[79285.0 66178.0]
+DP2-sim-cg256 rep3 C4 1184.27 tpot=2.99 ttft=231.09 draft_acc_before=[79285.0 66178.0] after=[99145.0 82724.0]
+== decode C1
+Successful requests:                     5         
+Failed requests:                         0         
+Output token throughput (tok/s):         417.68    
+Mean TTFT (ms):                          185.95    
+Mean TPOT (ms):                          2.21      
+== decode C16
+Successful requests:                     80        
+Failed requests:                         0         
+Output token throughput (tok/s):         1933.80   
+Mean TTFT (ms):                          842.34    
+Mean TPOT (ms):                          7.17      
+== decode C32
+Successful requests:                     160       
+Failed requests:                         0         
+Output token throughput (tok/s):         2361.30   
+Mean TTFT (ms):                          1151.60   
+Mean TPOT (ms):                          11.88     
+== decode C64
+Successful requests:                     320       
+Failed requests:                         0         
+Output token throughput (tok/s):         2867.89   
+Mean TTFT (ms):                          1798.09   
+Mean TPOT (ms):                          19.20     
+results: /home/<user>/bench/r21-1008/DP2-sim-cg256/decode
+decode metrics(draft acc pc_queries pc_hits order as /metrics) before=[99145.0 82724.0 819200.0 604800.0] after=[658267.0 592495.0 6.373376e+06 1.524096e+06]
+end 03:43:55
+--- R-solo-cg256/phase.out (same config, the other Station idle)
+start 03:49:46
+== decode C1
+Successful requests:                     5         
+Failed requests:                         0         
+Output token throughput (tok/s):         505.78    
+Mean TPOT (ms):                          1.80      
+== decode C16
+Successful requests:                     80        
+Failed requests:                         0         
+Output token throughput (tok/s):         1995.02   
+Mean TPOT (ms):                          6.67      
+== decode C32
+Successful requests:                     160       
+Failed requests:                         0         
+Output token throughput (tok/s):         2382.88   
+Mean TPOT (ms):                          11.64     
+== decode C64
+Successful requests:                     320       
+Failed requests:                         0         
+Output token throughput (tok/s):         3047.45   
+Mean TPOT (ms):                          18.56     
+end 03:54:58
+--- GSM8K-100 summary (thinking, reasoning_effort 50, T 0.3, concurrency 16)
+{"n": 100, "correct": 98, "acc": 98.0, "runaways": 0, "errors": 0, "wall_s": 24, "median_ctoks": 155}
+--- A-mix-cosine-gate.txt (bring-up gate boot)
+MEGA_PEER check layer=0 T=2342 rows=706 cold rel_diff=0.0178 cos=0.99984 (cold share of output norm 0.070)
+MEGA_PEER check layer=1 T=2342 rows=830 cold rel_diff=0.0200 cos=0.99980 (cold share of output norm 0.046)
+MEGA_PEER check layer=2 T=2342 rows=611 cold rel_diff=0.0218 cos=0.99976 (cold share of output norm 0.069)
+MEGA_PEER check layer=3 T=2342 rows=355 cold rel_diff=0.0210 cos=0.99978 (cold share of output norm 0.055)
+MEGA_PEER check layer=4 T=2342 rows=572 cold rel_diff=0.0192 cos=0.99982 (cold share of output norm 0.087)
+MEGA_PEER check layer=5 T=2342 rows=669 cold rel_diff=0.0172 cos=0.99985 (cold share of output norm 0.125)
+MEGA_PEER check layer=6 T=2342 rows=667 cold rel_diff=0.0171 cos=0.99985 (cold share of output norm 0.150)
+MEGA_PEER check layer=7 T=2342 rows=430 cold rel_diff=0.0201 cos=0.99980 (cold share of output norm 0.084)
+MEGA_PEER check layer=8 T=2342 rows=656 cold rel_diff=0.0179 cos=0.99984 (cold share of output norm 0.076)
+MEGA_PEER check layer=9 T=2342 rows=650 cold rel_diff=0.0175 cos=0.99985 (cold share of output norm 0.132)
+MEGA_PEER check layer=10 T=2342 rows=964 cold rel_diff=0.0126 cos=0.99992 (cold share of output norm 0.953)
+MEGA_PEER check layer=11 T=2342 rows=720 cold rel_diff=0.0177 cos=0.99984 (cold share of output norm 0.154)
+MEGA_PEER check layer=12 T=2342 rows=861 cold rel_diff=0.0182 cos=0.99983 (cold share of output norm 0.147)
+MEGA_PEER check layer=13 T=2342 rows=745 cold rel_diff=0.0173 cos=0.99985 (cold share of output norm 0.131)
+MEGA_PEER check layer=14 T=2342 rows=969 cold rel_diff=0.0184 cos=0.99983 (cold share of output norm 0.083)
+MEGA_PEER check layer=15 T=2342 rows=407 cold rel_diff=0.0067 cos=0.99998 (cold share of output norm 0.917)
+MEGA_PEER check layer=16 T=2342 rows=1171 cold rel_diff=0.0180 cos=0.99984 (cold share of output norm 0.108)
+MEGA_PEER check layer=17 T=2342 rows=938 cold rel_diff=0.0176 cos=0.99985 (cold share of output norm 0.136)
+MEGA_PEER check layer=18 T=2342 rows=666 cold rel_diff=0.0187 cos=0.99982 (cold share of output norm 0.093)
+MEGA_PEER check layer=19 T=2342 rows=531 cold rel_diff=0.0194 cos=0.99981 (cold share of output norm 0.052)
+MEGA_PEER check layer=20 T=2342 rows=628 cold rel_diff=0.0190 cos=0.99982 (cold share of output norm 0.002)
+MEGA_PEER check layer=21 T=128 rows=17 cold rel_diff=0.0201 cos=0.99980 (cold share of output norm 0.071)
+MEGA_PEER check layer=22 T=128 rows=53 cold rel_diff=0.0183 cos=0.99983 (cold share of output norm 0.175)
+MEGA_PEER check layer=23 T=128 rows=26 cold rel_diff=0.0175 cos=0.99985 (cold share of output norm 0.159)
+MEGA_PEER check layer=24 T=128 rows=41 cold rel_diff=0.0171 cos=0.99985 (cold share of output norm 0.191)
+MEGA_PEER check layer=25 T=128 rows=16 cold rel_diff=0.0207 cos=0.99979 (cold share of output norm 0.062)
+MEGA_PEER check layer=26 T=128 rows=27 cold rel_diff=0.0225 cos=0.99975 (cold share of output norm 0.113)
+MEGA_PEER check layer=27 T=128 rows=10 cold rel_diff=0.0263 cos=0.99966 (cold share of output norm 0.046)
+MEGA_PEER check layer=28 T=128 rows=24 cold rel_diff=0.0226 cos=0.99975 (cold share of output norm 0.073)
+MEGA_PEER check layer=29 T=128 rows=40 cold rel_diff=0.0232 cos=0.99973 (cold share of output norm 0.128)
+MEGA_PEER check layer=30 T=128 rows=30 cold rel_diff=0.0187 cos=0.99983 (cold share of output norm 0.086)
+MEGA_PEER check layer=31 T=128 rows=26 cold rel_diff=0.0210 cos=0.99978 (cold share of output norm 0.076)
+MEGA_PEER check layer=32 T=128 rows=8 cold rel_diff=0.0169 cos=0.99986 (cold share of output norm 0.050)
+MEGA_PEER check layer=33 T=128 rows=23 cold rel_diff=0.0204 cos=0.99979 (cold share of output norm 0.086)
+MEGA_PEER check layer=34 T=128 rows=21 cold rel_diff=0.0233 cos=0.99973 (cold share of output norm 0.053)
+MEGA_PEER check layer=35 T=128 rows=15 cold rel_diff=0.0224 cos=0.99975 (cold share of output norm 0.041)
+MEGA_PEER check layer=36 T=128 rows=20 cold rel_diff=0.0243 cos=0.99970 (cold share of output norm 0.050)
+MEGA_PEER check layer=37 T=128 rows=42 cold rel_diff=0.0257 cos=0.99967 (cold share of output norm 0.144)
+MEGA_PEER check layer=38 T=128 rows=9 cold rel_diff=0.0298 cos=0.99956 (cold share of output norm 0.018)
+MEGA_PEER check layer=39 T=128 rows=16 cold rel_diff=0.0530 cos=0.99859 (cold share of output norm 0.006)
+--- power-all.csv: peak samples inside the DP2-sim-cg256 window 03:34:52-03:44:02 (2 s sampling)
+2026/10/08 03:42:15.422,  NVIDIA GB300,  917.31 W,  1300.00 W,  245176 MiB,  100 %
+2026/10/08 03:43:47.470,  NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition,  254.02 W,  300.00 W,  73361 MiB,  62 %
