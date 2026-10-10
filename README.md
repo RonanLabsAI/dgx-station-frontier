@@ -15,7 +15,7 @@ Six recipes and a microbenchmark atlas (the Nemotron and Kimi K3 recipes were ad
 | [`recipes/kimi-k3/`](recipes/kimi-k3/) | Moonshot Kimi K3 at 3 bits (vellum W3A16) across both Stations in vLLM, with most routed experts in Grace memory (load hook and four load fixes included); and the 1.6-bit GGUF in llama.cpp on one Station, two Stations and four GPUs, with our C2C zero-copy patch and a CUDA 13.2 miscompile warning |
 | [`recipes/fabric-data-direct/`](recipes/fabric-data-direct/) | The cross-Station fabric: Data Direct inside containers, a per-message-size NCCL tuner, the lossless traffic class, and what small-message latency does and does not allow |
 | [`atlas/microbench/`](atlas/microbench/) | C2C, HBM, Grace STREAM, RTX PRO 6000 to Grace, CPU vs GPU expert compute, GEMM power |
-| [`articles/`](articles/) | Plain-English write-ups of the results above. [Where should your experts live?](articles/where-should-your-experts-live/) (Grace vs HBM vs RTX PRO 6000); [What does an expert sidecar actually do?](articles/what-does-an-expert-sidecar-do/); [One Station with a sidecar vs two Stations without](articles/one-station-with-a-sidecar-vs-two-without/) |
+| [`articles/`](articles/) | Plain-English write-ups of the results above. [Where should your experts live?](articles/where-should-your-experts-live/) (Grace vs HBM vs RTX PRO 6000); [What does an expert sidecar actually do?](articles/what-does-an-expert-sidecar-do/); [One Station with a sidecar vs two Stations without](articles/one-station-with-a-sidecar-vs-two-without/); [Running a 1.6T model on two desktops](articles/running-a-1-6t-model-on-two-desktops/) (DeepSeek-V4-Pro across two Stations) |
 
 ## Hardware
 
