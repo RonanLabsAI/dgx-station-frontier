@@ -77,7 +77,91 @@ Reading the numbers:
   (private and public text, GSM8K). The fit counts included the C1 real-text prompts measured here, so the 87.72 tok/s
   C1 figure (81.65 with thinking on) is in-sample for the map. Random ids, the C16 run (338.41 tok/s; 330.94 with
   thinking on; 9 of its 12 prompts were not in the fit), GSM8K-200, flips and the soak are not. A clean held-out
-  public-text measurement is still owed.
+  public-text measurement is still owed: it follows in the next section.
+
+## Public-text results (2026-10-09)
+
+The same final stack (E2 + E3-A16 + DSpark `K = 5` + guard + acceptance-gated `K` + skip-draft), re-measured on public
+text with every measured prompt held out of the expert map. Two boots in one session, same image: a **public-only map**
+(fitted from the CNN/DailyMail and ShareGPT training-slot counts alone, no private text), and the same map with the
+**sidecar off** (`E3_ENABLE=0`, warm experts back on Grace), about an hour after the sidecar-on boot.
+
+- **CNN/DM long:** CNN/DailyMail 3.0.0 test articles concatenated to `8,191` tokens, `1,024` forced output tokens.
+- **ShareGPT short:** ShareGPT V3 first human turns, natural output (EOS honoured) up to `1,024` tokens.
+- Both in the DeepSeek-V4-Pro chat encoding with thinking off and on, from a pool built with seed `20261009` from
+  sha-pinned public sources. Every invocation has its own disjoint prompt slice and seed, and measured slots are disjoint
+  from the slots the maps were fitted on. C1 = mean of three repetitions, C16 = one run, decode tok/s = C x 1000 / mean
+  TPOT. Long C16 runs are KV-capped (about 11 requests resident on average, logged per run).
+
+<!-- results -->
+| Bench, decode tok/s | Public-only map, sidecar on: C1 / C16 | Sidecar off: C1 / C16 | Sidecar gain C1 / C16 | Receipt |
+|---|---|---|---|---|
+| CNN/DM long, thinking off | **94.92** / **282.24** | 73.55 / 183.13 | 1.291x / 1.541x | [on](../../logs/dsv4-pro-two-stations/v4p-public-map.log), [off](../../logs/dsv4-pro-two-stations/v4p-public-map-sidecar-off.log) |
+| CNN/DM long, thinking on | **86.93** / **274.02** | 67.87 / 178.99 | 1.281x / 1.531x | [on](../../logs/dsv4-pro-two-stations/v4p-public-map.log), [off](../../logs/dsv4-pro-two-stations/v4p-public-map-sidecar-off.log) |
+| ShareGPT short, thinking off | **93.88** / **288.08** | 74.35 / 179.31 | 1.263x / 1.607x | [on](../../logs/dsv4-pro-two-stations/v4p-public-map.log), [off](../../logs/dsv4-pro-two-stations/v4p-public-map-sidecar-off.log) |
+| ShareGPT short, thinking on | **83.2** / **312.62** | 66.36 / 202.43 | 1.254x / 1.544x | [on](../../logs/dsv4-pro-two-stations/v4p-public-map.log), [off](../../logs/dsv4-pro-two-stations/v4p-public-map-sidecar-off.log) |
+| Random ids (control), C1 | 38.28 | 35.62 | 1.075x | [on](../../logs/dsv4-pro-two-stations/v4p-public-map.log), [off](../../logs/dsv4-pro-two-stations/v4p-public-map-sidecar-off.log) |
+<!-- /results -->
+
+Quality and hygiene, public-only map: GSM8K (thinking on, first fifty rows) 98%; sidecar vs marlin minimum cosine
+0.99999 (gate passed); 0 sidecar timeouts on both ranks; 0.0% prefix-cache hits on every public run. Receipts:
+[on](../../logs/dsv4-pro-two-stations/v4p-public-map.log), [off](../../logs/dsv4-pro-two-stations/v4p-public-map-sidecar-off.log).
+
+Reading the numbers:
+
+- **Reproducible from public text.** The public-only map is fitted from route counts on public prompts only, and the
+  prompts come from public datasets, so the table above can be reproduced without anything private. The map file is not
+  shipped here: it is a function only of per-(layer, expert) routing counts on CNN/DailyMail and ShareGPT training
+  slots (thinking off and on, equal weight), which are disjoint from the measured slots, so it can be rebuilt from public
+  text.
+- **The sidecar matters more on real text than on random ids.** On the public-only map the RTX PRO 6000 warm tier adds
+  about a quarter for one user and about half or more at C16; random ids, which route almost uniformly, gain little.
+  The sidecar-on and sidecar-off boots are separate, about an hour apart.
+- C16 is a single run per boot, so treat differences of a few percent as noise.
+- ShareGPT C1 varies widely between repetitions (each repetition is three different prompts, and drafter acceptance
+  depends on the prompt); the per-repetition rows are in `results.jsonl`.
+
+### Rebuild the public-only map
+
+Scripts: [bench/public/](bench/public/) (pool builder, capture, bench) and `tools/mixfit.py`, `tools/refit.py`,
+`tools/analyze_pc.py` (the fit). Run from this recipe folder on the rank-0 Station, with the launcher environment of
+"How to run" below (`RANK0_IP`, `RANK1_IP`, `PEER_SSH`).
+
+```bash
+# 1. Prompt pool from public data at pinned revisions: abisee/cnn_dailymail @96df5e68 (3.0.0/test-00000-of-00001.parquet),
+#    anon8231489123/ShareGPT_Vicuna_unfiltered @192ab218 (ShareGPT_V3_unfiltered_cleaned_split.json), and the model's own
+#    tokenizer.json + encoding/encoding_dsv4.py. Seed 20261009; compare the output manifest.json (sha256 of every slot)
+#    with bench/public/manifest.json.
+W=/models/hf/deepseek-ai__DeepSeek-V4-Pro-0813
+python3 bench/public/build_pool_v4p.py test-00000-of-00001.parquet ShareGPT_V3_unfiltered_cleaned_split.json \
+  $W/tokenizer.json $W/encoding/encoding_dsv4.py ~/dsv4pro-public/pool
+
+# 2. Capture route counts on the TRAINING slots: E3-A16 with tier counters on, no drafter. Any E2/E3 maps will do
+#    (routing does not depend on placement; ours were older maps). Maps: E2 in ~/dsv4pro/prof, E3 in rowmaps/.
+E3_MODE=a16 B12X=<b12x checkout with the patch> E3ROWMAP=rowmap-e3.json launch/e3-sidecar.sh 1   # on rank 1
+E3_MODE=a16 B12X=<b12x checkout with the patch> E3ROWMAP=rowmap-e3.json launch/e3-sidecar.sh 0   # on rank 0
+E3HOOK=1 E3_COUNT=1 E3ROWMAP=rowmap-e3.json PIN_MODE=split ROWMAP=rowmap-e2.json launch/e3-up.sh ~/bench/capture
+bash bench/public/capture_public.sh ~/bench/capture 9600     # cnn-off, cnn-on, sg-off, sg-on -> snaps-capture/
+launch/e3-down.sh sidecars
+
+# 3. Fit: equal weight over the four public workloads -> rowmap-dsv4pro-v4ppub.json (E2) + rowmap-e3-on-e2-v4ppub.json (E3)
+python3 tools/mixfit.py ~/bench/capture/snaps-capture ~/dsv4pro-public/mix --work cnn-off,cnn-on,sg-off,sg-on \
+  --tag v4ppub --pcdir tools --old-e2 ~/dsv4pro/prof/rowmap-e2.json --old-e3 rowmaps/rowmap-e3.json
+cp ~/dsv4pro-public/mix/rowmap-dsv4pro-v4ppub.json ~/dsv4pro/prof/; cp ~/dsv4pro-public/mix/rowmap-e3-on-e2-v4ppub.json rowmaps/
+
+# 4. Boot on the new maps (sidecars with E3ROWMAP=rowmap-e3-on-e2-v4ppub.json, then e3-up.sh with
+#    ROWMAP=rowmap-dsv4pro-v4ppub.json; E3_ENABLE=0 for the sidecar-off arm) and bench the HELD-OUT slots:
+python3 bench/public/gauge.py http://127.0.0.1:8010 ~/bench/pub/gauge.tsv &     # measured concurrency (optional)
+for ds in long short; do for md in off on; do
+  GAUGE=~/bench/pub/gauge.tsv V4P=~/dsv4pro-public bash bench/public/pbench.sh ~/bench/pub/public/$ds-$md $ds $md
+done; done
+```
+
+`pbench.sh` copies `$V4P/pool` and `$V4P/pylib` (pandas for the `vllm bench serve` client, which the image lacks) into
+the container. Two limits: the counters in step 2 need the tier-counter version of `hook/e3_hook.py` (bucketed
+`by_bucket` / `tiers` output), which is not in this release yet; and the drafter stack of our rows (DSpark with the
+guard, acceptance-gated `K` and skip-draft) is not in this recipe's launcher, so step 4 here boots E3-A16 without a
+drafter.
 
 ## Hardware and software
 
@@ -162,3 +246,4 @@ The routing counts are aggregate per-(layer, expert) histograms; no per-request 
 | `tests/` | CPU tests for the map builder and the shared-memory protocol; one-layer b12x check | ours |
 
 Not included: the E2/E3 maps and routing counts we fitted to our private workload, and the real-text prompt set.
+The 2026-10-09 public-only map is not included either; it is reproducible from public text (see the public-text results).

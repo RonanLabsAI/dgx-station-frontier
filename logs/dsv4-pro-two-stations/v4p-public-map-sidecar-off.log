@@ -1,0 +1,71 @@
+# DeepSeek-V4-Pro, PUBLIC-ONLY map, SIDECAR OFF (E3_ENABLE=0: the warm experts stay on Grace, read over C2C), 2026-10-09
+# 21:13-22:00 PT. Same stack, image, maps and benches as the public-only map run, about an hour later; only E3 is off. The
+# sidecar processes were started but never called: their peer counters read 0 published on both ranks.
+# decode = C x 1000 / mean TPOT; out_tput = vLLM output token throughput; prefix_hit and DSpark acceptance from /metrics
+# deltas around each measured run (> 2% prefix hit would have been retried on a fresh slice). 'running mean' is the
+# measured concurrency (2-s /metrics gauge). Public pools: CNN/DailyMail 3.0.0 test (long, 8K in, 1,024 forced out) and
+# ShareGPT V3 first human turns (short, natural output <= 1,024), DeepSeek-V4-Pro encoding, pool seed 20261009; every
+# measured slot is disjoint from the map-training slots and from every other slot.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names, GPU UUIDs, home paths and
+# the name of the private prompt set (and of maps fitted to it) replaced with <placeholders>; private-prompt result lines
+# removed. Nothing else edited.
+# Times are Pacific (PT) unless the line says otherwise.
+
+--- master.log
+21:13:33 +0m V4P-PUBOFF start (maps rowmap-dsv4pro-v4ppub.json / rowmap-e3-on-e2-v4ppub.json, E3_ENABLE=0); L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89201 MiB;NVIDIA GB300, 221188 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89990 MiB;NVIDIA GB300, 242352 MiB;
+21:21:10 +7m sidecars P (rowmap-e3-on-e2-v4ppub.json from <home>/v4p-1009/repo) rc 0/0: 87393 MiB | 88981 MiB
+21:21:10 +7m P boot <home>/bench/dsv4pro-v4ppuboff-20261009-2113-P (public-only map, SIDECAR OFF E3_ENABLE=0; DSpark K=5 + KCTL + skip-draft)
+21:28:34 +15m P ready 2026-10-09 21:28:34 after 430 s
+22:00:10 +46m P run exit 0
+--- launch-rank0.txt + e3-rank0.txt (server args, maps, E3 / guard / drafter switches)
+launched 2026-10-09 21:21:24 PDT host=<host-left> rank=0 gpu=<gpu-uuid> image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+spec={"method":"dspark","num_speculative_tokens":5,"num_speculative_tokens_per_batch_size":[[1,4,5],[5,8,3],[9,16,3]]} nsys=
+model=/models/hf/deepseek-ai__DeepSeek-V4-Pro-0813 mode=tp moe=marlin pin=alloc offgb=200 ctx=16384 seqs=16 mbt=4096 util=0.99 dd=1 tuner=tuner3.csv
+args: serve /model --served-model-name deepseek-v4-pro --trust-remote-code --tokenizer-mode deepseek_v4 --reasoning-parser deepseek_v4 --tool-call-parser deepseek_v4 --enable-auto-tool-choice --distributed-executor-backend mp --nnodes 2 --node-rank 0 --master-addr <rail-ip> --master-port 29614 --disable-custom-all-reduce --moe-backend marlin --offload-backend uva --cpu-offload-gb 200 --cpu-offload-params routed_experts.w13_weight routed_experts.w2_weight --max-model-len 16384 --max-num-seqs 16 --max-num-batched-tokens 4096 --gpu-memory-utilization 0.99 --no-enable-flashinfer-autotune --tensor-parallel-size 2 --pipeline-parallel-size 1 --enable-expert-parallel --language-model-only --host 0.0.0.0 --port 8010 --kv-cache-memory-bytes 9717363507 --speculative-config \{\"method\":\"dspark\"\,\"num_speculative_tokens\":5\,\"num_speculative_tokens_per_batch_size\":\[\[1\,4\,5\]\,\[5\,8\,3\]\,\[9\,16\,3\]\]\}
+e3hook=1 rowmap=rowmap-e3-on-e2-v4ppub.json enable=0 check=3 count=0 pin=split e2rowmap=rowmap-dsv4pro-v4ppub.json
+r31b guard=1 dir=<home>/v4p-1009/repo failfast=1 dgwarm=relax inject= kctl=1 koff=0 skipdraft=1 probemax=256 check=512 exec_timeout=120 kvbytes=9717363507
+spec={"method":"dspark","num_speculative_tokens":5,"num_speculative_tokens_per_batch_size":[[1,4,5],[5,8,3],[9,16,3]]} nsys=
+--- image-digest-rank0.txt
+sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+--- public/long-off/summary.txt
+== 2026-10-09 21:28:35 PDT dsv4pro-e3 :8010 deepseek-v4-pro ds=long mode=off nonce=606515000 np1=3 np16=16
+long think-off long-off-c1-r1 try1 seed 606515002 warmseed 606515001: decode_agg 72.67 tok/s (C1 x 1000/meanTPOT 13.76 ms) | out_tput 60.98 | meanTTFT 2716.71 ms | in 24573 out 3072 tok in 50.38 s | dspark_acc_len 3.261 draft_acc 45.2% | failed 0 | prefix_hit 0.00% | running mean 0.8 max 1 waiting mean 0.0
+long think-off long-off-c1-r2 try1 seed 606515004 warmseed 606515003: decode_agg 73.53 tok/s (C1 x 1000/meanTPOT 13.6 ms) | out_tput 61.57 | meanTTFT 2723.79 ms | in 24573 out 3072 tok in 49.90 s | dspark_acc_len 3.330 draft_acc 46.6% | failed 0 | prefix_hit 0.00% | running mean 0.8 max 1 waiting mean 0.0
+long think-off long-off-c1-r3 try1 seed 606515006 warmseed 606515005: decode_agg 74.46 tok/s (C1 x 1000/meanTPOT 13.43 ms) | out_tput 62.20 | meanTTFT 2720.81 ms | in 24573 out 3072 tok in 49.39 s | dspark_acc_len 3.330 draft_acc 46.6% | failed 0 | prefix_hit 0.00% | running mean 0.8 max 1 waiting mean 0.0
+long think-off long-off-c16-r1 try1 seed 606515008 warmseed 606515007: decode_agg 183.13 tok/s (C16 x 1000/meanTPOT 87.37 ms) | out_tput 141.54 | meanTTFT 23591.25 ms | in 131054 out 16384 tok in 115.76 s | dspark_acc_len 2.873 draft_acc 62.3% | failed 0 | prefix_hit 0.00% | running mean 12.0 max 16 waiting mean 2.3
+DONE long off 2026-10-09 21:34:59
+--- public/long-on/summary.txt
+== 2026-10-09 21:34:59 PDT dsv4pro-e3 :8010 deepseek-v4-pro ds=long mode=on nonce=606899000 np1=3 np16=16
+long think-on long-on-c1-r1 try1 seed 606899002 warmseed 606899001: decode_agg 67.25 tok/s (C1 x 1000/meanTPOT 14.87 ms) | out_tput 57.11 | meanTTFT 2714.16 ms | in 24572 out 3072 tok in 53.79 s | dspark_acc_len 2.917 draft_acc 38.3% | failed 0 | prefix_hit 0.00% | running mean 0.8 max 1 waiting mean 0.0
+long think-on long-on-c1-r2 try1 seed 606899004 warmseed 606899003: decode_agg 70.18 tok/s (C1 x 1000/meanTPOT 14.25 ms) | out_tput 59.15 | meanTTFT 2736.88 ms | in 24572 out 3072 tok in 51.94 s | dspark_acc_len 3.050 draft_acc 41.0% | failed 0 | prefix_hit 0.00% | running mean 0.8 max 1 waiting mean 0.0
+long think-on long-on-c1-r3 try1 seed 606899006 warmseed 606899005: decode_agg 66.18 tok/s (C1 x 1000/meanTPOT 15.11 ms) | out_tput 56.28 | meanTTFT 2734.62 ms | in 24573 out 3072 tok in 54.58 s | dspark_acc_len 2.988 draft_acc 39.8% | failed 0 | prefix_hit 0.00% | running mean 0.8 max 1 waiting mean 0.0
+long think-on long-on-c16-r1 try1 seed 606899008 warmseed 606899007: decode_agg 178.99 tok/s (C16 x 1000/meanTPOT 89.39 ms) | out_tput 137.97 | meanTTFT 23560.50 ms | in 131055 out 16384 tok in 118.75 s | dspark_acc_len 2.745 draft_acc 57.8% | failed 0 | prefix_hit 0.00% | running mean 11.9 max 16 waiting mean 2.1
+DONE long on 2026-10-09 21:41:14
+--- public/short-off/summary.txt
+== 2026-10-09 21:41:14 PDT dsv4pro-e3 :8010 deepseek-v4-pro ds=short mode=off nonce=607274000 np1=3 np16=32
+short think-off short-off-c1-r1 try1 seed 607274002 warmseed 607274001: decode_agg 64.56 tok/s (C1 x 1000/meanTPOT 15.49 ms) | out_tput 59.89 | meanTTFT 168.33 ms | in 101 out 1792 tok in 29.92 s | dspark_acc_len 3.039 draft_acc 40.8% | failed 0 | prefix_hit 0.00% | running mean 0.8 max 1 waiting mean 0.0
+short think-off short-off-c1-r2 try1 seed 607274004 warmseed 607274003: decode_agg 86.66 tok/s (C1 x 1000/meanTPOT 11.54 ms) | out_tput 83.86 | meanTTFT 324.38 ms | in 294 out 1785 tok in 21.29 s | dspark_acc_len 5.373 draft_acc 87.5% | failed 0 | prefix_hit 0.00% | running mean 0.7 max 1 waiting mean 0.0
+short think-off short-off-c1-r3 try1 seed 607274006 warmseed 607274005: decode_agg 71.84 tok/s (C1 x 1000/meanTPOT 13.92 ms) | out_tput 66.50 | meanTTFT 281.32 ms | in 381 out 1606 tok in 24.15 s | dspark_acc_len 3.253 draft_acc 45.1% | failed 0 | prefix_hit 0.00% | running mean 0.8 max 1 waiting mean 0.0
+short think-off short-off-c16-r1 try1 seed 607274008 warmseed 607274007: decode_agg 179.31 tok/s (C16 x 1000/meanTPOT 89.23 ms) | out_tput 149.99 | meanTTFT 995.84 ms | in 3395 out 21769 tok in 145.14 s | dspark_acc_len 2.816 draft_acc 59.4% | failed 0 | prefix_hit 0.00% | running mean 12.2 max 16 waiting mean 0.0
+DONE short off 2026-10-09 21:46:13
+--- public/short-on/summary.txt
+== 2026-10-09 21:46:13 PDT dsv4pro-e3 :8010 deepseek-v4-pro ds=short mode=on nonce=607573000 np1=3 np16=32
+short think-on short-on-c1-r1 try1 seed 607573002 warmseed 607573001: decode_agg 66.80 tok/s (C1 x 1000/meanTPOT 14.97 ms) | out_tput 61.84 | meanTTFT 187.04 ms | in 88 out 2280 tok in 36.87 s | dspark_acc_len 2.908 draft_acc 38.2% | failed 0 | prefix_hit 0.00% | running mean 0.8 max 1 waiting mean 0.0
+short think-on short-on-c1-r2 try1 seed 607573004 warmseed 607573003: decode_agg 71.02 tok/s (C1 x 1000/meanTPOT 14.08 ms) | out_tput 70.16 | meanTTFT 185.43 ms | in 106 out 3072 tok in 43.78 s | dspark_acc_len 3.361 draft_acc 47.2% | failed 0 | prefix_hit 0.00% | running mean 0.8 max 1 waiting mean 0.0
+short think-on short-on-c1-r3 try1 seed 607573006 warmseed 607573005: decode_agg 61.27 tok/s (C1 x 1000/meanTPOT 16.32 ms) | out_tput 60.18 | meanTTFT 317.20 ms | in 408 out 3072 tok in 51.05 s | dspark_acc_len 2.959 draft_acc 39.2% | failed 0 | prefix_hit 0.00% | running mean 0.8 max 1 waiting mean 0.0
+short think-on short-on-c16-r1 try1 seed 607573008 warmseed 607573007: decode_agg 202.43 tok/s (C16 x 1000/meanTPOT 79.04 ms) | out_tput 162.84 | meanTTFT 893.98 ms | in 2440 out 25088 tok in 154.07 s | dspark_acc_len 2.657 draft_acc 53.9% | failed 0 | prefix_hit 0.00% | running mean 12.3 max 16 waiting mean 0.0
+DONE short on 2026-10-09 21:52:18
+--- summary.txt (catid random ids control; the private held-out prompt lines that followed are removed from this excerpt)
+== 2026-10-09 21:52:18 mini seedbase 9900
+catid-c1-r1 seed 9911: decode_agg 33.47 (TPOT 29.88 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.025 drafts 79 | running mean 0.9 max 1 waiting mean 0.0
+catid-c1-r2 seed 9912: decode_agg 36.81 (TPOT 27.17 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 2.622 drafts 304 | running mean 0.9 max 1 waiting mean 0.0
+catid-c1-r3 seed 9913: decode_agg 36.58 (TPOT 27.34 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 2.380 drafts 292 | running mean 0.9 max 1 waiting mean 0.0
+--- progress.log (end-of-run divergence and sidecar counters)
+22:00:10 div peer r0 {'published': 0, 'completed': 0, 'timeouts': 0, 'rows': 0, 'tokens': 0, 'wait_s': 0.0, 'waits': 0}
+22:00:10 div peer r1 {'published': 0, 'completed': 0, 'timeouts': 0, 'rows': 0, 'tokens': 0, 'wait_s': 0.0, 'waits': 0}
+22:00:10 div server-rank0.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=3 shm_stall=0
+22:00:10 div server-rank1-copy.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=1 shm_stall=0
+22:00:10 div r31b-stats r0 free_min_MiB 4171 free_last_MiB 4171 failfast 0 injected 0 dg 1164 0.14 skip {'calls': 24350, 'light': 7710, 'full': 16640, 'checks': 47}
+22:00:10 div r31b-stats r1 free_min_MiB 4058 free_last_MiB 4058 failfast 0 injected 0 dg 1164 0.15 skip {'calls': 24279, 'light': 7710, 'full': 16569, 'checks': 47}
+22:00:10 div kctl {"time": 1791608410.0135112, "on": true, "ema": 3.478, "flips": 8, "steps_off": 2065, "probes": 42, "probe_gap": 256, "k_hist": {"5": 14596, "3": 2044, "0": 7702}}
+22:00:10 DONE stages (public mini div); server left up
