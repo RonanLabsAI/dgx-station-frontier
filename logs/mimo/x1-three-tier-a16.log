@@ -1,0 +1,131 @@
+# MiMo-V2.6-Pro on one Station (left), three tiers: GB300 HBM (hot experts) + RTX PRO 6000 sidecar (warm experts,
+# W4A16, b12x with the dropped-route and E8M0-underflow fixes) + Grace via UVA (cold experts). original-el8's v2
+# three-tier design and placement. 2026-10-10 12:11-13:01 PT (X1-A16, fixed kernel). Control: the same day's X1-A8
+# (el8's W4A8-MX sidecar on public b12x 2cc7f66a), 09:45-10:11 PT, same Station, same kit, not the same session.
+# Headline = the published knee shape (16 chat prompts, 192 forced out, T 0, thinking off; mean of 3 runs; own
+# vLLM cache_salt per request, /metrics prefix guard); secondary = vllm bench serve 8,192/1,024 C16 NP 32.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names, GPU UUIDs, network
+# device names, file-system paths and the names of the services stopped for the run replaced with <placeholders>.
+# Nothing else edited. Times are Pacific (PT) unless the line says otherwise (vLLM's own log stamps are UTC = PT + 7 h).
+
+--- master.txt (X1-A16 session; sidecar self-test detail lines omitted)
+2026-10-10 12:12:12 PT after stop: GB300 22 MiB, RTX 47 MiB; MemAvailable 447 GiB
+2026-10-10 12:12:12 PT P1 numerics preflight: b12x fork W4A16 at MiMo shapes, NaN scratch (bar 0 non-finite, cos >= 0.9999)
+2026-10-10 12:12:51 PT P1 fork a16: PASS: rc 0, m [1, 4, 16, 32, 128], min cos 0.99999, rows below 0.9999 or non-finite 0
+2026-10-10 12:13:21 PT P1 (information) public b12x A8 floor: below 0.9999 (expected: MXFP8 floor): rc 0, m [1, 4, 16, 32, 128], min cos 0.998828, rows below 0.9999 or non-finite 5
+2026-10-10 12:13:21 PT P2 memory rule: A16 sidecar prepare + self-test with rowmap-3tier-v2.json
+2026-10-10 12:22:13 PT P2: rowmap-3tier-v2.json prepares; prepared 69 layers (4829 experts) in 511s; 93.7 GiB allocated captured 966 graphs; 93.7 GiB allocated, 0.4 GiB free 
+2026-10-10 12:25:25 PT P2 result: X1-A16 uses rowmap-3tier-v2.json
+2026-10-10 12:25:25 PT arms: X1-A16; b12x a16 <path> (kernel 95873024e5a1); caches a16 <path> p1 <path>
+2026-10-10 12:25:25 PT === X1-A16 act=a16 b12x=<path> rowmap=rowmap-3tier-v2.json
+  launched mimo3t image=vllm/vllm-openai:nightly-d05da62e9ccdf8e342b15bf6785d83224cc165af rowmap=rowmap-3tier-v2.json act=a16 peer_check=80 arm=/w/gate/ARM mw=<path> fused=0 stage=0 mnbt=2048 ctx=131072
+2026-10-10 12:42:03 PT mimo3t ready after 461 s
+2026-10-10 12:42:07 PT X1-A16 pre-arm: startup at log line 306; x1 checks logged so far 0 (expected 0)
+2026-10-10 12:42:27 PT X1-A16 gate window: gate armed: tag=x1-X1-A16-1791661327, 80 checks left|
+2026-10-10 12:42:27 PT X1-A16 X1GATE PASS: 80 real-prompt checks (tag x1-X1-A16-1791661327, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=1629 share 0.336), mean 1.000000; sidecar self-test 21 values min 0.999989; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 306
+  INFO real-prompt T values {511: 11, 2048: 69}; registered prompt max tokens 2559
+  INFO not the gate: per-row min cos 0.99997 (live rows below 0.999: 0); old bf16(out+peer)-out metric min 0.99915 (0 below 0.999); MXFP8-matched reference (direct vs Marlin on x_hat) min 0.987491 (22 below 0.999); format floor (Marlin bf16 vs Marlin x_hat) min 0.987491
+2026-10-10 12:42:28 PT X1-A16 (information, old bf16(out+peer)-out metric) COSGATE PASS: 80 real-prompt checks (tag x1-X1-A16-1791661327) over 69 layers, min cos 0.99915 (layer 13 T=2048 rows=1753 share 0.000), mean 0.99997; sidecar self-test 21 values min 0.99999; warm-up c
+2026-10-10 12:42:28 PT X1-A16 knee (published shape) C1/C8/C16 x3
+  KNEE C1: mean 33.36 agg tok/s over 3 clean runs (per-stream 33.36)
+  KNEE C8: mean 81.8 agg tok/s over 3 clean runs (per-stream 10.22)
+  KNEE C16: mean 105.61 agg tok/s over 3 clean runs (per-stream 6.60)
+2026-10-10 12:45:09 PT X1-A16 vLLM bench 8192/1024 C16 NP 32 (secondary)
+  decode-c16-r1 seed 661509002 warmseed 661509001: decode_agg 77.75 tok/s (C16 x 1000/meanTPOT 205.79 ms) | out_tput 69.57 | meanTTFT 23504.22 ms | failed 0 | prefix_hit 0.00%
+2026-10-10 12:54:02 PT X1-A16 GSM8K-50
+x1-X1-A16: GSM8K 49/50 = 98.0% (request errors 0)
+  timeouts_delta 0 words_before 897 897 0 210178 289938 69688160 756 words_after 331200 331200 0 19310559 25444509 3089830400 320973
+2026-10-10 12:55:51 PT X1-A16 end-of-boot audit (stray = checks outside the gate window, expected 0): stray post-startup untagged 0
+SUMMARY X1-A16 [act=a16 rowmap=rowmap-3tier-v2.json b12x=<path> w4a16_kernel_sha=95873024e5a1]: knee C16 105.61 (3 clean) | C1 33.36 (3) | C8 81.80 (3) | GSM8K-50 49/50 | timeouts end 0 delta 0 | X1GATE PASS: 80 real-prompt checks (tag x1-X1-A16-1791661327, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=1629 share 0.336), mean 1.000000; sidecar self-test  | MXFP8-reference row min cos 0.987491 | 8192/1024 C16: decode-c16-r1 seed 661509002 warmseed 661509001: decode_agg 77.75 tok/s (C16 x 1000/meanTPOT 205.79 ms) | out_tput 69.57 | meanTTFT 23504.22 ms | failed 0 | pre | gates: cosine=ok gsm8k=ok timeouts=ok runs=ok
+2026-10-10 12:59:09 PT X1-A16 teardown; GPU NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+2026-10-10 12:59:09 PT === X1 verdicts (PREREG.md; rules applied by x1_sum.py)
+SUMMARY X1-A8 [act=a8 rowmap=rowmap-3tier-v2.json b12x=<path> w4a16_kernel_sha=a98e6648b3e9]: knee C16 105.59 (3 clean) | C1 33.36 (3) | C8 81.78 (3) | GSM8K-50 49/50 | timeouts end 0 delta 0 | X1GATE FAIL: 80 real-prompt checks (tag x1-X1-A8-1791651267, act a8) over 69 layers, direct-vs-marlin(bf16) min cos 0.986045 (layer 8 T=2048 rows=1372 share 0.998), mean 0.998045; sidecar self-test 6  | MXFP8-reference row min cos 0.999529 | 8192/1024 C16: decode-c16-r1 seed 651449002 warmseed 651449001: decode_agg 76.59 tok/s (C16 x 1000/meanTPOT 208.9 ms) | out_tput 68.70 | meanTTFT 23313.40 ms | failed 0 | pref | gates: cosine=FAIL gsm8k=ok timeouts=ok runs=ok
+SUMMARY X1-A16 [act=a16 rowmap=rowmap-3tier-v2.json b12x=<path> w4a16_kernel_sha=95873024e5a1]: knee C16 105.61 (3 clean) | C1 33.36 (3) | C8 81.80 (3) | GSM8K-50 49/50 | timeouts end 0 delta 0 | X1GATE PASS: 80 real-prompt checks (tag x1-X1-A16-1791661327, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=1629 share 0.336), mean 1.000000; sidecar self-test  | MXFP8-reference row min cos 0.987491 | 8192/1024 C16: decode-c16-r1 seed 661509002 warmseed 661509001: decode_agg 77.75 tok/s (C16 x 1000/meanTPOT 205.79 ms) | out_tput 69.57 | meanTTFT 23504.22 ms | failed 0 | pre | gates: cosine=ok gsm8k=ok timeouts=ok runs=ok
+V-X1: PASS -- X1-A16 knee C16 105.61 > 63.0 with every gate passing: three-tier MiMo-Pro beats J-M's 63.0 at the published shape, with the sidecar matching the BF16 Marlin path to 0.999. Context (no other wording): el8 v2 102.2; ours B1 76.28, B2 104.94. Credit: three-tier design, hook, placement (rowmap-3tier-v2) and sidecar server: el8 (original-el8/dgx-station-gb300-research @87af662, Apache-2.0), on J-M's hotsplit and public histogram (MIT); ours: A16 mode, BF16 wire, b12x W4A16 fix dce2933e, the gate
+V-X1-parity: PASS -- X1-A16/X1-A8 knee C16 = 105.61/105.59 = 1.000 >= 0.95: W4A16 sidecar at no material speed cost
+V-X1-el8 (fact only, not a claim of beating el8): X1-A16 knee C16 105.61 > 102.2 (el8 v2; same design, his raw log not kept, our lane differs in image and MNBT)
+X1-A8 control: cosine gate FAIL (expected FAIL: MXFP8 activations vs the BF16 reference; a control reading, not a finding about el8's work)
+2026-10-10 13:01:45 PT X1-ALLDONE
+
+--- X1-A16/config.txt (image, server cmd, selected env, sidecar image and cmd, GPUs)
+image sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71 vllm/vllm-openai:nightly-d05da62e9ccdf8e342b15bf6785d83224cc165af
+repodigests [vllm/vllm-openai@sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71]
+cmd ["--model","/model","--served-model-name","mimo26-pro","--trust-remote-code","--tensor-parallel-size","1","--offload-backend","uva","--cpu-offload-gb","320","--cpu-offload-params","routed_experts.w13_weight","routed_experts.w2_weight","--max-model-len","131072","--max-num-seqs","16","--max-num-batched-tokens","2048","--gpu-memory-utilization","0.96","--compilation-config","{\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}","--tool-call-parser","mimo","--reasoning-parser","mimo","--enable-auto-tool-choice","--generation-config","auto","--moe-backend","marlin","--host","0.0.0.0","--port","30007"]
+env (selected: HOTSPLIT_* / PEER_* / X2_* / VLLM_USE_DEEP_GEMM / VLLM_WEIGHT_* / NCCL tuner and IB traffic-class entries) ["HOTSPLIT_PEER_CHECK=80", "HOTSPLIT_PEER_CHECK_ARM=/w/gate/ARM", "PEER_ACT=a16", "HOTSPLIT_ROWMAP=/w/rowmap-3tier-v2.json", "PEER_SHM=/dev/shm/vllm_peer_mimo", "PEER_MAX_ROWS=8192", "HOTSPLIT_FUSED_SEND=0", "HOTSPLIT_STAGE_SLOTS=0", "VLLM_USE_DEEP_GEMM=0", "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY=1", "HOTSPLIT_WEIGHTS=decode=1,prefill=0", "HOTSPLIT_MAX_TOKENS=2048", "HOTSPLIT_COUNTS=/w/patches/expert_hist_mix.json"]
+sidecar vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b cmd ["-c","exec numactl --membind=0 python3 /w/peer_server_mimo.py --rowmap /w/rowmap-3tier-v2.json --model /model --min-cos 0.999"]
+name, uuid, power.limit [W], driver_version
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, <gpu-uuid>, 300.00 W, 595.99.02
+NVIDIA GB300, <gpu-uuid>, 1300.00 W, 595.99.02
+
+--- X1-A16/server.log (vLLM version banner, tier plan)
+(APIServer pid=1) INFO 10-10 19:34:50 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.29.1rc1.dev422+gd05da62e9
+(EngineCore pid=403) INFO 10-10 19:39:47 [hotsplit.py:158] hotsplit plan (rowmap /w/rowmap-3tier-v2.json): 69 layers, hot cells 8181 (143.8 GiB HBM), peer cells 4829 (84.9 GiB on the sidecar), Grace cells 13486; stock HBM experts 141.8 GiB
+
+--- X1-A16/knee.log
+knee C1 run1 try1: 33.28 agg tok/s (192 tok / 5.77 s) prefix_hit 0.00%
+knee C1 run2 try1: 33.42 agg tok/s (192 tok / 5.75 s) prefix_hit 0.00%
+knee C1 run3 try1: 33.38 agg tok/s (192 tok / 5.75 s) prefix_hit 0.00%
+KNEE C1: mean 33.36 agg tok/s over 3 clean runs (per-stream 33.36)
+knee C8 run1 try1: 82.13 agg tok/s (1536 tok / 18.70 s) prefix_hit 0.00%
+knee C8 run2 try1: 81.91 agg tok/s (1536 tok / 18.75 s) prefix_hit 0.00%
+knee C8 run3 try1: 81.35 agg tok/s (1536 tok / 18.88 s) prefix_hit 0.00%
+KNEE C8: mean 81.8 agg tok/s over 3 clean runs (per-stream 10.22)
+knee C16 run1 try1: 105.58 agg tok/s (3072 tok / 29.10 s) prefix_hit 0.00%
+knee C16 run2 try1: 105.23 agg tok/s (3072 tok / 29.19 s) prefix_hit 0.00%
+knee C16 run3 try1: 106.02 agg tok/s (3072 tok / 28.98 s) prefix_hit 0.00%
+KNEE C16: mean 105.61 agg tok/s over 3 clean runs (per-stream 6.60)
+
+--- X1-A16/cosgate-x1.txt (in-server gate: 80 real-prompt checks, sidecar fp32 output vs Marlin on BF16)
+X1GATE PASS: 80 real-prompt checks (tag x1-X1-A16-1791661327, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=1629 share 0.336), mean 1.000000; sidecar self-test 21 values min 0.999989; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 306
+INFO real-prompt T values {511: 11, 2048: 69}; registered prompt max tokens 2559
+INFO not the gate: per-row min cos 0.99997 (live rows below 0.999: 0); old bf16(out+peer)-out metric min 0.99915 (0 below 0.999); MXFP8-matched reference (direct vs Marlin on x_hat) min 0.987491 (22 below 0.999); format floor (Marlin bf16 vs Marlin x_hat) min 0.987491
+
+--- X1-A16/timeouts.txt (sidecar shared-memory words; words[2] = timeouts)
+timeouts_delta 0 words_before 897 897 0 210178 289938 69688160 756 words_after 331200 331200 0 19310559 25444509 3089830400 320973
+
+--- X1-A16/vbench/decode-c16-r1.log (vllm bench serve; num_warmups=0)
+Maximum request concurrency: 16
+Successful requests:                     32        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  471.02    
+Total input tokens:                      262144    
+Total generated tokens:                  32768     
+Output token throughput (tok/s):         69.57     
+Total token throughput (tok/s):          626.11    
+Mean TTFT (ms):                          23504.22  
+Mean TPOT (ms):                          205.79    
+
+--- X1-A16/gsm8k.json (summary fields)
+{"label": "x1-X1-A16", "n": 50, "correct": 49, "errors": 0}
+
+--- X1-A8/knee.log (control, morning session)
+knee C1 run1 try1: 33.25 agg tok/s (192 tok / 5.77 s) prefix_hit 0.00%
+knee C1 run2 try1: 33.35 agg tok/s (192 tok / 5.76 s) prefix_hit 0.00%
+knee C1 run3 try1: 33.46 agg tok/s (192 tok / 5.74 s) prefix_hit 0.00%
+KNEE C1: mean 33.36 agg tok/s over 3 clean runs (per-stream 33.36)
+knee C8 run1 try1: 81.59 agg tok/s (1536 tok / 18.82 s) prefix_hit 0.00%
+knee C8 run2 try1: 82.26 agg tok/s (1536 tok / 18.67 s) prefix_hit 0.00%
+knee C8 run3 try1: 81.48 agg tok/s (1536 tok / 18.85 s) prefix_hit 0.00%
+KNEE C8: mean 81.78 agg tok/s over 3 clean runs (per-stream 10.22)
+knee C16 run1 try1: 105.00 agg tok/s (3072 tok / 29.26 s) prefix_hit 0.00%
+knee C16 run2 try1: 106.02 agg tok/s (3072 tok / 28.98 s) prefix_hit 0.00%
+knee C16 run3 try1: 105.74 agg tok/s (3072 tok / 29.05 s) prefix_hit 0.00%
+KNEE C16: mean 105.59 agg tok/s over 3 clean runs (per-stream 6.60)
+
+--- X1-A8/cosgate-x1.txt (control; FAIL expected: MXFP8 activations against the BF16 reference)
+X1GATE FAIL: 80 real-prompt checks (tag x1-X1-A8-1791651267, act a8) over 69 layers, direct-vs-marlin(bf16) min cos 0.986045 (layer 8 T=2048 rows=1372 share 0.998), mean 0.998045; sidecar self-test 6 values min 0.999640; 23 below 0.999; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 306
+INFO real-prompt T values {511: 11, 2048: 69}; registered prompt max tokens 2559
+INFO not the gate: per-row min cos 0.52901 (live rows below 0.999: 18871); old bf16(out+peer)-out metric min 0.98605 (23 below 0.999); MXFP8-matched reference (direct vs Marlin on x_hat) min 0.999529 (0 below 0.999); format floor (Marlin bf16 vs Marlin x_hat) min 0.987530
+
+--- X1-A8/gsm8k.json (summary fields)
+{"label": "x1-X1-A8", "n": 50, "correct": 49, "errors": 0}
+
+--- X1-A8/config.txt (image, server cmd)
+image sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71 vllm/vllm-openai:nightly-d05da62e9ccdf8e342b15bf6785d83224cc165af
+repodigests [vllm/vllm-openai@sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71]
+cmd ["--model","/model","--served-model-name","mimo26-pro","--trust-remote-code","--tensor-parallel-size","1","--offload-backend","uva","--cpu-offload-gb","320","--cpu-offload-params","routed_experts.w13_weight","routed_experts.w2_weight","--max-model-len","131072","--max-num-seqs","16","--max-num-batched-tokens","2048","--gpu-memory-utilization","0.96","--compilation-config","{\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}","--tool-call-parser","mimo","--reasoning-parser","mimo","--enable-auto-tool-choice","--generation-config","auto","--moe-backend","marlin","--host","0.0.0.0","--port","30007"]
+sidecar vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b cmd ["-c","exec numactl --membind=0 python3 /w/peer_server_mimo.py --rowmap /w/rowmap-3tier-v2.json --model /model --min-cos 0.999"]
+name, uuid, power.limit [W], driver_version
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, <gpu-uuid>, 300.00 W, 595.99.02
+NVIDIA GB300, <gpu-uuid>, 1300.00 W, 595.99.02

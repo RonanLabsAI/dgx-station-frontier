@@ -1,0 +1,62 @@
+# WITHDRAWN (2026-10-10): MiMo-V2.6-Pro three-tier X1-A16, morning run on b12x W4A16 WITHOUT the E8M0-underflow fix.
+# The sidecar returned rows with missing route contributions on MoE layers 1-16 (partly 17-18) at prefill: the
+# in-server gate FAILED (min cos 0.843891; per-row min -0.00473). Its knee figure was measured on a model with
+# dropped compute and is not a result. Replaced by the fixed-kernel run: logs/mimo/x1-three-tier-a16.log.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names, GPU UUIDs, network
+# device names, file-system paths and the names of the services stopped for the run replaced with <placeholders>.
+# Nothing else edited. Times are Pacific (PT) unless the line says otherwise (vLLM's own log stamps are UTC = PT + 7 h).
+
+--- master.txt (morning session, X1-A16 lines)
+2026-10-10 09:45:01 PT P2 result: X1-A16 uses rowmap-3tier-v2.json
+  KNEE C1: mean 33.36 agg tok/s over 3 clean runs (per-stream 33.36)
+  KNEE C8: mean 81.78 agg tok/s over 3 clean runs (per-stream 10.22)
+  KNEE C16: mean 105.59 agg tok/s over 3 clean runs (per-stream 6.60)
+  decode-c16-r1 seed 651449002 warmseed 651449001: decode_agg 76.59 tok/s (C16 x 1000/meanTPOT 208.9 ms) | out_tput 68.70 | meanTTFT 23313.40 ms | failed 0 | prefix_hit 0.00%
+  timeouts_delta 0 words_before 897 897 0 210198 289938 36690208 767 words_after 336927 336927 0 19306045 25442508 3928730368 324487
+2026-10-10 10:11:33 PT === X1-A16 act=a16 b12x=<path> rowmap=rowmap-3tier-v2.json
+2026-10-10 10:28:19 PT X1-A16 pre-arm: startup at log line 306; x1 checks logged so far 0 (expected 0)
+2026-10-10 10:28:39 PT X1-A16 gate window: gate armed: tag=x1-X1-A16-1791653299, 80 checks left|
+2026-10-10 10:28:39 PT X1-A16 X1GATE FAIL: 80 real-prompt checks (tag x1-X1-A16-1791653299, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 0.843891 (layer 11 T=511 rows=475 share 0.013), mean 0.993930; sidecar self-test 21 values min 0.999982; 17 below 0.999; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 306
+2026-10-10 10:28:39 PT X1-A16 (information, old bf16(out+peer)-out metric) COSGATE FAIL: 80 real-prompt checks (tag x1-X1-A16-1791653299) over 69 layers, min cos 0.84389 (layer 11 T=511 rows=475 share 0.013), mean 0.99391; sidecar self-test 21 values min 0.99998; 17 below 0.
+2026-10-10 10:28:39 PT X1-A16 knee (published shape) C1/C8/C16 x3
+  KNEE C1: mean 33.46 agg tok/s over 3 clean runs (per-stream 33.46)
+  KNEE C8: mean 82.62 agg tok/s over 3 clean runs (per-stream 10.33)
+  KNEE C16: mean 107.48 agg tok/s over 3 clean runs (per-stream 6.72)
+2026-10-10 10:31:19 PT X1-A16 vLLM bench 8192/1024 C16 NP 32 (secondary)
+  decode-c16-r1 seed 653479002 warmseed 653479001: decode_agg 77.55 tok/s (C16 x 1000/meanTPOT 206.31 ms) | out_tput 69.53 | meanTTFT 23139.28 ms | failed 0 | prefix_hit 0.00%
+2026-10-10 10:40:11 PT X1-A16 GSM8K-50
+x1-X1-A16: GSM8K 49/50 = 98.0% (request errors 0)
+  timeouts_delta 0 words_before 897 897 0 210173 289938 35211328 760 words_after 336789 336789 0 19298292 25446096 3806303072 325355
+2026-10-10 10:42:00 PT X1-A16 end-of-boot audit (stray = checks outside the gate window, expected 0): stray post-startup untagged 0
+SUMMARY X1-A16 [act=a16 rowmap=rowmap-3tier-v2.json b12x=<path> w4a16_kernel_sha=683ad2e61541]: knee C16 107.48 (3 clean) | C1 33.46 (3) | C8 82.62 (3) | GSM8K-50 49/50 | timeouts end 0 delta 0 | X1GATE FAIL: 80 real-prompt checks (tag x1-X1-A16-1791653299, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 0.843891 (layer 11 T=511 rows=475 share 0.013), mean 0.993930; sidecar self-test 2 | MXFP8-reference row min cos 0.841555 | 8192/1024 C16: decode-c16-r1 seed 653479002 warmseed 653479001: decode_agg 77.55 tok/s (C16 x 1000/meanTPOT 206.31 ms) | out_tput 69.53 | meanTTFT 23139.28 ms | failed 0 | pre | gates: cosine=FAIL gsm8k=ok timeouts=ok runs=ok
+2026-10-10 10:45:18 PT X1-A16 teardown; GPU NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+SUMMARY X1-A16 [act=a16 rowmap=rowmap-3tier-v2.json b12x=<path> w4a16_kernel_sha=683ad2e61541]: knee C16 107.48 (3 clean) | C1 33.46 (3) | C8 82.62 (3) | GSM8K-50 49/50 | timeouts end 0 delta 0 | X1GATE FAIL: 80 real-prompt checks (tag x1-X1-A16-1791653299, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 0.843891 (layer 11 T=511 rows=475 share 0.013), mean 0.993930; sidecar self-test 2 | MXFP8-reference row min cos 0.841555 | 8192/1024 C16: decode-c16-r1 seed 653479002 warmseed 653479001: decode_agg 77.55 tok/s (C16 x 1000/meanTPOT 206.31 ms) | out_tput 69.53 | meanTTFT 23139.28 ms | failed 0 | pre | gates: cosine=FAIL gsm8k=ok timeouts=ok runs=ok
+V-X1: FAIL -- X1-A16 knee C16 107.48; failed: cosine
+V-X1-el8 (fact only, not a claim of beating el8): X1-A16 knee C16 107.48 > 102.2 (el8 v2; same design, his raw log not kept, our lane differs in image and MNBT)
+
+--- X1-A16/knee.log
+knee C1 run1 try1: 33.43 agg tok/s (192 tok / 5.74 s) prefix_hit 0.00%
+knee C1 run2 try1: 33.38 agg tok/s (192 tok / 5.75 s) prefix_hit 0.00%
+knee C1 run3 try1: 33.58 agg tok/s (192 tok / 5.72 s) prefix_hit 0.00%
+KNEE C1: mean 33.46 agg tok/s over 3 clean runs (per-stream 33.46)
+knee C8 run1 try1: 82.97 agg tok/s (1536 tok / 18.51 s) prefix_hit 0.00%
+knee C8 run2 try1: 82.39 agg tok/s (1536 tok / 18.64 s) prefix_hit 0.00%
+knee C8 run3 try1: 82.50 agg tok/s (1536 tok / 18.62 s) prefix_hit 0.00%
+KNEE C8: mean 82.62 agg tok/s over 3 clean runs (per-stream 10.33)
+knee C16 run1 try1: 107.42 agg tok/s (3072 tok / 28.60 s) prefix_hit 0.00%
+knee C16 run2 try1: 107.38 agg tok/s (3072 tok / 28.61 s) prefix_hit 0.00%
+knee C16 run3 try1: 107.65 agg tok/s (3072 tok / 28.54 s) prefix_hit 0.00%
+KNEE C16: mean 107.48 agg tok/s over 3 clean runs (per-stream 6.72)
+
+--- X1-A16/cosgate-x1.txt
+X1GATE FAIL: 80 real-prompt checks (tag x1-X1-A16-1791653299, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 0.843891 (layer 11 T=511 rows=475 share 0.013), mean 0.993930; sidecar self-test 21 values min 0.999982; 17 below 0.999; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 306
+INFO real-prompt T values {511: 11, 2048: 69}; registered prompt max tokens 2559
+INFO not the gate: per-row min cos -0.00473 (live rows below 0.999: 33574); old bf16(out+peer)-out metric min 0.84389 (17 below 0.999); MXFP8-matched reference (direct vs Marlin on x_hat) min 0.841555 (24 below 0.999); format floor (Marlin bf16 vs Marlin x_hat) min 0.987527
+INFO below bar: layer 11 T=511 rows=475 cos 0.843891 share 0.013 mx_cos 0.841555
+INFO below bar: layer 10 T=511 rows=433 cos 0.877503 share 0.125 mx_cos 0.869703
+INFO below bar: layer 7 T=2048 rows=1843 cos 0.958245 share 0.182 mx_cos 0.950828
+INFO below bar: layer 9 T=2048 rows=1610 cos 0.966854 share 0.231 mx_cos 0.955721
+INFO below bar: layer 9 T=511 rows=411 cos 0.974170 share 0.335 mx_cos 0.966773
+INFO below bar: layer 7 T=511 rows=412 cos 0.979110 share 0.290 mx_cos 0.976170
+INFO below bar: layer 11 T=2048 rows=1908 cos 0.985081 share 0.054 mx_cos 0.982568
+INFO below bar: layer 2 T=511 rows=412 cos 0.989254 share 0.184 mx_cos 0.978600

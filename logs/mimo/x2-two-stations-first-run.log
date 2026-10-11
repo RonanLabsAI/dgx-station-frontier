@@ -1,0 +1,133 @@
+# MiMo-V2.6-Pro on two Stations (TP2 over one rail), first run 2026-10-10 13:06-14:09 PT. X2-T0 = two-tier control
+# (J-M hotsplit per rank: hot experts in HBM, the rest in Grace via UVA, 64 GiB per rank). X2-S6 = six tiers (each
+# rank: HBM hot + its own Station's RTX PRO 6000 W4A16 sidecar for every other expert; Grace holds 0 cells).
+# X2-S6 FAILED the registered counters gate (the two ranks' sidecars saw different row totals: the TP ranks routed
+# some tokens differently), so its speed carries no claim. The knee prompts start with a ~12-token nonce.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names, GPU UUIDs, network
+# device names, file-system paths and the names of the services stopped for the run replaced with <placeholders>.
+# Nothing else edited. Times are Pacific (PT) unless the line says otherwise (vLLM's own log stamps are UTC = PT + 7 h).
+
+--- master.txt (first run; sidecar self-test detail lines and container launch lines omitted)
+2026-10-10 13:06:13 PT +0m X2 start; L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89201 MiB;NVIDIA GB300, 226612 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89990 MiB;NVIDIA GB300, 245812 MiB;
+2026-10-10 13:06:13 PT +0m X1 gate: V-X1: PASS -- X1-A16 knee C16 105.61 > 63.0 with every gate passing: three-tier MiMo-Pro beats J-M's 63.0 at t|V-X1-parity: PASS -- X1-A16/X1-A8 knee C16 = 105.61/105.59 = 1.000 >= 0.95: W4A16 sidecar at no material speed|
+2026-10-10 13:17:27 PT +0m X2 start; L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89201 MiB;NVIDIA GB300, 221188 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89990 MiB;NVIDIA GB300, 243420 MiB;
+2026-10-10 13:17:27 PT +0m X1 gate: V-X1: PASS -- X1-A16 knee C16 105.61 > 63.0 with every gate passing: three-tier MiMo-Pro beats J-M's 63.0 at t|V-X1-parity: PASS -- X1-A16/X1-A8 knee C16 = 105.61/105.59 = 1.000 >= 0.95: W4A16 sidecar at no material speed|
+2026-10-10 13:19:49 PT +2m after stop: GB300 L 22 R 22 MiB, RTX L 47 R 47 MiB; MemAvailable L 445 R 448 GiB
+2026-10-10 13:19:49 PT +2m === X2-T0: TP2 two-tier control (reader recipe; ctx 131072, MNBT 2048, 16 seqs; no sidecar)
+2026-10-10 13:26:06 PT +8m ready after 364 s
+2026-10-10 13:26:11 PT +8m X2-T0 KV: GPU KV cache size: 977,023 tokens | Available KV cache memory: 27.82 GiB | DD lines 2 | plan: hotsplit plan: 69 layers, budget 168.8 GiB (stock HBM experts 168.8 GiB), hot cells 19200/26496, train-weighted coverage 92.3%
+2026-10-10 13:26:12 PT +8m X2-T0 knee (published shape, start nonce) C1,8,16 x3
+  KNEE C1: mean 53.85 agg tok/s over 3 clean runs (per-stream 53.85)
+  KNEE C8: mean 195.6 agg tok/s over 3 clean runs (per-stream 24.45)
+  KNEE C16: mean 278.85 agg tok/s over 3 clean runs (per-stream 17.43)
+2026-10-10 13:27:20 PT +9m X2-T0 vLLM bench 8192/1024 C16 NP 32 (secondary)
+  decode-c16-r1 seed 664040002 warmseed 664040001: decode_agg 184.86 tok/s (C16 x 1000/meanTPOT 86.55 ms) | out_tput 163.17 | meanTTFT 11198.84 ms | failed 0 | prefix_hit 0.00%
+2026-10-10 13:31:25 PT +13m X2-T0 GSM8K-50
+x2-X2-T0: GSM8K 49/50 = 98.0% (request errors 0)
+2026-10-10 13:32:26 PT +14m after teardown: L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+  nccl_errors r0 0 r1 0
+  rdma_delta L packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+  rdma_delta R packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+SUMMARY X2-T0 [arm=t0 hook=<path> (J-M two-tier) offload=64GiB/rank ctx=131072 mnbt=2048 seqs=16]: knee C16 278.85 (3 clean) | C1 53.85 (3) | C8 195.60 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: decode-c16-r1 seed 664040002 warmseed 664040001: decode_agg 184.86 tok/s (C16 x 1000/meanTPOT 86.55 ms) | out_tput 163.17 | meanTTFT 11198.84 ms | fai | gates: gsm8k=ok runs=ok nccl=ok rdma=ok
+2026-10-10 13:32:26 PT +14m P1 numerics: b12x fork W4A16 at the TP2 rank shape (H 6144, I 1024), NaN scratch, both RTXs (bar 0 non-finite, cos >= 0.9999)
+2026-10-10 13:33:19 PT +15m P1 rank 0: PASS: rc 0, m [1, 4, 16, 32, 128], min cos 0.999989, rows below 0.9999 or non-finite 0
+2026-10-10 13:33:19 PT +15m P1 rank 1: PASS: rc 0, m [1, 4, 16, 32, 128], min cos 0.999989, rows below 0.9999 or non-finite 0
+2026-10-10 13:33:19 PT +15m P2 memory rule: both sidecars prepare + self-test rowmap-x2-s6.json
+2026-10-10 13:44:43 PT +27m P2 rowmap-x2-s6.json: rank 0 rc 0, rank 1 rc 0; r0 prepared 69 layers (7296 experts) in 657s; 71.6 GiB allocated captured 966 graphs; 71.6 GiB allocated, 22.4 GiB free  | r1 prepared 69 layers (7296 experts) in 668s; 71.6 GiB allocated captured 966 graphs; 71.6 GiB allocated, 22.4 GiB free 
+2026-10-10 13:44:43 PT +27m P2 PASS: large-batch peer check rows (128, 475, 1372, 2048) on 2 sidecar(s), worst cos per rows {128: 0.999989, 475: 0.999989, 1372: 0.999989, 2048: 0.999989}
+  r0 peer tp rank 0/2 (RonanLabs X2): I 1024 of 2048 per expert
+  r1 peer tp rank 1/2 (RonanLabs X2): I 1024 of 2048 per expert
+2026-10-10 13:44:43 PT +27m P2 result: X2-S6 uses rowmap-x2-s6.json
+2026-10-10 13:44:43 PT +27m === X2-S6: six tiers (TP2 + one W4A16 sidecar per Station), rowmap rowmap-x2-s6.json
+2026-10-10 13:50:40 PT +33m ready after 345 s
+2026-10-10 13:50:45 PT +33m X2-S6 KV: GPU KV cache size: 995,889 tokens | Available KV cache memory: 28.35 GiB | DD lines 2 | plan: hotsplit plan (rowmap /w/rowmap-x2-s6.json): 69 layers, hot cells 19200 (168.8 GiB HBM), peer cells 7296 (64.1 GiB on the sidecar), Grace cells 0
+2026-10-10 13:50:46 PT +33m X2-S6 pre-arm: x1 checks so far r0 0 r1 0 (expected 0); rank 1 log line 403 at ready
+2026-10-10 13:51:03 PT +33m X2-S6 X2GATE rank 0 PASS: 80 real-prompt checks (tag x2-S6-1791665446, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=962 share 0.117), mean 1.000000; sidecar self-test 30 values min 0.999988; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 610
+2026-10-10 13:51:03 PT +33m X2-S6 X2GATE rank 1 PASS: 80 real-prompt checks (tag x2-S6-1791665446, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=962 share 0.203), mean 1.000000; sidecar self-test 30 values min 0.999989; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 404
+  INFO real-prompt T values {531: 11, 2048: 69}; registered prompt max tokens 2579
+  INFO not the gate: per-row min cos 0.99997 (live rows below 0.999: 0); old bf16(out+peer)-out metric min 0.98462 (3 below 0.999); MXFP8-matched reference (direct vs Marlin on x_hat) min 0.970658 (25 below 0.999); format floor (Marlin bf16 vs Marlin x_hat) min 0.970658
+  X2GATE rank 1 PASS: 80 real-prompt checks (tag x2-S6-1791665446, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=962 share 0.203), mean 1.000000; sidecar self-test 30 values min 0.999989; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 404
+  INFO real-prompt T values {531: 11, 2048: 69}; registered prompt max tokens 2579
+  INFO not the gate: per-row min cos 0.99969 (live rows below 0.999: 0); old bf16(out+peer)-out metric min 0.98691 (3 below 0.999); MXFP8-matched reference (direct vs Marlin on x_hat) min 0.968759 (25 below 0.999); format floor (Marlin bf16 vs Marlin x_hat) min 0.968759
+2026-10-10 13:51:03 PT +33m X2-S6 knee (published shape, start nonce) C1,8,16 x3
+  KNEE C1: mean 62.14 agg tok/s over 3 clean runs (per-stream 62.14)
+  KNEE C8: mean 331.77 agg tok/s over 3 clean runs (per-stream 41.47)
+  KNEE C16: mean 510.16 agg tok/s over 3 clean runs (per-stream 31.89)
+2026-10-10 13:51:45 PT +34m X2-S6 vLLM bench 8192/1024 C16 NP 32 (secondary)
+  decode-c16-r1 seed 665505002 warmseed 665505001: decode_agg 363.14 tok/s (C16 x 1000/meanTPOT 44.06 ms) | out_tput 312.45 | meanTTFT 7010.17 ms | failed 0 | prefix_hit 0.00%
+2026-10-10 13:54:08 PT +36m X2-S6 GSM8K-50
+x2-X2-S6: GSM8K 49/50 = 98.0% (request errors 0)
+  rank 0 timeouts_delta 0 words_after 337824 337824 0 19419110 25580370 9377055712 318171 6354932228815996465 6355234726747308544 words_before 897 897 0 218673 289938 58399392 756 6354932228815996465 6355234726747308544
+  rank 1 timeouts_delta 0 words_after 337824 337824 0 19419100 25580370 9822790016 318171 6354932228815996465 6355234726747308545 words_before 897 897 0 218673 289938 56648288 756 6354932228815996465 6355234726747308545
+  counters_equal no: r0 seq 337824 rows 19419110 tokens 25580370 wait_ns 9377055712 waits 318171 | r1 seq 337824 rows 19419100 tokens 25580370 wait_ns 9822790016 waits 318171
+2026-10-10 13:54:35 PT +37m X2-S6 rank 0 end-of-boot audit (stray = checks outside the gate window, expected 0): stray post-startup untagged 0
+2026-10-10 13:54:35 PT +37m X2-S6 rank 1 end-of-boot audit (stray = checks outside the gate window, expected 0): stray post-startup untagged 0
+2026-10-10 13:57:02 PT +39m after teardown: L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+  nccl_errors r0 0 r1 0
+  rdma_delta L packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+  rdma_delta R packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+SUMMARY X2-S6 [arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix w4a16_kernel_sha=95873024e5a1 ctx=131072 mnbt=2048 seqs=16]: knee C16 510.16 (3 clean) | C1 62.14 (3) | C8 331.77 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: decode-c16-r1 seed 665505002 warmseed 665505001: decode_agg 363.14 tok/s (C16 x 1000/meanTPOT 44.06 ms) | out_tput 312.45 | meanTTFT 7010.17 ms | fail | X2GATE rank 0 PASS: 80 real-prompt checks (tag x2-S6-1791665446, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=962 share 0.117), m | X2GATE rank 1 PASS: 80 real-prompt checks (tag x2-S6-1791665446, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=962 share 0.203), m | timeouts {0: ('0', 0), 1: ('0', 0)} | counters_equal no: r0 seq 337824 rows 19419110 tokens 25580370 wait_ns 9377055712 waits 318171 | r1 seq 337824 rows 1941 | gates: gsm8k=ok runs=ok nccl=ok rdma=ok cosine=ok timeouts=ok counters=FAIL
+2026-10-10 13:57:03 PT +39m === X2 verdicts (PREREG.md; rules applied by x2_sum.py)
+SUMMARY X2-T0 [arm=t0 hook=<path> (J-M two-tier) offload=64GiB/rank ctx=131072 mnbt=2048 seqs=16]: knee C16 278.85 (3 clean) | C1 53.85 (3) | C8 195.60 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: decode-c16-r1 seed 664040002 warmseed 664040001: decode_agg 184.86 tok/s (C16 x 1000/meanTPOT 86.55 ms) | out_tput 163.17 | meanTTFT 11198.84 ms | fai | gates: gsm8k=ok runs=ok nccl=ok rdma=ok
+SUMMARY X2-S6 [arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix w4a16_kernel_sha=95873024e5a1 ctx=131072 mnbt=2048 seqs=16]: knee C16 510.16 (3 clean) | C1 62.14 (3) | C8 331.77 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: decode-c16-r1 seed 665505002 warmseed 665505001: decode_agg 363.14 tok/s (C16 x 1000/meanTPOT 44.06 ms) | out_tput 312.45 | meanTTFT 7010.17 ms | fail | X2GATE rank 0 PASS: 80 real-prompt checks (tag x2-S6-1791665446, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=962 share 0.117), m | X2GATE rank 1 PASS: 80 real-prompt checks (tag x2-S6-1791665446, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=962 share 0.203), m | timeouts {0: ('0', 0), 1: ('0', 0)} | counters_equal no: r0 seq 337824 rows 19419110 tokens 25580370 wait_ns 9377055712 waits 318171 | r1 seq 337824 rows 1941 | gates: gsm8k=ok runs=ok nccl=ok rdma=ok cosine=ok timeouts=ok counters=FAIL
+V-X2-T0 (the owed TP2 knee receipt): X2-T0 knee C16 278.85 (3 clean runs), C1 53.85, C8 195.60 on two Stations; gates all ok: RECORDED
+V-X2: FAIL (gates: counters) -- ratio 1.829 (510.16 / 278.85) carries no claim
+V-X2-C1: PASS -- X2-S6 knee C1 62.14 vs X2-T0 53.85 = 1.154 (bar >= 0.97)
+Context (two Stations / 2, not a one-Station result): X2-T0 139.43 per Station at knee C16 vs J-M 63.0, el8 v2 102.2, ours B1 76.28 (one-Station figures)
+Context (two Stations / 2, not a one-Station result): X2-S6 255.08 per Station at knee C16 vs J-M 63.0, el8 v2 102.2, ours B1 76.28 (one-Station figures)
+
+--- X2-T0/knee.log
+knee C1 run1 try1: 53.93 agg tok/s (192 tok / 3.56 s) prefix_hit 0.00%
+knee C1 run2 try1: 53.81 agg tok/s (192 tok / 3.57 s) prefix_hit 0.00%
+knee C1 run3 try1: 53.82 agg tok/s (192 tok / 3.57 s) prefix_hit 0.00%
+KNEE C1: mean 53.85 agg tok/s over 3 clean runs (per-stream 53.85)
+knee C8 run1 try1: 195.38 agg tok/s (1536 tok / 7.86 s) prefix_hit 0.00%
+knee C8 run2 try1: 194.21 agg tok/s (1536 tok / 7.91 s) prefix_hit 0.00%
+knee C8 run3 try1: 197.23 agg tok/s (1536 tok / 7.79 s) prefix_hit 0.00%
+KNEE C8: mean 195.6 agg tok/s over 3 clean runs (per-stream 24.45)
+knee C16 run1 try1: 277.98 agg tok/s (3072 tok / 11.05 s) prefix_hit 0.00%
+knee C16 run2 try1: 279.49 agg tok/s (3072 tok / 10.99 s) prefix_hit 0.00%
+knee C16 run3 try1: 279.09 agg tok/s (3072 tok / 11.01 s) prefix_hit 0.00%
+KNEE C16: mean 278.85 agg tok/s over 3 clean runs (per-stream 17.43)
+
+--- X2-T0/gsm8k.json (summary fields)
+{"label": "x2-X2-T0", "n": 50, "correct": 49, "errors": 0}
+
+--- X2-T0/config.txt (image, rank-0 server cmd, selected env, GPUs)
+image sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71 vllm/vllm-openai:nightly-d05da62e9ccdf8e342b15bf6785d83224cc165af
+repodigests [vllm/vllm-openai@sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71]
+cmd ["--model","/model","--served-model-name","mimo26-pro","--trust-remote-code","--tensor-parallel-size","2","--nnodes","2","--node-rank","0","--master-addr","<rail-ip>","--master-port","29611","--offload-backend","uva","--cpu-offload-gb","64","--cpu-offload-params","routed_experts.w13_weight","routed_experts.w2_weight","--max-model-len","131072","--max-num-seqs","16","--max-num-batched-tokens","2048","--gpu-memory-utilization","0.95","--compilation-config","{\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}","--reasoning-parser","mimo","--generation-config","auto","--moe-backend","marlin","--disable-custom-all-reduce","--host","0.0.0.0","--port","8006"]
+env (selected: HOTSPLIT_* / PEER_* / X2_* / VLLM_USE_DEEP_GEMM / VLLM_WEIGHT_* / NCCL tuner and IB traffic-class entries) ["NCCL_TUNER_CONFIG_FILE=/opt/nccl-tuner/tuner3.csv", "NCCL_IB_QPS_PER_CONNECTION=4", "NCCL_IB_SPLIT_DATA_ON_QPS=1", "NCCL_IB_TC=106", "VLLM_USE_DEEP_GEMM=0", "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY=1", "HOTSPLIT_COUNTS=/w/patches/expert_hist_mix.json", "HOTSPLIT_WEIGHTS=decode=1,prefill=0"]
+name, uuid, power.limit [W], driver_version
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, <gpu-uuid>, 300.00 W, 595.99.02
+NVIDIA GB300, <gpu-uuid>, 1300.00 W, 595.99.02
+name, uuid, power.limit [W], driver_version
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, <gpu-uuid>, 300.00 W, 595.99.02
+NVIDIA GB300, <gpu-uuid>, 1300.00 W, 595.99.02
+
+--- X2-S6/knee.log
+knee C1 run1 try1: 62.15 agg tok/s (192 tok / 3.09 s) prefix_hit 0.00%
+knee C1 run2 try1: 62.05 agg tok/s (192 tok / 3.09 s) prefix_hit 0.00%
+knee C1 run3 try1: 62.21 agg tok/s (192 tok / 3.09 s) prefix_hit 0.00%
+KNEE C1: mean 62.14 agg tok/s over 3 clean runs (per-stream 62.14)
+knee C8 run1 try1: 331.68 agg tok/s (1536 tok / 4.63 s) prefix_hit 0.00%
+knee C8 run2 try1: 332.42 agg tok/s (1536 tok / 4.62 s) prefix_hit 0.00%
+knee C8 run3 try1: 331.20 agg tok/s (1536 tok / 4.64 s) prefix_hit 0.00%
+KNEE C8: mean 331.77 agg tok/s over 3 clean runs (per-stream 41.47)
+knee C16 run1 try1: 510.59 agg tok/s (3072 tok / 6.02 s) prefix_hit 0.00%
+knee C16 run2 try1: 509.55 agg tok/s (3072 tok / 6.03 s) prefix_hit 0.00%
+knee C16 run3 try1: 510.36 agg tok/s (3072 tok / 6.02 s) prefix_hit 0.00%
+KNEE C16: mean 510.16 agg tok/s over 3 clean runs (per-stream 31.89)
+
+--- X2-S6/counters.txt (sidecar shared-memory counters at end of boot, both ranks)
+counters_equal no: r0 seq 337824 rows 19419110 tokens 25580370 wait_ns 9377055712 waits 318171 | r1 seq 337824 rows 19419100 tokens 25580370 wait_ns 9822790016 waits 318171
+
+--- X2-S6/x1-gate-lines-r0.log, lines 58-60 (rows each rank's sidecar served on one tagged gate call per layer)
+(Worker_TP0 pid=624) INFO 10-10 20:50:56 [hotsplit.py:650] hotsplit x1 check layer=58 T=2048 rows=1913 act=a16 direct-vs-marlin cos=1.000000 rel=0.00004 row_min_cos=1.00000 worst_row=1764 row_share=0.757 rows_below_0.999=0 old_cos=1.00000 direct-vs-marlin_mx cos=0.999664 marlin-vs-marlin_mx cos=0.999664 xq_rel=0.0266 share=0.557 gate=x2-S6-1791665446
+(Worker_TP0 pid=624) INFO 10-10 20:50:56 [hotsplit.py:650] hotsplit x1 check layer=59 T=2048 rows=1923 act=a16 direct-vs-marlin cos=1.000000 rel=0.00002 row_min_cos=1.00000 worst_row=369 row_share=0.798 rows_below_0.999=0 old_cos=1.00000 direct-vs-marlin_mx cos=0.999614 marlin-vs-marlin_mx cos=0.999614 xq_rel=0.0266 share=0.534 gate=x2-S6-1791665446
+(Worker_TP0 pid=624) INFO 10-10 20:50:56 [hotsplit.py:650] hotsplit x1 check layer=60 T=2048 rows=1914 act=a16 direct-vs-marlin cos=1.000000 rel=0.00004 row_min_cos=1.00000 worst_row=79 row_share=0.079 rows_below_0.999=0 old_cos=0.99999 direct-vs-marlin_mx cos=0.999667 marlin-vs-marlin_mx cos=0.999667 xq_rel=0.0266 share=0.447 gate=x2-S6-1791665446
+
+--- X2-S6/x1-gate-lines-r1.log, lines 58-60
+(Worker_TP1 pid=470) INFO 10-10 20:50:56 [hotsplit.py:650] hotsplit x1 check layer=58 T=2048 rows=1913 act=a16 direct-vs-marlin cos=1.000000 rel=0.00003 row_min_cos=1.00000 worst_row=273 row_share=0.450 rows_below_0.999=0 old_cos=0.99999 direct-vs-marlin_mx cos=0.999621 marlin-vs-marlin_mx cos=0.999621 xq_rel=0.0266 share=0.526 gate=x2-S6-1791665446
+(Worker_TP1 pid=470) INFO 10-10 20:50:56 [hotsplit.py:650] hotsplit x1 check layer=59 T=2048 rows=1922 act=a16 direct-vs-marlin cos=1.000000 rel=0.00002 row_min_cos=1.00000 worst_row=832 row_share=0.280 rows_below_0.999=0 old_cos=1.00000 direct-vs-marlin_mx cos=0.999615 marlin-vs-marlin_mx cos=0.999615 xq_rel=0.0266 share=0.537 gate=x2-S6-1791665446
+(Worker_TP1 pid=470) INFO 10-10 20:50:56 [hotsplit.py:650] hotsplit x1 check layer=60 T=2048 rows=1914 act=a16 direct-vs-marlin cos=1.000000 rel=0.00003 row_min_cos=1.00000 worst_row=1823 row_share=0.333 rows_below_0.999=0 old_cos=0.99999 direct-vs-marlin_mx cos=0.999605 marlin-vs-marlin_mx cos=0.999605 xq_rel=0.0266 share=0.410 gate=x2-S6-1791665446

@@ -1,0 +1,76 @@
+# REBEAT item B, arm B1: MiMo-V2.6-Pro on one Station (left), today's two-tier recipe (J-M hotsplit: hot experts in
+# HBM, the rest in Grace via UVA; Marlin; max-num-seqs 16). 2026-10-09 23:26-23:51 PT, run first; B2 followed on the
+# same Station. Headline = the published knee shape (16 chat prompts, 192 forced out, T 0, thinking off; mean of 3
+# runs); secondary = vllm bench serve 8,192/1,024 C16. Prefix-cache hit read from /metrics around every run.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names, GPU UUIDs and the
+# names of the services stopped for the run replaced with <placeholders>. Nothing else edited. Times are Pacific
+# (PT) unless the line says otherwise (vLLM's own log stamps are UTC = PT + 7 h).
+# Pre-registered before any measurement (REBEAT, 2026-10-09). The full REBEAT write-up is not published yet.
+
+--- master.txt (B1 section)
+2026-10-09 23:26:09 === B1 two-tier (MAXSEQ=16 <path>)
+2026-10-09 23:33:54 mimo26-pro-m5b-c ready after 461 s
+2026-10-09 23:33:58 B1 probe 391: 391
+2026-10-09 23:33:59 B1 knee (published shape) C1/C8/C16 x3
+  KNEE C1: mean 29.41 agg tok/s over 3 clean runs (per-stream 29.41)
+  KNEE C8: mean 60.37 agg tok/s over 3 clean runs (per-stream 7.55)
+  KNEE C16: mean 76.28 agg tok/s over 3 clean runs (per-stream 4.77)
+2026-10-09 23:37:36 B1 vLLM bench 8192/1024 C16 NP 32 (secondary)
+  decode-c16-r1 seed 614256002 warmseed 614256001: decode_agg 63.05 tok/s (C16 x 1000/meanTPOT 253.77 ms) | out_tput 56.19 | meanTTFT 30286.95 ms | failed 0 | prefix_hit 0.00%
+2026-10-09 23:48:28 B1 GSM8K-50
+rebeat-B1: GSM8K 49/50 = 98.0% (request errors 0)
+  timeouts_delta NA words_before NA words_after NA
+2026-10-09 23:51:15 B1 teardown; GPU NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+--- B1/config.txt (image, server cmd; env filtered to HOTSPLIT_* / PEER_* / VLLM_USE* / VLLM_WEIGHT* entries; GPUs)
+image sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71 vllm/vllm-openai:nightly-d05da62e9ccdf8e342b15bf6785d83224cc165af
+repodigests [vllm/vllm-openai@sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71]
+cmd ["--model","/model","--served-model-name","mimo26-pro","--trust-remote-code","--tensor-parallel-size","1","--offload-backend","uva","--cpu-offload-gb","320","--cpu-offload-params","routed_experts.w13_weight","routed_experts.w2_weight","--max-model-len","131072","--max-num-seqs","16","--max-num-batched-tokens","2048","--gpu-memory-utilization","0.96","--compilation-config","{\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}","--tool-call-parser","mimo","--reasoning-parser","mimo","--enable-auto-tool-choice","--generation-config","auto","--moe-backend","marlin","--host","0.0.0.0","--port","30007"]
+env (selected) VLLM_USE_DEEP_GEMM=0 VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY=1 HOTSPLIT_COUNTS=/w/patches/expert_hist_mix.json HOTSPLIT_WEIGHTS=decode=1,prefill=0
+
+name, uuid, power.limit [W], driver_version
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, <gpu-uuid>, 300.00 W, 595.99.02
+NVIDIA GB300, <gpu-uuid>, 1300.00 W, 595.99.02
+GPU 0: NVIDIA GB300 (UUID: <gpu-uuid>)
+(EngineCore pid=403) INFO 10-10 06:31:44 [hotsplit.py:140] hotsplit plan: 69 layers, budget 141.8 GiB (stock HBM experts 141.8 GiB), hot cells 8064/26496, train-weighted coverage 59.2%
+(EngineCore pid=403) INFO 10-10 06:31:44 [hotsplit.py:143] hotsplit per-layer hot counts: {1: 126, 2: 115, 3: 121, 4: 127, 5: 131, 6: 126, 7: 120, 8: 148, 9: 120, 10: 113, 11: 142, 12: 110, 13: 113, 14: 119, 15: 118, 16: 133, 17: 137, 18: 1
+(EngineCore pid=403) INFO 10-10 06:31:53 [hotsplit.py:167] hotsplit: 10/69 layers; HBM free 22.5 GiB; host avail 146.0 GiB
+(EngineCore pid=403) INFO 10-10 06:31:57 [hotsplit.py:167] hotsplit: 20/69 layers; HBM free 28.1 GiB; host avail 142.6 GiB
+(EngineCore pid=403) INFO 10-10 06:32:01 [hotsplit.py:167] hotsplit: 30/69 layers; HBM free 20.4 GiB; host avail 150.2 GiB
+(EngineCore pid=403) INFO 10-10 06:32:05 [hotsplit.py:167] hotsplit: 40/69 layers; HBM free 27.9 GiB; host avail 142.8 GiB
+(EngineCore pid=403) INFO 10-10 06:32:10 [hotsplit.py:167] hotsplit: 50/69 layers; HBM free 21.3 GiB; host avail 149.2 GiB
+(EngineCore pid=403) INFO 10-10 06:32:14 [hotsplit.py:167] hotsplit: 60/69 layers; HBM free 28.1 GiB; host avail 142.2 GiB
+(EngineCore pid=403) INFO 10-10 06:32:17 [hotsplit.py:173] hotsplit done in 33s; HBM free 45.7 GiB; host avail 124.4 GiB
+(EngineCore pid=403) INFO 10-10 06:33:16 [kv_cache_utils.py:2404] GPU KV cache size: 471,441 tokens, Maximum concurrency for 131,072 tokens per request: 3.60x
+--- B1/server.log (vLLM version banner)
+(APIServer pid=1) INFO 10-10 06:26:41 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.29.1rc1.dev422+gd05da62e9 
+--- B1/knee.log (rb_knee.py: Al-ENGR knee.sh workload, own cache_salt per request, /metrics prefix guard)
+knee C1 run1 try1: 29.31 agg tok/s (192 tok / 6.55 s) prefix_hit 0.00%
+knee C1 run2 try1: 29.41 agg tok/s (192 tok / 6.53 s) prefix_hit 0.00%
+knee C1 run3 try1: 29.53 agg tok/s (192 tok / 6.50 s) prefix_hit 0.00%
+KNEE C1: mean 29.41 agg tok/s over 3 clean runs (per-stream 29.41)
+knee C8 run1 try1: 60.61 agg tok/s (1536 tok / 25.34 s) prefix_hit 0.00%
+knee C8 run2 try1: 60.12 agg tok/s (1536 tok / 25.55 s) prefix_hit 0.00%
+knee C8 run3 try1: 60.38 agg tok/s (1536 tok / 25.44 s) prefix_hit 0.00%
+KNEE C8: mean 60.37 agg tok/s over 3 clean runs (per-stream 7.55)
+knee C16 run1 try1: 76.19 agg tok/s (3072 tok / 40.32 s) prefix_hit 0.00%
+knee C16 run2 try1: 76.41 agg tok/s (3072 tok / 40.20 s) prefix_hit 0.00%
+knee C16 run3 try1: 76.25 agg tok/s (3072 tok / 40.29 s) prefix_hit 0.00%
+KNEE C16: mean 76.28 agg tok/s over 3 clean runs (per-stream 4.77)
+--- B1/vbench/summary.txt (vllm bench serve 8,192 in / 1,024 forced out, NP 32; secondary shape)
+== 2026-10-09 23:37:36 PDT mimo26-pro-m5b-c :30007 mimo26-pro mode=decode nonce=614256000 image=vllm/vllm-openai:nightly-d05da62e9ccdf8e342b15bf6785d83224cc165af
+decode-c16-r1 seed 614256002 warmseed 614256001: decode_agg 63.05 tok/s (C16 x 1000/meanTPOT 253.77 ms) | out_tput 56.19 | meanTTFT 30286.95 ms | failed 0 | prefix_hit 0.00%
+DONE 2026-10-09 23:48:28
+--- B1/vbench/decode-c16-r1.log (vllm bench serve; num_warmups=0)
+Maximum request concurrency: 16
+Successful requests:                     32        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  583.17    
+Total input tokens:                      262144    
+Total generated tokens:                  32768     
+Output token throughput (tok/s):         56.19     
+Total token throughput (tok/s):          505.70    
+Mean TTFT (ms):                          30286.95  
+Mean TPOT (ms):                          253.77    
+--- B1/gsm8k.json (summary fields)
+{"label": "rebeat-B1", "n": 50, "correct": 49, "errors": 0}
