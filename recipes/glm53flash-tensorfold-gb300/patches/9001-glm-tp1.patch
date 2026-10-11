@@ -1,0 +1,31 @@
+--- tensorfold/families/glm5_next/__init__.py
++++ tensorfold/families/glm5_next/__init__.py
+@@ -200,7 +200,7 @@
+ 
+ # the CUDA engine's kernels read MLX affine weights of this (bits, group size); EXL3 checkpoints are checked above
+ CUDA_QUANTIZATION = (4, 64)
+-CUDA_TP = (2, 3, 4)                    # GPUs (one per machine) the CUDA engine splits over
++CUDA_TP = (1, 2, 3, 4)                 # GPUs (one per machine) the CUDA engine splits over; 1 = one large GPU (GB300)
+ 
+ 
+ # --spill-gib on CUDA: kept prompt states go to a disk tier (cuda/spill.py) and come back instead of a prefill
+@@ -215,6 +215,8 @@
+     if tp not in CUDA_TP:
+         raise ValueError("GLM-5.3-Flash needs two GPUs or more (2, 3 or 4), one per machine: run the same "
+                          "`tensorfold serve` command with --tp N --rank R --master ADDRESS on each (rank 0 last)")
++    if not master and tp == 1:
++        master = "127.0.0.1"           # one rank: NCCL's rendezvous stays on loopback
+     if not master:
+         raise ValueError(f"--tp {tp} needs --master: rank 0's address on the link between the machines")
+     if not 0 <= int(rank) < tp:
+--- tensorfold/families/glm5_next/cuda/tp.py
++++ tensorfold/families/glm5_next/cuda/tp.py
+@@ -21,7 +21,7 @@
+ from tensorfold.cuda.shares import parts
+ 
+ UNITS = {"heads": 1, "lin": 1, "dense": 128, "moe": 128, "shared": 128, "vocab": 64}
+-SIZES = (2, 3, 4)                     # the engine's tensor-parallel sizes
++SIZES = (1, 2, 3, 4)                  # the engine's tensor-parallel sizes (1: one GPU holds every share)
+ 
+ _LAYER = re.compile(r"(?:^|\.)layers\.(\d+)\.")
+ _FAMILIES = (

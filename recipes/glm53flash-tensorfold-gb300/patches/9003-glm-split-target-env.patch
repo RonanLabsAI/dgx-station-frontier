@@ -1,0 +1,22 @@
+--- tensorfold/families/glm5_next/cuda/qmm.py
++++ tensorfold/families/glm5_next/cuda/qmm.py
+@@ -73,7 +73,9 @@
+ 
+ 
+ # K split rule for shapes without a table entry: split until the column tiles times slices reach this many programs
+-SPLIT_TARGET = 192
++import os as _os
++# TF_GLM_SPLIT_TARGET: programs a matmul aims for (192 = 4 waves of GB10's 48 SMs; a GB300 has ~3x the SMs)
++SPLIT_TARGET = int(_os.environ.get("TF_GLM_SPLIT_TARGET", "192"))
+ 
+ 
+ # Per-shape K slices determine arithmetic equally for every row; group-step, warp, and stage settings preserve bits.
+@@ -84,7 +86,7 @@
+ def split_k(n: int, k: int) -> int:
+     """Choose K slices from shape alone until column tiles times slices reach SPLIT_TARGET; changing the target changes every row equally."""
+ 
+-    forced = SHAPE_SK.get(f"{n}x{k}")
++    forced = SHAPE_SK.get(f"{n}x{k}") if _os.environ.get("TF_GLM_SHAPE_SK", "1") != "0" else None   # 0: target only
+     if forced:
+         return forced
+     tiles = -(-n // BN)

@@ -1,0 +1,14 @@
+GLM-5.3-Flash on one NVIDIA DGX Station GB300 with TensorFold
+
+This recipe's own files (scripts, bench client, patches 9001-9003) are licensed under the Apache License 2.0 (LICENSE).
+
+It builds on, and downloads at build time, work by others under their own terms:
+- TensorFold, by Ash Hart (github.com/ashhart/TensorFold), Apache-2.0 from v0.6.0. Patches 9001-9003 modify it.
+- The GLM-5.3-Flash EXL3 recipe and its 107 patches, by Mia (MiaAI-Lab) and the contributors it credits
+  (github.com/MiaAI-Lab/GLM-5.3-Flash-EXL3-2x-DGX-Sparks-TensorFold), Apache-2.0. Fetched by prepare.sh, not copied here.
+- The checkpoint Mia-AiLab/GLM-5.3-Flash-EXL3-4bpw-TensorFold (Apache-2.0; base model GLM-5.3-Flash by Z.AI, MIT).
+- The EXL3 format, by turboderp (exllamav3, MIT).
+- The drafter incoai/GLM-5.3-Flash-DFlash2, CC BY-NC-ND 4.0 (non-commercial, no derivatives). Downloaded by prepare.sh,
+  never redistributed here. Use DRAFTS=none to serve without it.
+- Benchmark prompts: CNN/DailyMail (abisee/cnn_dailymail), ShareGPT V3 (anon8231489123/ShareGPT_Vicuna_unfiltered),
+  GSM8K (openai/grade-school-math), each under its own license, downloaded at pinned revisions.

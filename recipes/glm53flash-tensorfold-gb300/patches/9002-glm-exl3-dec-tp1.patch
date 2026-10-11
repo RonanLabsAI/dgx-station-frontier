@@ -1,0 +1,26 @@
+--- tensorfold/families/glm5_next/cuda/exl3.cu
++++ tensorfold/families/glm5_next/cuda/exl3.cu
+@@ -1058,10 +1058,11 @@
+ #define ARGS X0, X1, T0, T1, items, counts, members, Z, mats, K, N, P, SK, max_items, E, slots, fuse, xrow, sv0, sv1, \
+              su2, out, limit, done, ld, swz
+     if (steps == 16) dec_launch<16>(ARGS);
++    else if (steps == 32) dec_launch<32>(ARGS);      // one rank's whole 2048-wide experts (TP1): the down projection
+     else if (steps == 12) dec_launch<12>(ARGS);
+     else if (steps == 10) dec_launch<10>(ARGS);
+     else if (steps == 8) dec_launch<8>(ARGS);
+-    else TORCH_CHECK(false, "decode expert kernel: 8, 10, 12 or 16 k steps a warp, not ", steps);
++    else TORCH_CHECK(false, "decode expert kernel: 8, 10, 12, 16 or 32 k steps a warp, not ", steps);
+ #undef ARGS
+     C10_CUDA_KERNEL_LAUNCH_CHECK();
+ }
+--- tensorfold/families/glm5_next/cuda/exl3_mm.py
++++ tensorfold/families/glm5_next/cuda/exl3_mm.py
+@@ -13,7 +13,7 @@
+ 
+ # a rank's expert widths the decode kernel (``dec``) takes: two ranks' 1024, four ranks' 512, three ranks' 768 / 640
+ # (its down projection's K / 64 k steps a warp: 16, 8, 12, 10); others run the grouped kernel (the same bits)
+-DEC_WIDTHS = (1024, 768, 640, 512)
++DEC_WIDTHS = (2048, 1024, 768, 640, 512)   # 2048: one rank (TP1), its down projection 32 k steps a warp
+ # Gate/up and down tile counts, warps, and K splits stay fixed across row counts to preserve each row's bits.
+ GATEUP_CFG = (8, 4, 4)
+ DOWN_CFG = (8, 4, 1)

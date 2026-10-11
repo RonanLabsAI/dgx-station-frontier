@@ -1,0 +1,44 @@
+--- code: 'Write a Python function `merge_intervals(intervals)` that me'
+    finish=stop tool_calls=[]
+    ```python
+    def merge_intervals(intervals):
+        """
+        Merge overlapping closed intervals and return them sorted.
+    
+        Args:
+            intervals: A list of [start, end] pairs (closed intervals).
+    
+        Returns:
+            A sorted list of merged, non-overlapping intervals.
+        """
+        if not intervals:
+        
+--- code: 'In C, write a function `int is_balanced(const char *s)` that'
+    finish=stop tool_calls=[]
+    ```c
+    #include <stddef.h>
+    
+    int is_balanced(const char *s) {
+        /* Fixed-size stack: 64 nested brackets max. */
+        char stack[64];
+        int top = -1;
+    
+        for (; *s; s++) {
+            char c = *s;
+            if (c == '(' || c == '[' || c == '{') {
+                if (top == 63) return 0;  /* overflow: too deep
+--- code: 'Here is a buggy JavaScript function. Find the bug and give t'
+    finish=stop tool_calls=[]
+    ```javascript
+    function sum(arr) {
+      let total = 0;
+      for (let i = 0; i < arr.length; i++) total += arr[i];
+      return total;
+    }
+    ```
+--- tool: "What's the weather in Reykjavik right now, in Celsius?"
+    finish=tool_calls tool_calls=[('get_weather', '{"city":"Reykjavik","unit":"c"}')]
+    
+--- tool: 'How much is 250 US dollars in euros? Then tell me the weathe'
+    finish=tool_calls tool_calls=[('convert_currency', '{"amount":250,"from":"USD","to":"EUR"}'), ('get_weather', '{"city":"Lisbon"}')]
+    I'll get both of those for you now.

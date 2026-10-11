@@ -1,0 +1,71 @@
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+20.5,971345067,21462,45258.8,45216.0,44640,46912,252.3,"void <unnamed>::dec_kernel<(int)8, (int)4, (int)16, (int)0, (bool)1, (int)1, (int)4, (int)0>(const __half *, const __half *, const unsigned int *, const unsigned int *, const int *, const int *, const int *, float *, int, int, int, int, int, int, const __half *, const __half *, const __half *, void *, float, int *)"
+12.2,578031351,21462,26932.8,26912.0,26528,28417,170.8,"void <unnamed>::dec_kernel<(int)8, (int)4, (int)32, (int)1, (bool)0, (int)1, (int)4, (int)0>(const __half *, const __half *, const unsigned int *, const unsigned int *, const int *, const int *, const int *, float *, int, int, int, int, int, int, const __half *, const __half *, const __half *, void *, float, int *)"
+11.1,523884606,18907,27708.5,27680.0,27296,29088,205.3,"void <unnamed>::qmm_kernel<(int)64, (int)16, (int)64, (int)1, (int)4, (int)4, (bool)0, (bool)1, (bool)0>(const __nv_bfloat16 *, const float *, const unsigned int *, const __nv_bfloat16 *, const __nv_bfloat16 *, void *, float *, int, int, int, int, int, int, int)"
+6.4,304358908,5621,54146.8,54080.0,49440,356706,4806.3,_seg_chunks
+5.7,268219774,46080,5820.7,5760.0,5440,7232,189.6,_hc_finish
+4.7,221939002,17374,12774.2,12768.0,12448,13568,117.9,"void <unnamed>::qmm_kernel<(int)64, (int)16, (int)128, (int)1, (int)4, (int)6, (bool)1, (bool)1, (bool)0>(const __nv_bfloat16 *, const float *, const unsigned int *, const __nv_bfloat16 *, const __nv_bfloat16 *, void *, float *, int, int, int, int, int, int, int)"
+3.5,166079592,51611,3217.9,2304.0,1984,8256,1717.6,"void <unnamed>::qmm_kernel<(int)64, (int)16, (int)64, (int)1, (int)4, (int)4, (bool)0, (bool)0, (bool)0>(const __nv_bfloat16 *, const float *, const unsigned int *, const __nv_bfloat16 *, const __nv_bfloat16 *, void *, float *, int, int, int, int, int, int, int)"
+3.3,157547410,27083,5817.2,6145.0,4192,7009,723.4,"void <unnamed>::qmm_kernel<(int)64, (int)16, (int)128, (int)1, (int)8, (int)4, (bool)0, (bool)0, (bool)0>(const __nv_bfloat16 *, const float *, const unsigned int *, const __nv_bfloat16 *, const __nv_bfloat16 *, void *, float *, int, int, int, int, int, int, int)"
+3.0,142793645,7154,19960.0,20768.0,16384,21792,1691.7,"void <unnamed>::qmm_kernel<(int)64, (int)16, (int)64, (int)1, (int)4, (int)4, (bool)1, (bool)1, (bool)0>(const __nv_bfloat16 *, const float *, const unsigned int *, const __nv_bfloat16 *, const __nv_bfloat16 *, void *, float *, int, int, int, int, int, int, int)"
+2.4,114677781,27136,4226.0,4224.0,3872,5344,104.9,_router_part
+2.0,95859355,512,187225.3,187041.5,186369,190594,595.4,_fmm
+1.9,91894951,45990,1998.2,1984.0,1920,2528,57.5,"<unnamed>::hc_partial_kernel(const __nv_bfloat16 *, const __nv_bfloat16 *, float *, int)"
+1.9,89964596,21462,4191.8,4192.0,3968,4800,86.8,"void <unnamed>::qmm_kernel<(int)64, (int)16, (int)64, (int)1, (int)4, (int)4, (bool)1, (bool)0, (bool)0>(const __nv_bfloat16 *, const float *, const unsigned int *, const __nv_bfloat16 *, const __nv_bfloat16 *, void *, float *, int, int, int, int, int, int, int)"
+1.9,88102587,21462,4105.1,4096.0,3808,4704,112.1,"<unnamed>::gateup_epilogue_kernel(const float *, const int *, const __half *, const __half *, const __half *, __half *, int, int, int, int, float)"
+1.8,85677433,17374,4931.4,4928.0,4448,5824,182.7,"void <unnamed>::step_seg_kernel<(int)4, (int)16>(int, const int *, float *, unsigned long, unsigned long, const float *, const float *, const __nv_bfloat16 *, const float *, const float *, __nv_bfloat16 *)"
+1.8,84864484,21504,3946.5,3968.0,3744,4672,120.2,_topk
+1.6,73644379,43946,1675.8,1856.0,1056,2144,300.7,"void <unnamed>::reduce_kernel<(bool)0>(const float *, void *, long long, int)"
+1.4,66221834,46080,1437.1,1440.0,1280,2496,141.7,_hc_post
+1.2,56712669,21504,2637.3,2593.0,2400,4064,93.4,"<unnamed>::plan_kernel(const int *, int, int, int, int *, int *, int *)"
+1.2,56307637,57754,975.0,992.0,736,1920,115.0,_group_sums
+1.1,53190294,21504,2473.5,2464.0,2272,4576,118.8,_combine_sy
+1.0,47125993,17374,2712.4,2656.0,2496,4128,166.1,"<unnamed>::prep_seg_kernel(int, const int *, int, const __nv_bfloat16 *, int, int, const __nv_bfloat16 *, int, const __nv_bfloat16 *, unsigned long, const __nv_bfloat16 *, const float *, const float *, float, float *, float *, __nv_bfloat16 *, float *, float *)"
+0.8,37403181,27136,1378.4,1312.0,1280,2688,149.0,_router_sum
+0.7,35377986,21462,1648.4,1633.0,1536,1952,52.0,"void <unnamed>::reduce_kernel<(bool)1>(const float *, void *, long long, int)"
+0.7,32919922,5621,5856.6,5888.0,5312,6848,319.3,_absorb_q
+0.6,29399248,21504,1367.2,1344.0,1184,2144,111.8,"void <unnamed>::rot_in_kernel<(bool)1>(const __nv_bfloat16 *, int, const int *, const __half *, const __half *, __half *, __half *, int, int)"
+0.6,29048310,17374,1671.9,1664.0,1632,1920,17.7,"<unnamed>::out_kernel(int, const __nv_bfloat16 *, const __nv_bfloat16 *, int, const __nv_bfloat16 *, float, __nv_bfloat16 *)"
+0.6,26257907,28105,934.3,928.0,736,1536,124.1,_select_split
+0.6,26227996,5621,4666.1,4672.0,4384,5696,133.3,_expand_v
+0.5,22406943,23040,972.5,960.0,928,1920,72.8,_swiglu
+0.4,20872532,42,496965.0,476355.0,323874,732838,89977.8,"void <unnamed>::prompt_gateup_kernel<(int)64, (int)8, (bool)1>(const __half *, const __half *, const unsigned int *, const unsigned int *, const int *, const int *, const int *, const __half *, const __half *, const __half *, __half *, int, int, int, float, int, const int *)"
+0.4,17537076,11776,1489.2,1536.0,1280,2272,129.8,_rmsnorm
+0.2,11760527,2048,5742.4,5728.0,5504,6336,149.4,"at::native::mbtopk::computeDigitCumSum(short *, unsigned int *, unsigned int)"
+0.2,11598370,5621,2063.4,2048.0,2016,2528,56.8,_seg_scores
+0.2,10434865,42,248449.2,238385.5,162593,364547,44684.4,"void <unnamed>::prompt_down_kernel<(int)64, (int)8>(const __half *, const unsigned int *, const int *, const int *, const int *, const __half *, float *, int, int, int, const int *)"
+0.2,9528097,5621,1695.1,1728.0,1504,2656,117.6,_seg_index_write
+0.2,8482528,5632,1506.1,1504.0,1472,2400,36.2,_merge
+0.2,7397207,5621,1316.0,1280.0,1248,2400,76.4,_seg_lat_write
+0.2,7127309,5621,1268.0,1248.0,1184,1664,63.3,"void <unnamed>::seg_scores_kernel<(int)2>(const __nv_bfloat16 *, const __nv_bfloat16 *, int, const unsigned char *, int, float *, long long, const int *, const int *, const int *, const int *, const int *, const int *, int *, int, float, float)"
+0.1,5885994,5621,1047.1,704.0,672,3072,572.4,_seg_pool_keys
+0.1,5162886,48,107560.1,129601.0,32192,131393,41310.2,"void <unnamed>::prefill_kernel<(int)64, (int)128, (int)128, (int)2, (int)2, (int)2, (bool)0>(const __nv_bfloat16 *, const unsigned int *, const __nv_bfloat16 *, const __nv_bfloat16 *, void *, int, int, int, int, int, int)"
+0.1,5092135,90,56579.3,70897.0,19168,140737,40994.4,"void <unnamed>::prefill_kernel<(int)64, (int)64, (int)64, (int)1, (int)4, (int)4, (bool)1>(const __nv_bfloat16 *, const unsigned int *, const __nv_bfloat16 *, const __nv_bfloat16 *, void *, int, int, int, int, int, int)"
+0.1,4956716,2048,2420.3,2208.0,2144,3392,382.5,"void at::native::mbtopk::computeBlockDigitCounts<float, unsigned int, unsigned int, (int)1>(at::cuda::detail::TensorInfo<const T1, T2>, unsigned int, unsigned int *, unsigned int, T2, int, int, unsigned int, T3, T3 *, short *)"
+0.1,4900070,2048,2392.6,2368.0,2112,3040,156.1,"void at::native::mbtopk::computeBlockwiseWithinKCounts<unsigned int, float>(T1 *, short *, unsigned int *, unsigned int *, unsigned int, int, bool, unsigned int *, T2 *, unsigned int *, T1 *, unsigned int)"
+0.1,4232537,6135,689.9,672.0,640,1216,77.5,"void at::native::vectorized_elementwise_kernel<(int)4, at::native::FillFunctor<int>, std::array<char *, (unsigned long)1>>(int, T2, T3)"
+0.1,3075384,1024,3003.3,3008.5,2688,3488,234.8,"void at_cuda_detail::cub::detail::scan_by_key::DeviceScanByKeyKernel<at_cuda_detail::cub::detail::scan_by_key::policy_hub<thrust::_V_300304_SM_800_860_900_1000_1100_1200::transform_iterator<at::native::mbtopk::BlockIdxToKey, thrust::_V_300304_SM_800_860_900_1000_1100_1200::counting_iterator<unsigned int, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default, thrust::_V_300304_SM_800_860_900_1000_1100_1200::compile_time_value<(int)1>>, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default>, unsigned int, unsigned int, cuda::std::__4::plus<void>>::Policy1000, thrust::_V_300304_SM_800_860_900_1000_1100_1200::transform_iterator<at::native::mbtopk::BlockIdxToKey, thrust::_V_300304_SM_800_860_900_1000_1100_1200::counting_iterator<unsigned int, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default, thrust::_V_300304_SM_800_860_900_1000_1100_1200::compile_time_value<(int)1>>, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default>, unsigned int *, unsigned int *, at_cuda_detail::cub::ReduceByKeyScanTileState<unsigned int, int, (bool)1>, cuda::std::__4::equal_to<void>, cuda::std::__4::plus<void>, at_cuda_detail::cub::NullType, unsigned long long, unsigned int, unsigned int>(T2, T11 *, T3, T4, T5, int, T6, T7, T8, T9)"
+0.1,2575954,132,19514.8,3824.0,3072,37248,16688.1,"void <unnamed>::prefill_kernel<(int)64, (int)64, (int)64, (int)1, (int)4, (int)4, (bool)0>(const __nv_bfloat16 *, const unsigned int *, const __nv_bfloat16 *, const __nv_bfloat16 *, void *, int, int, int, int, int, int)"
+0.0,2344114,512,4578.3,4576.0,3232,5056,126.5,"void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase &)::[lambda() (instance 3)]::operator ()() const::[lambda() (instance 7)]::operator ()() const::[lambda(float) (instance 1)], std::array<char *, (unsigned long)2>, (int)4, TrivialOffsetCalculator<(int)1, unsigned int>, TrivialOffsetCalculator<(int)1, unsigned int>, at::native::memory::LoadWithCast<(int)1>, at::native::memory::StoreWithCast<(int)1>>(int, T1, T2, T4, T5, T6, T7)"
+0.0,2043762,512,3991.7,4000.0,3552,4512,256.2,"void at::native::mbtopk::gatherTopK<float, unsigned int, (int)1>(at::cuda::detail::TensorInfo<const T1, T2>, T2, T2, bool, unsigned int, T2, at::cuda::detail::TensorInfo<T1, T2>, T2, at::cuda::detail::TensorInfo<long, T2>, T2, unsigned int, unsigned int, T1 *, unsigned int *, unsigned int *, unsigned int)"
+0.0,1907729,511,3733.3,3744.0,3520,4224,96.1,_conv_shift_seg
+0.0,1619599,34,47635.3,47568.5,46913,49601,497.3,"<unnamed>::chunk_kernel(int, const __nv_bfloat16 *, int, int, const __nv_bfloat16 *, int, const __nv_bfloat16 *, int, const __nv_bfloat16 *, const __nv_bfloat16 *, const float *, const float *, const float *, const __nv_bfloat16 *, float, float, int, int, __nv_bfloat16 *, float *)"
+0.0,990374,512,1934.3,1920.0,1856,2176,61.1,"void at::native::mbtopk::computeBlockwiseKthCounts<unsigned int>(T1 *, short *, unsigned int, unsigned int, unsigned int *)"
+0.0,906469,512,1770.4,1696.0,1568,3296,215.8,_embed_b16
+0.0,883366,512,1725.3,1696.0,1632,2112,57.2,"void at::native::<unnamed>::CatArrayBatchedCopy_alignedK_contig<at::native::<unnamed>::OpaqueType<(unsigned int)4>, unsigned int, (int)2, (int)128, (int)1, (int)16>(T1 *, at::native::<unnamed>::CatArrInputTensorMetadata<T1, T2, T4, T5>, at::native::<unnamed>::TensorSizeStride<T2, (unsigned int)4>, int, T2)"
+0.0,854253,1024,834.2,864.0,672,1280,108.4,"void at_cuda_detail::cub::detail::scan_by_key::DeviceScanByKeyInitKernel<at_cuda_detail::cub::ReduceByKeyScanTileState<unsigned int, int, (bool)1>, thrust::_V_300304_SM_800_860_900_1000_1100_1200::transform_iterator<at::native::mbtopk::BlockIdxToKey, thrust::_V_300304_SM_800_860_900_1000_1100_1200::counting_iterator<unsigned int, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default, thrust::_V_300304_SM_800_860_900_1000_1100_1200::compile_time_value<(int)1>>, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default, thrust::_V_300304_SM_800_860_900_1000_1100_1200::use_default>, unsigned long long>(T1, T2, cuda::std::__4::iterator_traits<T2>::value_type *, T3, int)"
+0.0,844486,90,9383.2,9376.0,8768,10336,255.0,_hc_partial_mma
+0.0,820003,512,1601.6,1568.0,1504,1920,86.5,"void at::native::vectorized_elementwise_kernel<(int)2, at::native::CUDAFunctorOnSelf_add<long>, std::array<char *, (unsigned long)2>>(int, T2, T3)"
+0.0,792069,512,1547.0,1536.0,1440,1888,59.2,"void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase &)::[lambda() (instance 3)]::operator ()() const::[lambda() (instance 3)]::operator ()() const::[lambda(int) (instance 1)], std::array<char *, (unsigned long)2>, (int)4, TrivialOffsetCalculator<(int)1, unsigned int>, TrivialOffsetCalculator<(int)1, unsigned int>, at::native::memory::LoadWithCast<(int)1>, at::native::memory::StoreWithCast<(int)1>>(int, T1, T2, T4, T5, T6, T7)"
+0.0,552004,11,50182.2,50176.0,49888,50368,135.9,_dense_chunks
+0.0,488325,512,953.8,960.0,832,1248,84.9,"void at::native::mbtopk::fill<unsigned int, unsigned int>(T1 *, T1, T2)"
+0.0,399233,512,779.8,768.0,768,1568,38.0,_stream_mean
+0.0,119680,42,2849.5,2848.0,2656,3136,128.2,"<unnamed>::prompt_order_kernel(const int *, const int *, int *, int, int)"
+0.0,83969,11,7633.5,7584.0,7296,8064,220.4,_expand_mma
+0.0,70561,11,6414.6,6368.0,6208,6848,194.8,_absorb_mma
+0.0,63008,34,1853.2,1856.0,1824,2080,48.2,_conv_shift
+0.0,40288,1,40288.0,40288.0,40288,40288,0.0,"void at::native::vectorized_elementwise_kernel<(int)4, at::native::FillFunctor<float>, std::array<char *, (unsigned long)1>>(int, T2, T3)"
+0.0,31296,11,2845.1,2816.0,2432,3200,288.2,_pool_keys
+0.0,22816,11,2074.2,2048.0,1888,2432,187.0,_index_write
+0.0,20128,11,1829.8,1792.0,1568,2336,241.1,_lat_write
+0.0,3584,1,3584.0,3584.0,3584,3584,0.0,"void at::native::vectorized_elementwise_kernel<(int)8, at::native::FillFunctor<c10::BFloat16>, std::array<char *, (unsigned long)1>>(int, T2, T3)"

@@ -1,0 +1,214 @@
+{
+ "seed": 20261010,
+ "prefix_uniq_tokens": 64,
+ "plan": [
+  [
+   "warm-short",
+   "short",
+   4
+  ],
+  [
+   "warm-long8k",
+   "long8k",
+   1
+  ],
+  [
+   "c1-r1",
+   "short",
+   5
+  ],
+  [
+   "c1-r2",
+   "short",
+   5
+  ],
+  [
+   "c1-r3",
+   "short",
+   5
+  ],
+  [
+   "c4-r1",
+   "short",
+   16
+  ],
+  [
+   "c1long-r1",
+   "long8k",
+   3
+  ],
+  [
+   "prefill8k",
+   "long8k",
+   3
+  ],
+  [
+   "warm-long32k",
+   "long32k",
+   1
+  ],
+  [
+   "prefill32k",
+   "long32k",
+   3
+  ],
+  [
+   "spare-short",
+   "short",
+   24
+  ],
+  [
+   "spare-long8k",
+   "long8k",
+   3
+  ],
+  [
+   "warm-c16",
+   "short",
+   16
+  ],
+  [
+   "c16-r1",
+   "short",
+   64
+  ],
+  [
+   "prof-warm",
+   "short",
+   2
+  ],
+  [
+   "prof",
+   "short",
+   1
+  ]
+ ],
+ "long_instruction": "\n\nFor each article above, write a detailed summary of its main events, people and claims. Then explain how the articles relate to one another.",
+ "sources": {
+  "long": "abisee/cnn_dailymail @ 96df5e686bee6baa90b8bee7c28b81fa3fa6223d 3.0.0/test-00000-of-00001.parquet",
+  "short": "anon8231489123/ShareGPT_Vicuna_unfiltered @ 192ab2185289094fc556ec8ce5ce1e8e587154ca ShareGPT_V3_unfiltered_cleaned_split.json",
+  "tokenizer": "Mia-AiLab/GLM-5.3-Flash-EXL3-4bpw-TensorFold @ 078455ff tokenizer.json",
+  "sha256": {
+   "test.parquet": "04e322d2634a96dba76bf9a6294fbbe48e0b36abeae43f13d86ba2c3bebffe4e",
+   "sg.json": "35f0e213ce091ed9b9af2a1f0755e9d39f9ccec34ab281cd4ca60d70f6479ba4",
+   "tokenizer.json": "19e773648cb4e65de8660ea6365e10acca112d42a854923df93db4a6f333a82d"
+  }
+ },
+ "files": {
+  "warm-short.jsonl": "f5d3d2746ef2fe21ad27761f85ce908ffe7c1000b636155e29ee4dbc6996db6d",
+  "warm-long8k.jsonl": "24bd6f1a58251d5bddbc47a392c36dce05fb59d28b7e96fce646fd21d6a2146b",
+  "c1-r1.jsonl": "f3d43e38634284f5766dcc91aa467565b3e057a7c9be284635ae3a62672495a1",
+  "c1-r2.jsonl": "f9b8c6f6bf6ec91f2ff98638213943ebae334e107ca33f88dc86bbe86a94362d",
+  "c1-r3.jsonl": "c34ee641ec2c1eab0f241214d363c87a93db162fe5384ed23fce1ff8c9b700a4",
+  "c4-r1.jsonl": "b274a0a27fa5e418cf9ab50f75fbad7c608cc73c27daa61227fb936952eeee02",
+  "c1long-r1.jsonl": "0f72a1e63bc7ca5d854f0eb214e7a205d3a180ff3668efc35c0721a9eef09bf5",
+  "prefill8k.jsonl": "b5833f1ac05c00707a0df1e57630db1049d571846c1d039032e08022753c9251",
+  "warm-long32k.jsonl": "39be84570f2bebb6fc06645e18819fe0a4788732b261b51bf9899031f3b37675",
+  "prefill32k.jsonl": "8e1d8f57c167aaa4939dfe086ccc12d5b46f07e1836d4e77d65dc9a26c8cae1c",
+  "spare-short.jsonl": "25abc298bf7643381bbb1a03a988fdd98693df4c92b24b2ac3ce7486e95793e8",
+  "spare-long8k.jsonl": "d8c8ce163eb7d11c9a8968d91757815376a81624de800224ffdaab71f1a35116",
+  "warm-c16.jsonl": "0843b16e02b036a5e119eebb6af822b6402332c29f5021a085737561fcedb2c7",
+  "c16-r1.jsonl": "9232226da39e1dc638cb09d389443bd368a78a7e642661df20f720d9c39e51d4",
+  "prof-warm.jsonl": "759ce4ebde2b52cfb982048b64e23ae1bc1baad1dcf5f848e5dbf3dafa0d2c1b",
+  "prof.jsonl": "3a5aefd3a598598d0a6ac3053de7a7a00de619f0e939390739ad17a1d9c425d7"
+ },
+ "stats": {
+  "warm-short": {
+   "pool": "short",
+   "n": 4,
+   "min_tokens": 10,
+   "max_tokens": 94
+  },
+  "warm-long8k": {
+   "pool": "long8k",
+   "n": 1,
+   "min_tokens": 8192,
+   "max_tokens": 8192
+  },
+  "c1-r1": {
+   "pool": "short",
+   "n": 5,
+   "min_tokens": 9,
+   "max_tokens": 277
+  },
+  "c1-r2": {
+   "pool": "short",
+   "n": 5,
+   "min_tokens": 10,
+   "max_tokens": 80
+  },
+  "c1-r3": {
+   "pool": "short",
+   "n": 5,
+   "min_tokens": 8,
+   "max_tokens": 226
+  },
+  "c4-r1": {
+   "pool": "short",
+   "n": 16,
+   "min_tokens": 8,
+   "max_tokens": 217
+  },
+  "c1long-r1": {
+   "pool": "long8k",
+   "n": 3,
+   "min_tokens": 8192,
+   "max_tokens": 8192
+  },
+  "prefill8k": {
+   "pool": "long8k",
+   "n": 3,
+   "min_tokens": 8192,
+   "max_tokens": 8192
+  },
+  "warm-long32k": {
+   "pool": "long32k",
+   "n": 1,
+   "min_tokens": 32768,
+   "max_tokens": 32768
+  },
+  "prefill32k": {
+   "pool": "long32k",
+   "n": 3,
+   "min_tokens": 32768,
+   "max_tokens": 32768
+  },
+  "spare-short": {
+   "pool": "short",
+   "n": 24,
+   "min_tokens": 9,
+   "max_tokens": 398
+  },
+  "spare-long8k": {
+   "pool": "long8k",
+   "n": 3,
+   "min_tokens": 8192,
+   "max_tokens": 8192
+  },
+  "warm-c16": {
+   "pool": "short",
+   "n": 16,
+   "min_tokens": 8,
+   "max_tokens": 330
+  },
+  "c16-r1": {
+   "pool": "short",
+   "n": 64,
+   "min_tokens": 8,
+   "max_tokens": 336
+  },
+  "prof-warm": {
+   "pool": "short",
+   "n": 2,
+   "min_tokens": 36,
+   "max_tokens": 162
+  },
+  "prof": {
+   "pool": "short",
+   "n": 1,
+   "min_tokens": 18,
+   "max_tokens": 18
+  }
+ },
+ "cnn_articles_used": 255
+}

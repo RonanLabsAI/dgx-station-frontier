@@ -1,0 +1,90 @@
+# GLM-5.3-Flash EXL3 4bpw on ONE DGX Station GB300 with TensorFold v0.6.0 + Mia's 107 patches + ours (9001-9003), 2026-10-10 PT.
+# Excerpt: lines selected verbatim from the run outputs named below; GPU UUID and home path replaced with <placeholders>.
+# Nothing else edited. decode = (completion_tokens-1)/(last-first delta); C1 = mean of 3; prefill = prompt_tokens/TTFT at C1, 16-token reply;
+# GSM8K-50 = first 50 test rows, thinking on, greedy, C4. Prompts: ShareGPT V3 first turns; CNN/DailyMail 3.0.0 joined to 8,192 / 32,768 tokens.
+
+--- run-r1.out: ARM mia-drafts: Mia's defaults at TP1 (patch 9001), DFlash2 drafts on (16:29-16:41 PT)
+[2026-10-10 16:29:15 PDT] preflight: image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-ngc, out <home>/bench/tensorfold-20261010/b1-r1-ngc-q4-dflash2
+image sha256:7ddd5e32429247daa56f537a204745f154c221ba5502c7eb3f25b70ad7025333
+[2026-10-10 16:29:16 PDT] serve: GB300 <gb300-uuid>, context 1048576, parallel 4, dense q4, drafts dflash2
+[2026-10-10 16:37:42 PDT] healthy after 505 s; GB300 used 200348 MiB
+{"n": 50, "correct": 49, "acc": 0.98, "runaways": 0, "errors": 0, "think": 1, "pass_95": true}
+C1 decode tok/s (mean of 3 runs): 160.4 [155.9, 157.4, 167.9]
+C1 output tok/s (mean of 3 runs): 155.9
+C4 aggregate output tok/s: 306.0 | per-request decode 83.6540218751431
+C1 decode after 8K prompt: 158.55873768627063
+prefill tok/s 8K / 32K: 4473.205765194762 / 4495.778827107637
+max cached fraction over all runs: 0.0 | contaminated: []
+
+--- run-r2.out: ARM mia-nodrafts: same, --no-drafts (16:41-16:54 PT)
+[2026-10-10 16:41:27 PDT] preflight: image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-ngc, out <home>/bench/tensorfold-20261010/b1-r2-ngc-q4-nodrafts
+image sha256:7ddd5e32429247daa56f537a204745f154c221ba5502c7eb3f25b70ad7025333
+[2026-10-10 16:41:28 PDT] serve: GB300 <gb300-uuid>, context 1048576, parallel 4, dense q4, drafts none
+[2026-10-10 16:49:43 PDT] healthy after 495 s; GB300 used 199216 MiB
+{"n": 50, "correct": 49, "acc": 0.98, "runaways": 0, "errors": 0, "think": 1, "pass_95": true}
+C1 decode tok/s (mean of 3 runs): 91.7 [91.9, 91.6, 91.7]
+C1 output tok/s (mean of 3 runs): 90.3
+C4 aggregate output tok/s: 182.7 | per-request decode 55.29959971497122
+C1 decode after 8K prompt: 88.35261031135383
+prefill tok/s 8K / 32K: 4550.552220148032 / 4568.771809021171
+max cached fraction over all runs: 0.0 | contaminated: []
+
+--- ab1.out: ROUND 1 config A/B (same image 9ec20ee9): A0 baseline repeat, A2 = TF_GLM_L2PF=0
+[2026-10-10 17:18:58 PDT] preflight: image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-ngc, out <home>/bench/tensorfold-20261010/b1-ab1-P
+image sha256:9ec20ee9c4bfcc64660ba2eb94ec668f0921b44a0041e4fe6ca328ff800187c9
+[2026-10-10 17:18:59 PDT] serve: GB300 <gb300-uuid>, context 1048576, parallel 4, dense q4, drafts none, image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-ngc, profile 1
+[2026-10-10 17:28:25 PDT] healthy after 566 s; GB300 used 199240 MiB
+[2026-10-10 17:29:10 PDT] preflight: image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-ngc, out <home>/bench/tensorfold-20261010/b1-ab1-A0
+image sha256:9ec20ee9c4bfcc64660ba2eb94ec668f0921b44a0041e4fe6ca328ff800187c9
+[2026-10-10 17:29:10 PDT] serve: GB300 <gb300-uuid>, context 1048576, parallel 4, dense q4, drafts dflash2, image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-ngc, profile 0
+[2026-10-10 17:36:15 PDT] healthy after 424 s; GB300 used 200348 MiB
+C1 decode tok/s (mean of 3 runs): 160.8 [156.3, 157.9, 168.1]
+C1 output tok/s (mean of 3 runs): 156.3
+C4 aggregate output tok/s: 306.4 | per-request decode 83.75999819454977
+C1 decode after 8K prompt: 158.81121974895663
+prefill tok/s 8K / 32K: 4480.3612401261125 / 4499.931883961284
+max cached fraction over all runs: 0.0 | contaminated: []
+[2026-10-10 17:38:47 PDT] preflight: image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-ngc, out <home>/bench/tensorfold-20261010/b1-ab1-A1
+image sha256:9ec20ee9c4bfcc64660ba2eb94ec668f0921b44a0041e4fe6ca328ff800187c9
+[2026-10-10 17:38:48 PDT] serve: GB300 <gb300-uuid>, context 1048576, parallel 4, dense fp8, drafts dflash2, image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-ngc, profile 0
+[2026-10-10 17:46:04 PDT] healthy after 435 s; GB300 used 204598 MiB
+{"n": 50, "correct": 49, "acc": 0.98, "runaways": 0, "errors": 0, "think": 1, "pass_95": true}
+C1 decode tok/s (mean of 3 runs): 151.8 [144.5, 151.0, 159.8]
+C1 output tok/s (mean of 3 runs): 147.5
+C4 aggregate output tok/s: 259.1 | per-request decode 81.50516752714282
+C1 decode after 8K prompt: 148.44860646452935
+prefill tok/s 8K / 32K: 4115.94919777799 / 4134.251464375815
+max cached fraction over all runs: 0.0 | contaminated: []
+[2026-10-10 17:49:23 PDT] preflight: image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-ngc, out <home>/bench/tensorfold-20261010/b1-ab1-A2
+image sha256:9ec20ee9c4bfcc64660ba2eb94ec668f0921b44a0041e4fe6ca328ff800187c9
+[2026-10-10 17:49:23 PDT] extra env: TF_GLM_L2PF=0
+[2026-10-10 17:49:23 PDT] serve: GB300 <gb300-uuid>, context 1048576, parallel 4, dense q4, drafts dflash2, image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-ngc, profile 0
+[2026-10-10 17:55:58 PDT] healthy after 394 s; GB300 used 200302 MiB
+C1 decode tok/s (mean of 3 runs): 164.7 [160.1, 161.7, 172.3]
+C1 output tok/s (mean of 3 runs): 160.0
+C4 aggregate output tok/s: 310.5 | per-request decode 84.92800332036667
+C1 decode after 8K prompt: 162.81286472024578
+prefill tok/s 8K / 32K: 4481.970755983747 / 4499.058093459812
+max cached fraction over all runs: 0.0 | contaminated: []
+[2026-10-10 17:58:28 PDT] preflight: image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-ngc, out <home>/bench/tensorfold-20261010/b1-ab1-A3
+image sha256:9ec20ee9c4bfcc64660ba2eb94ec668f0921b44a0041e4fe6ca328ff800187c9
+[2026-10-10 17:58:28 PDT] serve: GB300 <gb300-uuid>, context 1048576, parallel 16, dense q4, drafts dflash2, image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-ngc, profile 0
+
+--- best.out: ARM gb300 (tuned): patches 9001+9002+9003, TF_GLM_L2PF=0, TF_GLM_SPLIT_TARGET=576, TF_GLM_SHAPE_SK=0, --parallel 8 (19:07-19:21 PT)
+[2026-10-10 19:07:50 PDT] preflight: image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-dec-ngc, out <home>/bench/tensorfold-20261010/b1-best-dec-p8
+image sha256:cd07e84a7d60e24f38e6855499bf8939ca84646811c1714583dd8ff21a66310e
+[2026-10-10 19:07:50 PDT] extra env: TF_GLM_L2PF=0
+[2026-10-10 19:07:50 PDT] extra env: TF_GLM_SPLIT_TARGET=576
+[2026-10-10 19:07:50 PDT] extra env: TF_GLM_SHAPE_SK=0
+[2026-10-10 19:07:50 PDT] serve: GB300 <gb300-uuid>, context 1048576, parallel 8, dense q4, drafts dflash2, image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-dec-ngc, profile 0
+[2026-10-10 19:15:55 PDT] healthy after 485 s; GB300 used 202570 MiB
+{"n": 50, "correct": 49, "acc": 0.98, "runaways": 0, "errors": 0, "think": 1, "pass_95": true}
+C1 decode tok/s (mean of 3 runs): 173.1 [169.1, 164.6, 185.7]
+C1 output tok/s (mean of 3 runs): 168.3
+C4 aggregate output tok/s: 313.8 | per-request decode 84.4835596008493
+C1 decode after 8K prompt: 173.45555271073206
+prefill tok/s 8K / 32K: 4500.440647489264 / 4518.435899350326
+max cached fraction over all runs: 0.0 | contaminated: []
+[2026-10-10 19:19:05 PDT] bench c8-r1: slot c16-r1, C8, max_tokens 1024, seed 1611
+  decode 56.0097620914384 tok/s/req | output 53.80383283598312 | agg 403.8 | ttft 0.2190225670037762 s | prefill 256.232864574041 | cached max 0.000 | finish ['length', 'stop']
+

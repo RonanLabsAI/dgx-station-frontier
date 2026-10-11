@@ -1,0 +1,37 @@
+{
+ "label": "prefill8k",
+ "slot": "/opt/b1/pool/prefill8k.jsonl",
+ "conc": 1,
+ "seed": 182,
+ "think": 0,
+ "max_tokens": 16,
+ "requests": 3,
+ "wall_s": 5.918571510002948,
+ "sum_completion_tokens": 48,
+ "aggregate_output_tps": 8.110065058583045,
+ "decode_tps": {
+  "mean": 88.00827974725165,
+  "median": 87.97676148218515,
+  "n": 3
+ },
+ "output_tps": {
+  "mean": 8.11366607235978,
+  "median": 8.135926650235815,
+  "n": 3
+ },
+ "ttft_s": {
+  "mean": 1.8015877926178898,
+  "median": 1.796086497954093,
+  "n": 3
+ },
+ "prefill_tps": {
+  "mean": 4550.552220148032,
+  "median": 4564.368146711349,
+  "n": 3
+ },
+ "max_cached_frac": 0.0,
+ "finish_reasons": [
+  "length"
+ ],
+ "contaminated": false
+}
