@@ -9,7 +9,7 @@ Six recipes and a microbenchmark atlas (the Nemotron and Kimi K3 recipes were ad
 
 | Folder | What it is |
 |---|---|
-| [`recipes/dsv41-flash-sidecar/`](recipes/dsv41-flash-sidecar/) | DeepSeek-V4.1-Flash on one Station, with the RTX PRO 6000 serving the cold experts (original-el8's sidecar design on public b12x). Also run as two independent copies, one per Station (DP2) |
+| [`recipes/dsv41-flash-sidecar/`](recipes/dsv41-flash-sidecar/) | DeepSeek-V4.1-Flash on one Station, with the RTX PRO 6000 serving the cold experts (original-el8's sidecar design on public b12x). Also run as two independent copies, one per Station (DP2). Plus prefill-biased expert slots (pre-registered): +7% `16K` prefill against our own same-session recipe, decode unchanged, long-context accuracy non-inferior |
 | [`recipes/dsv4-pro-two-stations/`](recipes/dsv4-pro-two-stations/) | DeepSeek-V4-Pro-0813 (1.6T parameters) across both Stations: E1 stock, E2 hot/cold expert split, E3 with an RTX PRO 6000 warm-expert tier on each Station. Plus the bundled DSpark drafter: hung unfixed, then made servable by a rank-symmetric guard and skip-draft (20-min streaming soak passed) |
 | [`recipes/nemotron-ultra/`](recipes/nemotron-ultra/) | NVIDIA Nemotron 3 Ultra 550B-A55B NVFP4 (general and IOI competitive-coding checkpoints) on one Station with routed experts in Grace memory, and on two Stations with every weight in HBM. Stock vLLM, no patches |
 | [`recipes/kimi-k3/`](recipes/kimi-k3/) | Moonshot Kimi K3 at 3 bits (vellum W3A16) across both Stations in vLLM, with most routed experts in Grace memory (load hook and four load fixes included); and the 1.6-bit GGUF in llama.cpp on one Station, two Stations and four GPUs, with our C2C zero-copy patch and a CUDA 13.2 miscompile warning |

@@ -1,0 +1,151 @@
+# Stage 0 confirmation C1, 2026-10-10 18:08-19:21 PT, fresh boots in REVERSED order U300, A0; catid C1 x8
+# (the section header still says 'C1 x3': the runner label was not updated; the eight decode-c1-r1..r8 lines below are the runs).
+# No placebo arm in C1 by design (amendment C1), so the 'P45: no result' line is expected.
+# Scrubbed excerpt of the runner's master log (one Station: GB300 + RTX PRO 6000 sidecar, DeepSeek-V4.1-Flash).
+# Removed: host paths, container names of the services stopped/restored around the run, GPU UUIDs, staging lines.
+# Decode lines are the full lines from each arm's bench summary (the master log truncates them).
+# steptime columns: label, try, step_ms (1000 x delta sum / delta count of vllm:inter_token_latency_seconds over the
+# run; one observation per request per engine step, so acceptance-independent), ITL observation count, delta of
+# vllm:num_preemptions_total over the run.
+# Image vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b (sha256:3af6a45b...), driver 595.99.02,
+# GB300 power.limit 1,300 W, RTX PRO 6000 Max-Q 300 W. Maps: rowmap-mix-v1.json (A0, original-el8),
+# rowmap-s0-u300.json, rowmap-s0-p45.json, rowmap-e2-x315.json, rowmap-e2-x330.json (built from el8's public
+# calibration counts only; recipes/dsv41-flash-sidecar/stage0/).
+2026-10-10 18:08:31 PT sidecar preflight: U300 sidecar alone; per-layer plan sizes + one cosine check per layer
+  E2 cold-expert counts per layer: 84: 21 layers, 99: 19 layers
+2026-10-10 18:10:18 PT sidecar preflight: SELFTEST PASS: 40 layers, cold counts [84, 99]; min cos 0.99957 (layer 28), layers 21-39 min 0.99957; reference convention (fp4 hi-first, swap gate/up, clamp) = (False, False, True); plan num_experts unexposed on 0 layers (rc 0)
+2026-10-10 18:10:34 PT === U300 map rowmap-s0-u300.json [MBT 8192 / LPT 6144] SEQS 64 graphs<=256 sidecar peer_server2_e2.py
+  E2 cold-expert counts per layer: 84: 21 layers, 99: 19 layers
+  launched dsv41-rb rowmap=rowmap-s0-u300.json MBT=8192 LPT=6144 FI_TUNE=live REPLAY=1 PEER2_MAX_ROWS=8192 TUNE_MAX=8192 check=80 arm=/w/gate/ARM hook=<hook copy> cold_trt=1
+2026-10-10 18:20:53 PT dsv41-rb ready after 541 s
+2026-10-10 18:20:53 PT U300 Available KV cache memory: 5.4 GiB; GPU KV cache size: 1,158,544 tokens
+2026-10-10 18:20:54 PT U300 probe 391: 391
+2026-10-10 18:20:54 PT U300 pre-arm: startup at log line 480; checks logged so far 0 (warm-up checks: expected 0)
+2026-10-10 18:21:00 PT U300 gate window: MEGA_PEER check gate armed: tag=s0-U300-1791681654, 80 checks left|MEGA_PEER check gate closed: 40 unused checks dropped (tag=s0-U300-1791681654)|
+2026-10-10 18:21:00 PT U300 COSGATE PASS (E2 rule: share>=0.01 -> cos>=0.999, any -> cos>=0.995): 40 real-prompt checks (tag s0-U300-1791681654) over 40 layers; min cos 0.99972 (layer 39 T=128 share 0.022); 40 checks with share>=0.01, min cos 0.99972 (layer 39 T=128); mean 0.99984; 0 bel
+  INFO real-prompt T values {128: 19, 8188: 21}; registered prompt max tokens 8203
+  INFO checks below 0.999 at any share (old REBEAT rule, information only): 0
+2026-10-10 18:21:00 PT U300 prefill 16K C1 x5 (headline)
+  MEAN catid-16384-c1: 47509.5 tok/s over 5 clean reps (sd 169.2; 47319.7 / 47687.6 / 47647.5 / 47347.0 / 47545.6)
+2026-10-10 18:21:11 PT U300 prefill 64K C1 x3
+  MEAN catid-65536-c1: 47639.4 tok/s over 3 clean reps (sd 231.9; 47569.7 / 47898.2 / 47450.4)
+2026-10-10 18:21:38 PT U300 prefill 8K C16
+  MEAN catid-8192-c16: 49813.0 tok/s over 1 clean reps (sd 0.0; 49813.0)
+2026-10-10 18:21:50 PT U300 catid decode 8192/1024: C1 x3 (NP 5), C16 x3 (NP 80), C64 (NP 320); acceptance + step timing + preemptions
+  random decode-c1-r1 try1 seed 681710002 warmseed 681710001: decode_agg 578.03 tok/s (C1 x 1000/meanTPOT 1.73 ms) | out_tput 517.68 | meanTTFT 204.52 ms | in 40960 out 5120 tok in 9.89 s | dspark_acc_len 5.821 draft_acc 96.4% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r2 try1 seed 681710004 warmseed 681710003: decode_agg 571.43 tok/s (C1 x 1000/meanTPOT 1.75 ms) | out_tput 513.06 | meanTTFT 204.56 ms | in 40960 out 5120 tok in 9.98 s | dspark_acc_len 5.777 draft_acc 95.5% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r3 try1 seed 681710006 warmseed 681710005: decode_agg 529.10 tok/s (C1 x 1000/meanTPOT 1.89 ms) | out_tput 479.43 | meanTTFT 202.72 ms | in 40960 out 5120 tok in 10.68 s | dspark_acc_len 5.416 draft_acc 88.3% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r4 try1 seed 681710008 warmseed 681710007: decode_agg 518.13 tok/s (C1 x 1000/meanTPOT 1.93 ms) | out_tput 469.32 | meanTTFT 207.15 ms | in 40960 out 5120 tok in 10.91 s | dspark_acc_len 5.494 draft_acc 89.9% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r5 try1 seed 681710010 warmseed 681710009: decode_agg 568.18 tok/s (C1 x 1000/meanTPOT 1.76 ms) | out_tput 509.63 | meanTTFT 206.01 ms | in 40960 out 5120 tok in 10.05 s | dspark_acc_len 5.699 draft_acc 94.0% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r6 try1 seed 681710012 warmseed 681710011: decode_agg 561.80 tok/s (C1 x 1000/meanTPOT 1.78 ms) | out_tput 507.24 | meanTTFT 200.17 ms | in 40960 out 5120 tok in 10.09 s | dspark_acc_len 5.777 draft_acc 95.5% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r7 try1 seed 681710014 warmseed 681710013: decode_agg 442.48 tok/s (C1 x 1000/meanTPOT 2.26 ms) | out_tput 407.74 | meanTTFT 204.05 ms | in 40960 out 5120 tok in 12.56 s | dspark_acc_len 4.677 draft_acc 73.5% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r8 try1 seed 681710016 warmseed 681710015: decode_agg 446.43 tok/s (C1 x 1000/meanTPOT 2.24 ms) | out_tput 410.22 | meanTTFT 206.06 ms | in 40960 out 5120 tok in 12.48 s | dspark_acc_len 4.752 draft_acc 75.0% | failed 0 | prefix_hit 0.00%
+  random decode-c16-r1 try1 seed 681710018 warmseed 681710017: decode_agg 2259.89 tok/s (C16 x 1000/meanTPOT 7.08 ms) | out_tput 1973.46 | meanTTFT 763.36 ms | in 655360 out 81920 tok in 41.51 s | dspark_acc_len 3.827 draft_acc 93.5% | failed 0 | prefix_hit 0.00%
+  random decode-c16-r2 try1 seed 681710020 warmseed 681710019: decode_agg 2339.18 tok/s (C16 x 1000/meanTPOT 6.84 ms) | out_tput 2021.83 | meanTTFT 810.94 ms | in 655360 out 81920 tok in 40.52 s | dspark_acc_len 3.829 draft_acc 93.9% | failed 0 | prefix_hit 0.00%
+  random decode-c16-r3 try1 seed 681710022 warmseed 681710021: decode_agg 2203.86 tok/s (C16 x 1000/meanTPOT 7.26 ms) | out_tput 1894.64 | meanTTFT 829.51 ms | in 655360 out 81920 tok in 43.24 s | dspark_acc_len 3.747 draft_acc 90.9% | failed 0 | prefix_hit 0.00%
+  random decode-c64-r1 try1 seed 681710024 warmseed 681710023: decode_agg 3514.55 tok/s (C64 x 1000/meanTPOT 18.21 ms) | out_tput 3116.39 | meanTTFT 1767.46 ms | in 2621440 out 327680 tok in 105.15 s | dspark_acc_len 3.758 draft_acc 91.9% | failed 0 | prefix_hit 0.31%
+  steptime decode-c1-r1	try1	10.093	881	0
+  steptime decode-c1-r2	try1	10.126	887	0
+  steptime decode-c1-r3	try1	10.233	947	0
+  steptime decode-c1-r4	try1	10.190	933	0
+  steptime decode-c1-r5	try1	10.058	899	0
+  steptime decode-c1-r6	try1	10.257	889	0
+  steptime decode-c1-r7	try1	10.549	1096	0
+  steptime decode-c1-r8	try1	10.637	1079	0
+  steptime decode-c16-r1	try1	27.057	21415	0
+  steptime decode-c16-r2	try1	26.164	21404	0
+  steptime decode-c16-r3	try1	27.169	21871	0
+  steptime decode-c64-r1	try1	68.313	87254	0
+2026-10-10 18:31:59 PT U300 RT long C16 x3 (NP 80)
+  long decode-c16-r1 try1 seed 682319002 warmseed 682319001: decode_agg 1469.24 tok/s (C16 x 1000/meanTPOT 10.89 ms) | out_tput 1356.79 | meanTTFT 694.34 ms | in 655268 out 81920 tok in 60.38 s | dspark_acc_len 2.655 draft_acc 55.1% | failed 0 | prefix_hit 0.00%
+  long decode-c16-r2 try1 seed 682319004 warmseed 682319003: decode_agg 1491.15 tok/s (C16 x 1000/meanTPOT 10.73 ms) | out_tput 1378.08 | meanTTFT 712.99 ms | in 655668 out 81920 tok in 59.45 s | dspark_acc_len 2.669 draft_acc 55.5% | failed 0 | prefix_hit 0.00%
+  long decode-c16-r3 try1 seed 682319006 warmseed 682319005: decode_agg 1484.23 tok/s (C16 x 1000/meanTPOT 10.78 ms) | out_tput 1381.54 | meanTTFT 710.60 ms | in 655668 out 81920 tok in 59.30 s | dspark_acc_len 2.674 draft_acc 55.8% | failed 0 | prefix_hit 0.00%
+2026-10-10 18:36:03 PT U300 RT short C16 x3 (NP 80)
+  short decode-c16-r1 try1 seed 682563002 warmseed 682563001: decode_agg 1570.17 tok/s (C16 x 1000/meanTPOT 10.19 ms) | out_tput 1396.57 | meanTTFT 123.58 ms | in 7049 out 51362 tok in 36.78 s | dspark_acc_len 2.500 draft_acc 49.3% | failed 0 | prefix_hit 0.00%
+  short decode-c16-r2 try1 seed 682563004 warmseed 682563003: decode_agg 1587.30 tok/s (C16 x 1000/meanTPOT 10.08 ms) | out_tput 1421.06 | meanTTFT 115.15 ms | in 7449 out 48804 tok in 34.34 s | dspark_acc_len 2.549 draft_acc 50.7% | failed 0 | prefix_hit 0.00%
+  short decode-c16-r3 try1 seed 682563006 warmseed 682563005: decode_agg 1592.04 tok/s (C16 x 1000/meanTPOT 10.05 ms) | out_tput 1404.97 | meanTTFT 113.12 ms | in 7449 out 48357 tok in 34.42 s | dspark_acc_len 2.556 draft_acc 51.2% | failed 0 | prefix_hit 0.00%
+2026-10-10 18:38:48 PT U300 GSM8K-200
+s0-U300: GSM8K 196/200 = 98.0% (request errors 0)
+2026-10-10 18:39:07 PT U300 longctx (6 continuations + needle 57K/114K + QA20)
+  U300 QA20 0/20
+2026-10-10 18:39:39 PT U300 Phase 0 probe (prefill_wait.py, 16K x5; information)
+  SUMMARY {"isl": 16384, "text": null, "reps": 5, "mean_wall_s": 0.3477745532989502, "mean_wait_share": 0.2919458624179032, "mean_rows_per_call": 1844.54, "max_prefix_hit_pct": 0, "timeouts": 0, "contaminated_excluded": 0}
+2026-10-10 18:39:41 PT U300 timeouts_delta 0 words_before 4400 4400 
+2026-10-10 18:39:41 PT U300 end-of-boot audit (stray = checks outside the gate window, expected 0): stray post-startup untagged 0
+  RESULT {"arm": "U300", "kv_gib": 5.4, "catid_c16_step_ms_mean": 26.797, "rt_short_c16_decode_mean": 1583.17, "gsm8k200_pct": 98.0, "sidecar_timeouts": 0, "c64_clean_completion": true, "qa20": {"correct": 0, "n": 20}, "prefill_16k_c1": 47509.5}
+2026-10-10 18:40:00 PT U300 teardown; GPU NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+2026-10-10 18:40:00 PT === A0 map rowmap-mix-v1.json [MBT 8192 / LPT 6144] SEQS 64 graphs<=256 sidecar peer_server2_e2.py
+  E2 cold-expert counts per layer: 99: 40 layers
+  launched dsv41-rb rowmap=rowmap-mix-v1.json MBT=8192 LPT=6144 FI_TUNE=live REPLAY=1 PEER2_MAX_ROWS=8192 TUNE_MAX=8192 check=80 arm=/w/gate/ARM hook=<hook copy> cold_trt=1
+2026-10-10 18:50:40 PT dsv41-rb ready after 561 s
+2026-10-10 18:50:41 PT A0 Available KV cache memory: 11.81 GiB; GPU KV cache size: 2,534,609 tokens
+2026-10-10 18:50:41 PT A0 probe 391: 391
+2026-10-10 18:50:41 PT A0 pre-arm: startup at log line 482; checks logged so far 0 (warm-up checks: expected 0)
+2026-10-10 18:50:48 PT A0 gate window: MEGA_PEER check gate armed: tag=s0-A0-1791683441, 80 checks left|MEGA_PEER check gate closed: 40 unused checks dropped (tag=s0-A0-1791683441)|
+2026-10-10 18:50:48 PT A0 COSGATE PASS (E2 rule: share>=0.01 -> cos>=0.999, any -> cos>=0.995): 40 real-prompt checks (tag s0-A0-1791683441) over 40 layers; min cos 0.99969 (layer 35 T=128 share 0.058); 40 checks with share>=0.01, min cos 0.99969 (layer 35 T=128); mean 0.99984; 0 below
+  INFO real-prompt T values {128: 19, 8188: 21}; registered prompt max tokens 8203
+  INFO checks below 0.999 at any share (old REBEAT rule, information only): 0
+2026-10-10 18:50:48 PT A0 prefill 16K C1 x5 (headline)
+  MEAN catid-16384-c1: 44177.7 tok/s over 5 clean reps (sd 484.2; 43326.7 / 44331.1 / 44423.7 / 44520.9 / 44286.3)
+2026-10-10 18:51:00 PT A0 prefill 64K C1 x3
+  MEAN catid-65536-c1: 44951.8 tok/s over 3 clean reps (sd 63.4; 44912.6 / 45024.9 / 44917.8)
+2026-10-10 18:51:28 PT A0 prefill 8K C16
+  MEAN catid-8192-c16: 46739.0 tok/s over 1 clean reps (sd 0.0; 46739.0)
+2026-10-10 18:51:41 PT A0 catid decode 8192/1024: C1 x3 (NP 5), C16 x3 (NP 80), C64 (NP 320); acceptance + step timing + preemptions
+  random decode-c1-r1 try1 seed 683501002 warmseed 683501001: decode_agg 483.09 tok/s (C1 x 1000/meanTPOT 2.07 ms) | out_tput 436.88 | meanTTFT 221.27 ms | in 40960 out 5120 tok in 11.72 s | dspark_acc_len 5.160 draft_acc 83.2% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r2 try1 seed 683501004 warmseed 683501003: decode_agg 510.20 tok/s (C1 x 1000/meanTPOT 1.96 ms) | out_tput 460.84 | meanTTFT 217.40 ms | in 40960 out 5120 tok in 11.11 s | dspark_acc_len 5.336 draft_acc 86.7% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r3 try1 seed 683501006 warmseed 683501005: decode_agg 436.68 tok/s (C1 x 1000/meanTPOT 2.29 ms) | out_tput 400.31 | meanTTFT 212.06 ms | in 40960 out 5120 tok in 12.79 s | dspark_acc_len 4.782 draft_acc 75.6% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r4 try1 seed 683501008 warmseed 683501007: decode_agg 396.83 tok/s (C1 x 1000/meanTPOT 2.52 ms) | out_tput 366.15 | meanTTFT 220.10 ms | in 40960 out 5120 tok in 13.98 s | dspark_acc_len 4.288 draft_acc 65.8% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r5 try1 seed 683501010 warmseed 683501009: decode_agg 520.83 tok/s (C1 x 1000/meanTPOT 1.92 ms) | out_tput 469.10 | meanTTFT 220.81 ms | in 40960 out 5120 tok in 10.91 s | dspark_acc_len 5.478 draft_acc 89.6% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r6 try1 seed 683501012 warmseed 683501011: decode_agg 564.97 tok/s (C1 x 1000/meanTPOT 1.77 ms) | out_tput 502.67 | meanTTFT 222.24 ms | in 40960 out 5120 tok in 10.19 s | dspark_acc_len 5.765 draft_acc 95.3% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r7 try1 seed 683501014 warmseed 683501013: decode_agg 571.43 tok/s (C1 x 1000/meanTPOT 1.75 ms) | out_tput 509.39 | meanTTFT 215.70 ms | in 40960 out 5120 tok in 10.05 s | dspark_acc_len 5.785 draft_acc 95.7% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r8 try1 seed 683501016 warmseed 683501015: decode_agg 478.47 tok/s (C1 x 1000/meanTPOT 2.09 ms) | out_tput 435.59 | meanTTFT 216.28 ms | in 40960 out 5120 tok in 11.75 s | dspark_acc_len 5.076 draft_acc 81.5% | failed 0 | prefix_hit 0.00%
+  random decode-c16-r1 try1 seed 683501018 warmseed 683501017: decode_agg 2206.90 tok/s (C16 x 1000/meanTPOT 7.25 ms) | out_tput 1892.30 | meanTTFT 895.40 ms | in 655360 out 81920 tok in 43.29 s | dspark_acc_len 3.805 draft_acc 92.8% | failed 0 | prefix_hit 0.00%
+  random decode-c16-r2 try1 seed 683501020 warmseed 683501019: decode_agg 2305.48 tok/s (C16 x 1000/meanTPOT 6.94 ms) | out_tput 2030.99 | meanTTFT 823.28 ms | in 655360 out 81920 tok in 40.34 s | dspark_acc_len 3.859 draft_acc 95.1% | failed 0 | prefix_hit 0.00%
+  random decode-c16-r3 try1 seed 683501022 warmseed 683501021: decode_agg 2141.90 tok/s (C16 x 1000/meanTPOT 7.47 ms) | out_tput 1808.81 | meanTTFT 842.12 ms | in 655360 out 81920 tok in 45.29 s | dspark_acc_len 3.735 draft_acc 90.4% | failed 0 | prefix_hit 0.00%
+  random decode-c64-r1 try1 seed 683501024 warmseed 683501023: decode_agg 3326.40 tok/s (C64 x 1000/meanTPOT 19.24 ms) | out_tput 2934.36 | meanTTFT 1859.89 ms | in 2621440 out 327680 tok in 111.67 s | dspark_acc_len 3.735 draft_acc 91.1% | failed 0 | prefix_hit 0.62%
+  steptime decode-c1-r1	try1	10.703	994	0
+  steptime decode-c1-r2	try1	10.466	960	0
+  steptime decode-c1-r3	try1	10.955	1073	0
+  steptime decode-c1-r4	try1	10.793	1196	0
+  steptime decode-c1-r5	try1	10.498	937	0
+  steptime decode-c1-r6	try1	10.226	890	0
+  steptime decode-c1-r7	try1	10.144	887	0
+  steptime decode-c1-r8	try1	10.337	1011	0
+  steptime decode-c16-r1	try1	27.553	21541	0
+  steptime decode-c16-r2	try1	26.742	21242	0
+  steptime decode-c16-r3	try1	27.852	21946	0
+  steptime decode-c64-r1	try1	71.761	87775	0
+2026-10-10 19:02:06 PT A0 RT long C16 x3 (NP 80)
+  long decode-c16-r1 try1 seed 684126002 warmseed 684126001: decode_agg 1444.04 tok/s (C16 x 1000/meanTPOT 11.08 ms) | out_tput 1337.77 | meanTTFT 743.92 ms | in 655268 out 81920 tok in 61.24 s | dspark_acc_len 2.671 draft_acc 55.6% | failed 0 | prefix_hit 0.00%
+  long decode-c16-r2 try1 seed 684126004 warmseed 684126003: decode_agg 1438.85 tok/s (C16 x 1000/meanTPOT 11.12 ms) | out_tput 1332.45 | meanTTFT 764.84 ms | in 655668 out 81920 tok in 61.48 s | dspark_acc_len 2.648 draft_acc 54.9% | failed 0 | prefix_hit 0.00%
+  long decode-c16-r3 try1 seed 684126006 warmseed 684126005: decode_agg 1437.56 tok/s (C16 x 1000/meanTPOT 11.13 ms) | out_tput 1337.15 | meanTTFT 757.54 ms | in 655668 out 81920 tok in 61.26 s | dspark_acc_len 2.647 draft_acc 54.9% | failed 0 | prefix_hit 0.00%
+2026-10-10 19:06:15 PT A0 RT short C16 x3 (NP 80)
+  short decode-c16-r1 try1 seed 684375002 warmseed 684375001: decode_agg 1582.59 tok/s (C16 x 1000/meanTPOT 10.11 ms) | out_tput 1447.12 | meanTTFT 112.92 ms | in 7049 out 50784 tok in 35.09 s | dspark_acc_len 2.546 draft_acc 51.2% | failed 0 | prefix_hit 0.00%
+  short decode-c16-r2 try1 seed 684375004 warmseed 684375003: decode_agg 1626.02 tok/s (C16 x 1000/meanTPOT 9.84 ms) | out_tput 1423.39 | meanTTFT 118.75 ms | in 7449 out 48446 tok in 34.04 s | dspark_acc_len 2.566 draft_acc 51.9% | failed 0 | prefix_hit 0.00%
+  short decode-c16-r3 try1 seed 684375006 warmseed 684375005: decode_agg 1592.04 tok/s (C16 x 1000/meanTPOT 10.05 ms) | out_tput 1401.97 | meanTTFT 114.90 ms | in 7449 out 49034 tok in 34.98 s | dspark_acc_len 2.545 draft_acc 50.8% | failed 0 | prefix_hit 0.00%
+2026-10-10 19:08:58 PT A0 GSM8K-200
+s0-A0: GSM8K 197/200 = 98.5% (request errors 0)
+2026-10-10 19:09:16 PT A0 longctx (6 continuations + needle 57K/114K + QA20)
+  A0 QA20 0/20
+2026-10-10 19:10:24 PT A0 Phase 0 probe (prefill_wait.py, 16K x5; information)
+  SUMMARY {"isl": 16384, "text": null, "reps": 5, "mean_wall_s": 0.3721285343170166, "mean_wait_share": 0.3516477828268991, "mean_rows_per_call": 2065.6316666666667, "max_prefix_hit_pct": 0, "timeouts": 0, "contaminated_excluded": 0}
+2026-10-10 19:10:26 PT A0 timeouts_delta 0 words_before 4440 4440 
+2026-10-10 19:10:26 PT A0 end-of-boot audit (stray = checks outside the gate window, expected 0): stray post-startup untagged 0
+  RESULT {"arm": "A0", "kv_gib": 11.81, "catid_c16_step_ms_mean": 27.382, "rt_short_c16_decode_mean": 1600.217, "gsm8k200_pct": 98.5, "sidecar_timeouts": 0, "c64_clean_completion": true, "qa20": {"correct": 0, "n": 20}, "prefill_16k_c1": 44177.7}
+2026-10-10 19:10:45 PT A0 teardown; GPU NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+  U300 Q3' FAIL: needle 6/6; QA20 0/20 vs A0a 0/20 (>= A0a - 1) ok; prefix band (one-prompt slack, wider = A0b) NO: arm [0, 0, 1, 7, 30, 48] vs A0b [1, 6, 9, 16, 32, 47]; first-token d0 max 0.744 vs limit 1.512 ok; divergences outside A0a top-5: 0 (<= 1); contaminated 0; P45 unreadable (FileNotFoundError)
+  U300 needle U300: 6/6   A0: 6/6
+  U300 n= 16384 rep=0: identical prefix  0/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.3259
+  U300 n= 16384 rep=1: identical prefix  7/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.1251
+  U300 n= 16384 rep=2: identical prefix  0/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.3298
+  U300 n= 65536 rep=0: identical prefix 30/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.1097
+  U300 n= 65536 rep=1: identical prefix  1/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.1279
+  U300 n= 65536 rep=2: identical prefix 48/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.7443
+  A0: KV 11.81 GiB (2534609 tok); 16K C1 44177.7 (1.000x A0), 64K C1 44951.8, 8K C16 46739.0; catid C1 476.657 C16 2218.093 (n 3, step 27.382 ms, client ITL mean/median 27.368/19.058) C64 out 2934.36 clean True; RT long/short C16 1440.15/1600.217 (n 3/3); GSM8K-200 98.5; QA20 {'correct': 0, 'n': 20}; timeouts 0; wait share 0.3516477828268991
+  U300: KV 5.4 GiB (1158544 tok); 16K C1 47509.5 (1.075x A0), 64K C1 47639.4, 8K C16 49813.0; catid C1 559.52 C16 2267.643 (n 3, step 26.797 ms, client ITL mean/median 26.783/18.632) C64 out 3116.39 clean True; RT long/short C16 1481.54/1583.17 (n 3/3); GSM8K-200 98.0; QA20 {'correct': 0, 'n': 20}; timeouts 0; wait share 0.2919458624179032
+  P45: no result (boot or run failed)
+  A0 own gates: ALL PASS
+  U300 gates: {'Q1_gsm8k200': True, 'Q2_cosgate': True, 'Q4_timeouts': True, 'hygiene_3_clean_16k': True, 'Q3prime': False, 'decode_guard_step_ms': True, 'decode_guard_rt_short': True, 'c64_no_preemption': True, 'bar_16k_1_05': True}; step ratio 0.9786356000292162, RT-short ratio 0.9893470698036578
+  VERDICT: NOT MET: U300 16K C1 1.075x A0; failing: Q3prime
+  PLACEBO: placebo reading not interpretable (no P45 result)

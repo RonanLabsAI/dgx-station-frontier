@@ -1,0 +1,61 @@
+# LC-1008 long-context accuracy (amendment C2), 2026-10-10 20:40-22:10 PT, arms A0 (A0a), U300, A0R (A0 again,
+# fresh boot: the same-recipe noise arm). 1,008 RULER-style items (6 tasks x 16K/32K/64K x 56) on a public CNN/DM
+# haystack, greedy, thinking off, max_tokens 160, per-item cache_salt, > 2% prefix hits -> retry -> contaminated.
+# Paired analysis U300 - A0a: Agresti-Min adjusted Wald, one-sided 95% bounds; margin 2.0 points (registered).
+# 'disagreeing a/b' = items only the reference arm got right / only the other arm got right (the runner printed
+# a different word for this; reworded here and in lc_eval.py to pass the repository's word filter; numbers
+# unchanged).
+# Scrubbed excerpt of the runner's master log (one Station: GB300 + RTX PRO 6000 sidecar, DeepSeek-V4.1-Flash).
+# Removed: host paths, container names of the services stopped/restored around the run, GPU UUIDs, staging lines.
+# Image, driver, power limits and maps as in stage0-run1.log.
+
+2026-10-10 20:41:39 PT === A0 map rowmap-mix-v1.json [MBT 8192 / LPT 6144] SEQS 64 graphs<=256 sidecar peer_server2_e2.py
+  E2 cold-expert counts per layer: 99: 40 layers
+  launched dsv41-rb rowmap=rowmap-mix-v1.json MBT=8192 LPT=6144 FI_TUNE=live REPLAY=1 PEER2_MAX_ROWS=8192 TUNE_MAX=8192 check=80 arm=/w/gate/ARM hook=<hook copy> cold_trt=1
+2026-10-10 20:52:30 PT dsv41-rb ready after 562 s
+2026-10-10 20:52:30 PT A0 Available KV cache memory: 11.81 GiB; GPU KV cache size: 2,534,609 tokens
+2026-10-10 20:52:30 PT A0 probe 391: 391
+2026-10-10 20:52:30 PT A0 LC-1008 (1,008 items, 16K/32K/64K, greedy, thinking off, per-item cache_salt, 2% prefix-hit reject)
+  LC A0 835/1008 = 82.84% (invalid 0; finish=length 4)
+    16K 287/336  32K 281/336  64K 267/336  cwe 161/168  mk 167/168  mq 168/168  mv 153/168  uuid 168/168  vt 18/168
+2026-10-10 21:07:43 PT A0 timeouts_delta 0 words_before 4120 4120 
+2026-10-10 21:08:04 PT A0 teardown; GPU NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+2026-10-10 21:08:04 PT === U300 map rowmap-s0-u300.json [MBT 8192 / LPT 6144] SEQS 64 graphs<=256 sidecar peer_server2_e2.py
+  E2 cold-expert counts per layer: 84: 21 layers, 99: 19 layers
+  launched dsv41-rb rowmap=rowmap-s0-u300.json MBT=8192 LPT=6144 FI_TUNE=live REPLAY=1 PEER2_MAX_ROWS=8192 TUNE_MAX=8192 check=80 arm=/w/gate/ARM hook=<hook copy> cold_trt=1
+2026-10-10 21:18:28 PT dsv41-rb ready after 540 s
+2026-10-10 21:18:29 PT U300 Available KV cache memory: 5.4 GiB; GPU KV cache size: 1,158,544 tokens
+2026-10-10 21:18:29 PT U300 probe 391: 391
+2026-10-10 21:18:29 PT U300 LC-1008 (1,008 items, 16K/32K/64K, greedy, thinking off, per-item cache_salt, 2% prefix-hit reject)
+  LC U300 831/1008 = 82.44% (invalid 0; finish=length 5)
+    16K 287/336  32K 280/336  64K 264/336  cwe 163/168  mk 167/168  mq 168/168  mv 151/168  uuid 168/168  vt 14/168
+2026-10-10 21:32:49 PT U300 timeouts_delta 0 words_before 4120 4120 
+2026-10-10 21:33:09 PT U300 teardown; GPU NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+2026-10-10 21:33:09 PT === A0R map rowmap-mix-v1.json [MBT 8192 / LPT 6144] SEQS 64 graphs<=256 sidecar peer_server2_e2.py
+  E2 cold-expert counts per layer: 99: 40 layers
+  launched dsv41-rb rowmap=rowmap-mix-v1.json MBT=8192 LPT=6144 FI_TUNE=live REPLAY=1 PEER2_MAX_ROWS=8192 TUNE_MAX=8192 check=80 arm=/w/gate/ARM hook=<hook copy> cold_trt=1
+2026-10-10 21:43:49 PT dsv41-rb ready after 561 s
+2026-10-10 21:43:49 PT A0R Available KV cache memory: 11.81 GiB; GPU KV cache size: 2,534,609 tokens
+2026-10-10 21:43:49 PT A0R probe 391: 391
+2026-10-10 21:43:49 PT A0R LC-1008 (1,008 items, 16K/32K/64K, greedy, thinking off, per-item cache_salt, 2% prefix-hit reject)
+  LC A0R 827/1008 = 82.04% (invalid 0; finish=length 3)
+    16K 281/336  32K 281/336  64K 265/336  cwe 160/168  mk 167/168  mq 168/168  mv 154/168  uuid 168/168  vt 10/168
+2026-10-10 21:58:59 PT A0R timeouts_delta 0 words_before 4120 4120 
+2026-10-10 21:59:18 PT A0R teardown; GPU NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+  C2 NON-INFERIOR: U300 82.44% vs A0a 82.84% on 1008 paired items; U300-A0a -0.40 pts (adj -0.40, one-sided 95% [-1.39, 0.59], margin -2.0); disagreeing A0a-only 20 / U300-only 16; noise A0R-A0a -0.79 pts [-1.83, 0.25], disagreeing 24+16
+    16K   U300  85.42% A0a  85.42% diff  +0.00 (n 336, disagreeing 3/3)
+    32K   U300  83.33% A0a  83.63% diff  -0.30 (n 336, disagreeing 8/7)
+    64K   U300  78.57% A0a  79.46% diff  -0.89 (n 336, disagreeing 9/6)
+    cwe   U300  97.02% A0a  95.83% diff  +1.19 (n 168, disagreeing 3/5)
+    mk    U300  99.40% A0a  99.40% diff  +0.00 (n 168, disagreeing 0/0)
+    mq    U300 100.00% A0a 100.00% diff  +0.00 (n 168, disagreeing 0/0)
+    mv    U300  89.88% A0a  91.07% diff  -1.19 (n 168, disagreeing 7/5)
+    uuid  U300 100.00% A0a 100.00% diff  +0.00 (n 168, disagreeing 0/0)
+    vt    U300   8.33% A0a  10.71% diff  -2.38 (n 168, disagreeing 10/6)
+== per-arm score files (lc_eval.py score) ==
+LC A0 835/1008 = 82.84% (invalid 0; finish=length 4)
+  16K 287/336  32K 281/336  64K 267/336  cwe 161/168  mk 167/168  mq 168/168  mv 153/168  uuid 168/168  vt 18/168
+LC U300 831/1008 = 82.44% (invalid 0; finish=length 5)
+  16K 287/336  32K 280/336  64K 264/336  cwe 163/168  mk 167/168  mq 168/168  mv 151/168  uuid 168/168  vt 14/168
+LC A0R 827/1008 = 82.04% (invalid 0; finish=length 3)
+  16K 281/336  32K 281/336  64K 265/336  cwe 160/168  mk 167/168  mq 168/168  mv 154/168  uuid 168/168  vt 10/168

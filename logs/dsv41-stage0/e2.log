@@ -1,0 +1,203 @@
+# E2 (asymmetric hot budget), 2026-10-10 09:30-11:07 PT, arms A0, X315, X330, X330M16, one session.
+# Scrubbed excerpt of the runner's master log (one Station: GB300 + RTX PRO 6000 sidecar, DeepSeek-V4.1-Flash).
+# Removed: host paths, container names of the services stopped/restored around the run, GPU UUIDs, staging lines.
+# Decode lines are the full lines from each arm's bench summary (the master log truncates them).
+# steptime columns: label, try, step_ms (1000 x delta sum / delta count of vllm:inter_token_latency_seconds over the
+# run; one observation per request per engine step, so acceptance-independent), ITL observation count, delta of
+# vllm:num_preemptions_total over the run.
+# Image vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b (sha256:3af6a45b...), driver 595.99.02,
+# GB300 power.limit 1,300 W, RTX PRO 6000 Max-Q 300 W. Maps: rowmap-mix-v1.json (A0, original-el8),
+# rowmap-s0-u300.json, rowmap-s0-p45.json, rowmap-e2-x315.json, rowmap-e2-x330.json (built from el8's public
+# calibration counts only; recipes/dsv41-flash-sidecar/stage0/).
+2026-10-10 09:31:16 PT sidecar preflight: X330 sidecar alone; per-layer plan sizes + one cosine check per layer
+  E2 cold-expert counts per layer: 54: 21 layers, 149: 19 layers
+2026-10-10 09:33:43 PT sidecar preflight: SELFTEST PASS: 40 layers, cold counts [54, 149]; min cos 0.99958 (layer 21), layers 21-39 min 0.99958; reference convention (fp4 hi-first, swap gate/up, clamp) = (False, False, True); plan num_experts unexposed on 0 layers (rc 0)
+2026-10-10 09:33:59 PT === A0 (A0, full) map rowmap-mix-v1.json env [MBT 8192 / LPT 6144] SEQS 64 graphs<=256 sidecar peer_server2_e2.py
+  E2 cold-expert counts per layer: 99: 40 layers
+  launched dsv41-rb rowmap=rowmap-mix-v1.json MBT=8192 LPT=6144 FI_TUNE=live REPLAY=1 PEER2_MAX_ROWS=8192 TUNE_MAX=8192 check=80 arm=/w/gate/ARM hook=<hook copy> cold_trt=1
+2026-10-10 09:44:08 PT dsv41-rb ready after 541 s
+2026-10-10 09:44:09 PT A0 GPU KV cache size: 2,534,609 tokens
+2026-10-10 09:44:09 PT A0 probe 391: 391
+2026-10-10 09:44:09 PT A0 pre-arm: startup at log line 481; checks logged so far 0 (warm-up checks: expected 0)
+2026-10-10 09:44:15 PT A0 gate window: MEGA_PEER check gate armed: tag=e2-A0-1791650649, 80 checks left|MEGA_PEER check gate closed: 40 unused checks dropped (tag=e2-A0-1791650649)|
+2026-10-10 09:44:16 PT A0 COSGATE PASS (E2 rule: share>=0.01 -> cos>=0.999, any -> cos>=0.995): 40 real-prompt checks (tag e2-A0-1791650649) over 40 layers; min cos 0.99980 (layer 32 T=128 share 0.092); 40 checks with share>=0.01, min cos 0.99980 (layer 32 T=128); mean 0.99985; 0 below
+  INFO real-prompt T values {128: 19, 8188: 21}; registered prompt max tokens 8203
+  INFO checks below 0.999 at any share (old REBEAT rule, information only): 0
+2026-10-10 09:44:16 PT A0 prefill 16K C1 x5 (headline)
+  MEAN catid-16384-c1: 44546.4 tok/s over 5 clean reps (sd 577.2; 43568.6 / 44898.6 / 45005.0 / 44510.8 / 44749.1)
+2026-10-10 09:44:27 PT A0 prefill 64K C1 x3 (stretch shape)
+  MEAN catid-65536-c1: 44909.0 tok/s over 3 clean reps (sd 102.8; 45027.5 / 44856.2 / 44843.3)
+2026-10-10 09:44:56 PT A0 prefill 8K C16
+  MEAN catid-8192-c16: 46751.4 tok/s over 1 clean reps (sd 0.0; 46751.4)
+2026-10-10 09:45:08 PT A0 catid decode 8192/1024: C1 x3 (NP 5), C16 (NP 80), C64 (NP 320), with acceptance
+  random decode-c1-r1 try1 seed 650708002 warmseed 650708001: decode_agg 495.05 tok/s (C1 x 1000/meanTPOT 2.02 ms) | out_tput 447.93 | meanTTFT 216.23 ms | in 40960 out 5120 tok in 11.43 s | dspark_acc_len 5.264 draft_acc 85.3% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r2 try1 seed 650708004 warmseed 650708003: decode_agg 444.44 tok/s (C1 x 1000/meanTPOT 2.25 ms) | out_tput 406.05 | meanTTFT 219.56 ms | in 40960 out 5120 tok in 12.61 s | dspark_acc_len 4.599 draft_acc 72.0% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r3 try1 seed 650708006 warmseed 650708005: decode_agg 396.83 tok/s (C1 x 1000/meanTPOT 2.52 ms) | out_tput 366.42 | meanTTFT 215.21 ms | in 40960 out 5120 tok in 13.97 s | dspark_acc_len 4.268 draft_acc 65.4% | failed 0 | prefix_hit 0.00%
+  random decode-c16-r1 try1 seed 650708008 warmseed 650708007: decode_agg 2173.91 tok/s (C16 x 1000/meanTPOT 7.36 ms) | out_tput 1876.76 | meanTTFT 864.97 ms | in 655360 out 81920 tok in 43.65 s | dspark_acc_len 3.806 draft_acc 92.8% | failed 0 | prefix_hit 0.00%
+  random decode-c64-r1 try1 seed 650708010 warmseed 650708009: decode_agg 3326.40 tok/s (C64 x 1000/meanTPOT 19.24 ms) | out_tput 2820.76 | meanTTFT 1950.21 ms | in 2621440 out 327680 tok in 116.17 s | dspark_acc_len 3.713 draft_acc 90.1% | failed 0 | prefix_hit 0.00%
+2026-10-10 09:50:47 PT A0 RT long C16 (NP 80)
+  long decode-c16-r1 try1 seed 651047002 warmseed 651047001: decode_agg 1429.85 tok/s (C16 x 1000/meanTPOT 11.19 ms) | out_tput 1327.73 | meanTTFT 711.16 ms | in 655268 out 81920 tok in 61.70 s | dspark_acc_len 2.668 draft_acc 55.5% | failed 0 | prefix_hit 0.00%
+2026-10-10 09:52:11 PT A0 RT short C16 (NP 80)
+  short decode-c16-r1 try1 seed 651131002 warmseed 651131001: decode_agg 1608.04 tok/s (C16 x 1000/meanTPOT 9.95 ms) | out_tput 1379.17 | meanTTFT 122.82 ms | in 7049 out 49807 tok in 36.11 s | dspark_acc_len 2.488 draft_acc 48.9% | failed 0 | prefix_hit 0.00%
+2026-10-10 09:53:07 PT A0 GSM8K-200
+e2-A0: GSM8K 196/200 = 98.0% (request errors 0)
+2026-10-10 09:53:24 PT A0 Q3 longctx (needle 57K/114K + 6 CNN/DM continuations)
+  NEEDLE 6/6 (A0; A0 reference run, Q3 needle part)
+  needle A0b: 6/6   A0: 6/6
+  n= 16384 rep=0: identical prefix  6/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.3851
+  n= 16384 rep=1: identical prefix 48/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.0000
+  n= 16384 rep=2: identical prefix 31/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.1987
+  n= 65536 rep=0: identical prefix 16/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.1733
+  n= 65536 rep=1: identical prefix  4/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.1160
+  n= 65536 rep=2: identical prefix  9/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.9971
+2026-10-10 09:54:16 PT A0 Phase 0 probe (prefill_wait.py, 16K x5; information)
+  SUMMARY {"isl": 16384, "text": null, "reps": 5, "mean_wall_s": 0.3772303581237793, "mean_wait_share": 0.3580110411914161, "mean_rows_per_call": 2064.8866666666668, "max_prefix_hit_pct": 0, "timeouts": 0, "contaminated_excluded": 0}
+2026-10-10 09:54:18 PT A0 timeouts_delta 0 words_before 4440 4440 
+2026-10-10 09:54:18 PT A0 end-of-boot audit (stray = checks outside the gate window, expected 0): stray post-startup untagged 0
+  RESULT {"arm": "A0", "prefill_16k_c1": {"mean": 44546.4, "n": 5, "sd": 577.2, "reps": "43568.6 / 44898.6 / 45005.0 / 44510.8 / 44749.1"}, "catid_c16_decode": 2173.91, "rt_short_c16_decode": 1608.04, "gsm8k200_pct": 98.0, "sidecar_timeouts": 0}
+2026-10-10 09:54:37 PT A0 teardown; GPU NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+2026-10-10 09:54:37 PT === X315 (X315, full) map rowmap-e2-x315.json env [MBT 8192 / LPT 6144] SEQS 64 graphs<=256 sidecar peer_server2_e2.py
+  E2 cold-expert counts per layer: 69: 21 layers, 132: 19 layers
+  launched dsv41-rb rowmap=rowmap-e2-x315.json MBT=8192 LPT=6144 FI_TUNE=live REPLAY=1 PEER2_MAX_ROWS=8192 TUNE_MAX=8192 check=80 arm=/w/gate/ARM hook=<hook copy> cold_trt=1
+2026-10-10 10:05:57 PT dsv41-rb ready after 561 s
+2026-10-10 10:05:57 PT X315 GPU KV cache size: 2,348,871 tokens
+2026-10-10 10:05:57 PT X315 probe 391: 391
+2026-10-10 10:05:57 PT X315 pre-arm: startup at log line 480; checks logged so far 0 (warm-up checks: expected 0)
+2026-10-10 10:06:04 PT X315 gate window: MEGA_PEER check gate armed: tag=e2-X315-1791651957, 80 checks left|MEGA_PEER check gate closed: 40 unused checks dropped (tag=e2-X315-1791651957)|
+2026-10-10 10:06:04 PT X315 COSGATE PASS (E2 rule: share>=0.01 -> cos>=0.999, any -> cos>=0.995): 40 real-prompt checks (tag e2-X315-1791651957) over 40 layers; min cos 0.99978 (layer 1 T=8188 share 0.037); 40 checks with share>=0.01, min cos 0.99978 (layer 1 T=8188); mean 0.99984; 0 bel
+  INFO real-prompt T values {128: 19, 8188: 21}; registered prompt max tokens 8203
+  INFO checks below 0.999 at any share (old REBEAT rule, information only): 0
+2026-10-10 10:06:04 PT X315 prefill 16K C1 x5 (headline)
+  MEAN catid-16384-c1: 52607.3 tok/s over 5 clean reps (sd 176.7; 52446.0 / 52807.2 / 52774.7 / 52574.3 / 52434.5)
+2026-10-10 10:06:14 PT X315 prefill 64K C1 x3 (stretch shape)
+  MEAN catid-65536-c1: 52899.4 tok/s over 3 clean reps (sd 254.6; 52717.6 / 53190.4 / 52790.2)
+2026-10-10 10:06:38 PT X315 prefill 8K C16
+  MEAN catid-8192-c16: 55419.1 tok/s over 1 clean reps (sd 0.0; 55419.1)
+2026-10-10 10:06:52 PT X315 catid decode 8192/1024: C1 x3 (NP 5), C16 (NP 80), C64 (NP 320), with acceptance
+  random decode-c1-r1 try1 seed 652012002 warmseed 652012001: decode_agg 540.54 tok/s (C1 x 1000/meanTPOT 1.85 ms) | out_tput 493.97 | meanTTFT 184.69 ms | in 40960 out 5120 tok in 10.37 s | dspark_acc_len 5.634 draft_acc 92.7% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r2 try1 seed 652012004 warmseed 652012003: decode_agg 555.56 tok/s (C1 x 1000/meanTPOT 1.8 ms) | out_tput 502.56 | meanTTFT 196.76 ms | in 40960 out 5120 tok in 10.19 s | dspark_acc_len 5.790 draft_acc 95.8% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r3 try1 seed 652012006 warmseed 652012005: decode_agg 442.48 tok/s (C1 x 1000/meanTPOT 2.26 ms) | out_tput 409.78 | meanTTFT 186.79 ms | in 40960 out 5120 tok in 12.49 s | dspark_acc_len 4.745 draft_acc 74.9% | failed 0 | prefix_hit 0.00%
+  random decode-c16-r1 try1 seed 652012008 warmseed 652012007: decode_agg 1977.75 tok/s (C16 x 1000/meanTPOT 8.09 ms) | out_tput 1728.77 | meanTTFT 833.80 ms | in 655360 out 81920 tok in 47.39 s | dspark_acc_len 3.714 draft_acc 89.9% | failed 0 | prefix_hit 0.00%
+  random decode-c64-r1 try1 seed 652012010 warmseed 652012009: decode_agg 3415.15 tok/s (C64 x 1000/meanTPOT 18.74 ms) | out_tput 3038.06 | meanTTFT 1639.42 ms | in 2621440 out 327680 tok in 107.86 s | dspark_acc_len 3.741 draft_acc 91.3% | failed 0 | prefix_hit 0.31%
+2026-10-10 10:12:18 PT X315 RT long C16 (NP 80)
+  long decode-c16-r1 try1 seed 652338002 warmseed 652338001: decode_agg 1462.52 tok/s (C16 x 1000/meanTPOT 10.94 ms) | out_tput 1362.25 | meanTTFT 643.57 ms | in 655268 out 81920 tok in 60.14 s | dspark_acc_len 2.649 draft_acc 54.9% | failed 0 | prefix_hit 0.00%
+2026-10-10 10:13:40 PT X315 RT short C16 (NP 80)
+  short decode-c16-r1 try1 seed 652420002 warmseed 652420001: decode_agg 1585.73 tok/s (C16 x 1000/meanTPOT 10.09 ms) | out_tput 1305.20 | meanTTFT 583.42 ms | in 7049 out 50540 tok in 38.72 s | dspark_acc_len 2.528 draft_acc 50.2% | failed 0 | prefix_hit 0.00%
+2026-10-10 10:14:38 PT X315 GSM8K-200
+e2-X315: GSM8K 197/200 = 98.5% (request errors 0)
+2026-10-10 10:14:55 PT X315 Q3 longctx (needle 57K/114K + 6 CNN/DM continuations)
+  Q3 PASS: needle 6/6; prefix band (one-prompt slack) ok: arm [1, 6, 12, 30, 37, 48] vs A0b-A0a [4, 6, 9, 16, 31, 48]; first-token d0 max 0.750 vs limit 1.994 (A0 band 0.997) ok; divergences outside A0a top-5: 1 (<= 1 allowed); contaminated requests 0
+  needle X315: 6/6   A0: 6/6
+  n= 16384 rep=0: identical prefix 12/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.4123
+  n= 16384 rep=1: identical prefix 37/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.7498
+  n= 16384 rep=2: identical prefix  6/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.2058
+  n= 65536 rep=0: identical prefix 30/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.0857
+  n= 65536 rep=1: identical prefix  1/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.1448
+  n= 65536 rep=2: identical prefix 48/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.4961
+2026-10-10 10:15:18 PT X315 Phase 0 probe (prefill_wait.py, 16K x5; information)
+  SUMMARY {"isl": 16384, "text": null, "reps": 5, "mean_wall_s": 0.3135525226593018, "mean_wait_share": 0.19369449514460918, "mean_rows_per_call": 1408.4033333333334, "max_prefix_hit_pct": 0, "timeouts": 0, "contaminated_excluded": 0}
+2026-10-10 10:15:20 PT X315 timeouts_delta 0 words_before 4440 4440 
+2026-10-10 10:15:20 PT X315 end-of-boot audit (stray = checks outside the gate window, expected 0): stray post-startup untagged 0
+  RESULT {"arm": "X315", "prefill_16k_c1": {"mean": 52607.3, "n": 5, "sd": 176.7, "reps": "52446.0 / 52807.2 / 52774.7 / 52574.3 / 52434.5"}, "catid_c16_decode": 1977.75, "rt_short_c16_decode": 1585.73, "gsm8k200_pct": 98.5, "sidecar_timeouts": 0}
+2026-10-10 10:15:39 PT X315 teardown; GPU NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+2026-10-10 10:15:39 PT === X330 (X330, full) map rowmap-e2-x330.json env [MBT 8192 / LPT 6144] SEQS 64 graphs<=256 sidecar peer_server2_e2.py
+  E2 cold-expert counts per layer: 54: 21 layers, 149: 19 layers
+  launched dsv41-rb rowmap=rowmap-e2-x330.json MBT=8192 LPT=6144 FI_TUNE=live REPLAY=1 PEER2_MAX_ROWS=8192 TUNE_MAX=8192 check=80 arm=/w/gate/ARM hook=<hook copy> cold_trt=1
+2026-10-10 10:26:19 PT dsv41-rb ready after 561 s
+2026-10-10 10:26:19 PT X330 GPU KV cache size: 2,361,838 tokens
+2026-10-10 10:26:20 PT X330 probe 391: 391
+2026-10-10 10:26:20 PT X330 pre-arm: startup at log line 480; checks logged so far 0 (warm-up checks: expected 0)
+2026-10-10 10:26:26 PT X330 gate window: MEGA_PEER check gate armed: tag=e2-X330-1791653180, 80 checks left|MEGA_PEER check gate closed: 40 unused checks dropped (tag=e2-X330-1791653180)|
+2026-10-10 10:26:26 PT X330 COSGATE PASS (E2 rule: share>=0.01 -> cos>=0.999, any -> cos>=0.995): 40 real-prompt checks (tag e2-X330-1791653180) over 40 layers; min cos 0.99974 (layer 39 T=128 share 0.037); 40 checks with share>=0.01, min cos 0.99974 (layer 39 T=128); mean 0.99984; 0 bel
+  INFO real-prompt T values {128: 19, 8188: 21}; registered prompt max tokens 8203
+  INFO checks below 0.999 at any share (old REBEAT rule, information only): 0
+2026-10-10 10:26:26 PT X330 prefill 16K C1 x5 (headline)
+  MEAN catid-16384-c1: 54951.1 tok/s over 5 clean reps (sd 328.4; 54731.3 / 54721.8 / 55464.4 / 54738.7 / 55099.2)
+2026-10-10 10:26:36 PT X330 prefill 64K C1 x3 (stretch shape)
+  MEAN catid-65536-c1: 55417.6 tok/s over 3 clean reps (sd 148.2; 55248.6 / 55525.7 / 55478.5)
+2026-10-10 10:26:59 PT X330 prefill 8K C16
+  MEAN catid-8192-c16: 57361.3 tok/s over 1 clean reps (sd 0.0; 57361.3)
+2026-10-10 10:27:15 PT X330 catid decode 8192/1024: C1 x3 (NP 5), C16 (NP 80), C64 (NP 320), with acceptance
+  random decode-c1-r1 try1 seed 653235002 warmseed 653235001: decode_agg 400.00 tok/s (C1 x 1000/meanTPOT 2.5 ms) | out_tput 372.69 | meanTTFT 189.95 ms | in 40960 out 5120 tok in 13.74 s | dspark_acc_len 4.375 draft_acc 67.5% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r2 try1 seed 653235004 warmseed 653235003: decode_agg 478.47 tok/s (C1 x 1000/meanTPOT 2.09 ms) | out_tput 441.90 | meanTTFT 183.28 ms | in 40960 out 5120 tok in 11.59 s | dspark_acc_len 5.130 draft_acc 82.6% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r3 try1 seed 653235006 warmseed 653235005: decode_agg 502.51 tok/s (C1 x 1000/meanTPOT 1.99 ms) | out_tput 462.27 | meanTTFT 178.98 ms | in 40960 out 5120 tok in 11.08 s | dspark_acc_len 5.153 draft_acc 83.1% | failed 0 | prefix_hit 0.00%
+  random decode-c16-r1 try1 seed 653235008 warmseed 653235007: decode_agg 2088.77 tok/s (C16 x 1000/meanTPOT 7.66 ms) | out_tput 1830.12 | meanTTFT 670.73 ms | in 655360 out 81920 tok in 44.76 s | dspark_acc_len 3.769 draft_acc 91.9% | failed 0 | prefix_hit 0.00%
+  random decode-c64-r1 try1 seed 653235010 warmseed 653235009: decode_agg 3371.97 tok/s (C64 x 1000/meanTPOT 18.98 ms) | out_tput 2999.90 | meanTTFT 1607.77 ms | in 2621440 out 327680 tok in 109.23 s | dspark_acc_len 3.736 draft_acc 91.0% | failed 0 | prefix_hit 0.00%
+2026-10-10 10:32:44 PT X330 RT long C16 (NP 80)
+  long decode-c16-r1 try1 seed 653564002 warmseed 653564001: decode_agg 1405.98 tok/s (C16 x 1000/meanTPOT 11.38 ms) | out_tput 1312.96 | meanTTFT 630.90 ms | in 655268 out 81920 tok in 62.39 s | dspark_acc_len 2.652 draft_acc 55.0% | failed 0 | prefix_hit 0.00%
+2026-10-10 10:34:08 PT X330 RT short C16 (NP 80)
+  short decode-c16-r1 try1 seed 653648002 warmseed 653648001: decode_agg 1500.94 tok/s (C16 x 1000/meanTPOT 10.66 ms) | out_tput 1272.03 | meanTTFT 588.75 ms | in 7049 out 51072 tok in 40.15 s | dspark_acc_len 2.544 draft_acc 50.9% | failed 0 | prefix_hit 0.00%
+2026-10-10 10:35:08 PT X330 GSM8K-200
+e2-X330: GSM8K 197/200 = 98.5% (request errors 0)
+2026-10-10 10:35:27 PT X330 Q3 longctx (needle 57K/114K + 6 CNN/DM continuations)
+  Q3 FAIL: needle 6/6; prefix band (one-prompt slack) NO: arm [0, 8, 9, 9, 11, 28] vs A0b-A0a [4, 6, 9, 16, 31, 48]; first-token d0 max 0.999 vs limit 1.994 (A0 band 0.997) ok; divergences outside A0a top-5: 0 (<= 1 allowed); contaminated requests 0
+  needle X330: 6/6   A0: 6/6
+  n= 16384 rep=0: identical prefix  0/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.5066
+  n= 16384 rep=1: identical prefix  9/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.1251
+  n= 16384 rep=2: identical prefix 11/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.1946
+  n= 65536 rep=0: identical prefix 28/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.0850
+  n= 65536 rep=1: identical prefix  8/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.0782
+  n= 65536 rep=2: identical prefix  9/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.9986
+2026-10-10 10:35:50 PT X330 Phase 0 probe (prefill_wait.py, 16K x5; information)
+  SUMMARY {"isl": 16384, "text": null, "reps": 5, "mean_wall_s": 0.2964693546295166, "mean_wait_share": 0.1303118228489149, "mean_rows_per_call": 1030.3533333333332, "max_prefix_hit_pct": 0, "timeouts": 0, "contaminated_excluded": 0}
+2026-10-10 10:35:52 PT X330 timeouts_delta 0 words_before 4400 4400 
+2026-10-10 10:35:52 PT X330 end-of-boot audit (stray = checks outside the gate window, expected 0): stray post-startup untagged 0
+  RESULT {"arm": "X330", "prefill_16k_c1": {"mean": 54951.1, "n": 5, "sd": 328.4, "reps": "54731.3 / 54721.8 / 55464.4 / 54738.7 / 55099.2"}, "catid_c16_decode": 2088.77, "rt_short_c16_decode": 1500.94, "gsm8k200_pct": 98.5, "sidecar_timeouts": 0}
+2026-10-10 10:36:11 PT X330 teardown; GPU NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+2026-10-10 10:36:11 PT === X330M16 (X330M16, full) map rowmap-e2-x330.json env [MBT=16384 LPT=16384 PEER2_MAX_ROWS=16384] SEQS 64 graphs<=256 sidecar peer_server2_e2.py
+  E2 cold-expert counts per layer: 54: 21 layers, 149: 19 layers
+  launched dsv41-rb rowmap=rowmap-e2-x330.json MBT=16384 LPT=16384 FI_TUNE=live REPLAY=1 PEER2_MAX_ROWS=16384 TUNE_MAX=16384 check=80 arm=/w/gate/ARM hook=<hook copy> cold_trt=1
+2026-10-10 10:47:15 PT dsv41-rb ready after 580 s
+2026-10-10 10:47:16 PT X330M16 GPU KV cache size: 887,036 tokens
+2026-10-10 10:47:16 PT X330M16 probe 391: 391
+2026-10-10 10:47:16 PT X330M16 pre-arm: startup at log line 479; checks logged so far 0 (warm-up checks: expected 0)
+2026-10-10 10:47:23 PT X330M16 gate window: MEGA_PEER check gate armed: tag=e2-X330M16-1791654436, 80 checks left|MEGA_PEER check gate closed: 40 unused checks dropped (tag=e2-X330M16-1791654436)|
+2026-10-10 10:47:23 PT X330M16 COSGATE PASS (E2 rule: share>=0.01 -> cos>=0.999, any -> cos>=0.995): 40 real-prompt checks (tag e2-X330M16-1791654436) over 40 layers; min cos 0.99969 (layer 39 T=128 share 0.010); 40 checks with share>=0.01, min cos 0.99969 (layer 39 T=128); mean 0.99983; 0 
+  INFO real-prompt T values {128: 19, 8205: 21}; registered prompt max tokens 8205
+  INFO checks below 0.999 at any share (old REBEAT rule, information only): 0
+2026-10-10 10:47:23 PT X330M16 prefill 16K C1 x5 (headline)
+  MEAN catid-16384-c1: 59913.1 tok/s over 5 clean reps (sd 194.7; 59645.5 / 60186.3 / 59873.2 / 59970.6 / 59890.1)
+2026-10-10 10:47:32 PT X330M16 prefill 64K C1 x3 (stretch shape)
+  MEAN catid-65536-c1: 60715.4 tok/s over 3 clean reps (sd 467.6; 60176.0 / 60965.1 / 61005.1)
+2026-10-10 10:47:53 PT X330M16 prefill 8K C16
+  MEAN catid-8192-c16: 64937.6 tok/s over 1 clean reps (sd 0.0; 64937.6)
+2026-10-10 10:48:02 PT X330M16 catid decode 8192/1024: C1 x3 (NP 5), C16 (NP 80), C64 (NP 320), with acceptance
+  random decode-c1-r1 try1 seed 654482002 warmseed 654482001: decode_agg 578.03 tok/s (C1 x 1000/meanTPOT 1.73 ms) | out_tput 527.35 | meanTTFT 167.46 ms | in 40960 out 5120 tok in 9.71 s | dspark_acc_len 5.795 draft_acc 95.9% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r2 try1 seed 654482004 warmseed 654482003: decode_agg 478.47 tok/s (C1 x 1000/meanTPOT 2.09 ms) | out_tput 443.10 | meanTTFT 168.17 ms | in 40960 out 5120 tok in 11.56 s | dspark_acc_len 4.963 draft_acc 79.3% | failed 0 | prefix_hit 0.00%
+  random decode-c1-r3 try1 seed 654482006 warmseed 654482005: decode_agg 444.44 tok/s (C1 x 1000/meanTPOT 2.25 ms) | out_tput 414.15 | meanTTFT 168.46 ms | in 40960 out 5120 tok in 12.36 s | dspark_acc_len 4.620 draft_acc 72.4% | failed 0 | prefix_hit 0.00%
+  random decode-c16-r1 try1 seed 654482008 warmseed 654482007: decode_agg 2219.14 tok/s (C16 x 1000/meanTPOT 7.21 ms) | out_tput 1943.10 | meanTTFT 685.50 ms | in 655360 out 81920 tok in 42.16 s | dspark_acc_len 3.698 draft_acc 89.7% | failed 0 | prefix_hit 0.00%
+  random decode-c64-r1 try1 seed 654482010 warmseed 654482009: decode_agg 3389.83 tok/s (C64 x 1000/meanTPOT 18.88 ms) | out_tput 3004.37 | meanTTFT 1616.71 ms | in 2621440 out 327680 tok in 109.07 s | dspark_acc_len 3.746 draft_acc 91.4% | failed 0 | prefix_hit 0.00%
+2026-10-10 10:53:26 PT X330M16 RT long C16 (NP 80)
+  long decode-c16-r1 try1 seed 654806002 warmseed 654806001: decode_agg 1531.10 tok/s (C16 x 1000/meanTPOT 10.45 ms) | out_tput 1436.67 | meanTTFT 531.70 ms | in 655268 out 81920 tok in 57.02 s | dspark_acc_len 2.656 draft_acc 55.1% | failed 0 | prefix_hit 0.00%
+2026-10-10 10:54:44 PT X330M16 RT short C16 (NP 80)
+  short decode-c16-r1 try1 seed 654884002 warmseed 654884001: decode_agg 1477.38 tok/s (C16 x 1000/meanTPOT 10.83 ms) | out_tput 1175.93 | meanTTFT 1081.18 ms | in 7049 out 51507 tok in 43.80 s | dspark_acc_len 2.513 draft_acc 49.7% | failed 0 | prefix_hit 0.00%
+2026-10-10 10:55:47 PT X330M16 GSM8K-200
+e2-X330M16: GSM8K 196/200 = 98.0% (request errors 0)
+2026-10-10 10:56:05 PT X330M16 Q3 longctx (needle 57K/114K + 6 CNN/DM continuations)
+  Q3 FAIL: needle 6/6; prefix band (one-prompt slack) NO: arm [0, 4, 6, 7, 23, 48] vs A0b-A0a [4, 6, 9, 16, 31, 48]; first-token d0 max 1.624 vs limit 1.994 (A0 band 0.997) ok; divergences outside A0a top-5: 0 (<= 1 allowed); contaminated requests 0
+  needle X330M16: 6/6   A0: 6/6
+  n= 16384 rep=0: identical prefix  6/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.4151
+  n= 16384 rep=1: identical prefix  7/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 1.6244
+  n= 16384 rep=2: identical prefix  0/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.2549
+  n= 65536 rep=0: identical prefix 48/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.0641
+  n= 65536 rep=1: identical prefix  4/48 tokens, first-token top-5 overlap 5/5, max |dlogprob| 0.1816
+  n= 65536 rep=2: identical prefix 23/48 tokens, first-token top-5 overlap 4/5, max |dlogprob| 0.7492
+2026-10-10 10:56:26 PT X330M16 Phase 0 probe (prefill_wait.py, 16K x5; information)
+  SUMMARY {"isl": 16384, "text": null, "reps": 5, "mean_wall_s": 0.2747539520263672, "mean_wait_share": 0.10808897038710344, "mean_rows_per_call": 1516.395, "max_prefix_hit_pct": 0, "timeouts": 0, "contaminated_excluded": 0}
+2026-10-10 10:56:28 PT X330M16 timeouts_delta 0 words_before 4400 4400 
+2026-10-10 10:56:28 PT X330M16 end-of-boot audit (stray = checks outside the gate window, expected 0): stray post-startup untagged 0
+  RESULT {"arm": "X330M16", "prefill_16k_c1": {"mean": 59913.1, "n": 5, "sd": 194.7, "reps": "59645.5 / 60186.3 / 59873.2 / 59970.6 / 59890.1"}, "catid_c16_decode": 2219.14, "rt_short_c16_decode": 1477.38, "gsm8k200_pct": 98.0, "sidecar_timeouts": 0}
+2026-10-10 10:56:47 PT X330M16 teardown; GPU NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+2026-10-10 10:56:47 PT no arm passed every gate: no confirmation run (rule: no re-runs to fish for a pass)
+  A0: 16K C1 44546.4 (1.000x A0), 64K C1 44909.0, 8K C16 46751.4; catid C1 445.44 C16 2173.91 C64 out 2820.76; RT long/short C16 1429.85/1608.04; GSM8K-200 98.0; phase0 wait share 0.3580110411914161 rows/call 2064.8866666666668
+      gates: ALL PASS
+  X315: 16K C1 52607.3 (1.181x A0), 64K C1 52899.4, 8K C16 55419.1; catid C1 512.86 C16 1977.75 C64 out 3038.06; RT long/short C16 1462.52/1585.73; GSM8K-200 98.5; phase0 wait share 0.19369449514460918 rows/call 1408.4033333333334
+      gates: FAIL decode_guard_catid_c16
+  X330: 16K C1 54951.1 (1.234x A0), 64K C1 55417.6, 8K C16 57361.3; catid C1 460.33 C16 2088.77 C64 out 2999.90; RT long/short C16 1405.98/1500.94; GSM8K-200 98.5; phase0 wait share 0.1303118228489149 rows/call 1030.3533333333332
+      gates: FAIL Q3_longctx, decode_guard_rt_short_c16, decode_guard_catid_c16
+  X330M16: 16K C1 59913.1 (1.345x A0), 64K C1 60715.4, 8K C16 64937.6; catid C1 500.31 C16 2219.14 C64 out 3004.37; RT long/short C16 1531.1/1477.38; GSM8K-200 98.0; phase0 wait share 0.10808897038710344 rows/call 1516.395
+      gates: FAIL Q3_longctx, decode_guard_rt_short_c16
+  A0 interpretable (its own gates): True
+  FAIL rule (X330 < 1.03x A0): False
+  selected for confirmation: None
+  VERDICT: no confirmation (no arm passed every gate)

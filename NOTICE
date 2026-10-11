@@ -14,6 +14,11 @@ Third-party material included in this repository
      recipes/dsv4-pro-two-stations/hook/peer_tier_v4.py     <- deepseek-v4.1-flash/m3/hook/peer_tier2.py
      recipes/dsv4-pro-two-stations/sidecar/peer_server_v4.py <- deepseek-v4.1-flash/m3/sidecar/peer_server2.py
      recipes/dsv4-pro-two-stations/hook/sitecustomize.py    <- deepseek-v4.1-flash/m3/hook/sitecustomize.py
+     recipes/dsv41-flash-sidecar/stage0/build_e2_maps.py   <- deepseek-v4.1-flash/m3/tools/build_rowmap.py and
+                                                             build_cal_rowmaps.py (scoring; commit 87af662)
+     recipes/dsv41-flash-sidecar/stage0/rowmap-s0-u300.json  derived from deepseek-v4.1-flash/m3/calibration/
+                                                             counts-{A,B,D,E}.json and hook/rowmap-mix-v1.json
+                                                             (built by build_s0_maps.py, which imports build_e2_maps.py)
    The el8 repository's own NOTICE also covers J-M-Recipes (MIT) material in sitecustomize.py; see item 2.
 
 2. J-M-Recipes/recipes (commit 71ea3eef). Copyright 2026 J&M Recipes. MIT License.

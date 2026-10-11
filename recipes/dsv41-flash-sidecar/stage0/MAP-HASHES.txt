@@ -1,0 +1,8 @@
+# sha256 of the maps served in the Stage 0 / E2 / LC-1008 runs. build_e2_maps.py and build_s0_maps.py rebuild every one
+# of them byte-identically from original-el8's public calibration counts (the builders refuse to write if an input
+# hash differs). Only rowmap-s0-u300.json is committed here; rowmap-mix-v1.json is el8's own file (not vendored).
+2be120dff20761eb231c0f5d409aea87c40d79ece99324d46cec810c6ca4e60d  rowmap-mix-v1.json   (A0, el8 verbatim)
+e7f0634ee746691760ed40073a834969236877623cd6f5f068b79182d3f8791c  rowmap-s0-u300.json  (U300, Stage 0)
+bc9619e92b7801c7f75c1ae71c70b7190dce885d668415419ea5d03f6a94540a  rowmap-s0-p45.json   (P45 placebo, Stage 0)
+ace75e9e20f49f6be65fa2d3c9c7cb138e5e63beea193a9708513c0f7f8fd0ae  rowmap-e2-x315.json  (X315, E2)
+09f58d4b9fc742e8df18f4661f934dd70b61b3b9a2d21db5fc7d8d87113c9f90  rowmap-e2-x330.json  (X330 and X330M16, E2)
