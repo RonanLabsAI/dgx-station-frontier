@@ -1,0 +1,593 @@
+# MiMo-V2.6-Pro on two Stations, six tiers + rank-0 routing broadcast (the X2 re-run's X2-S6 stack), plus the
+# checkpoint's own MTP layer as the speculative drafter. One session, 2026-10-11 01:42-04:14 PT. Arms in order:
+# X3-S6 = same-session control (no drafting), X3-MTP1 = --speculative-config {"method":"mtp","num_speculative_tokens":1},
+# X3-MTP2 = the same with 2 (vLLM applies MTP layer 0 twice). Pre-registered bars: V-X3 knee C16 ratio >= 1.05, V-X3-C1
+# >= 1.20. The 8192/1024 random-token bench was pre-registered as not run (public real text replaces it), hence "NA".
+# The knee prompts start with a ~12-token nonce. The soak that followed is in logs/mimo/x3-soak.log.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names, GPU UUIDs, network
+# device names, file-system paths and the names of the services stopped for the run replaced with <placeholders> or
+# their lines omitted. Nothing else edited. Times are Pacific (PT) unless the line says otherwise (vLLM's own log stamps
+# are UTC = PT + 7 h).
+
+--- master.txt (sidecar self-test detail lines, container launch lines, kit staging lines and the stop / restore of the other services omitted)
+2026-10-11 01:42:10 PT +0m X3 start (station); L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89201 MiB;NVIDIA GB300, 221188 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89990 MiB;NVIDIA GB300, 242352 MiB;
+2026-10-11 01:42:14 PT +0m staged on both: x1 a11da2d68be6 a174ff69f531 1de7ea40156a x2 656d55e2355b 1b13514c1486 2fcb85e1d865 b93827ca0ca5  | s6 257902f63b81 0b7c36808cc8 1b13514c1486 2fcb85e1d865 b93827ca0ca5 (ref) t0b 1e416973b6ce dfa110ca3402  | MTP weights eba334c8613d on both | arms X3-S6 + MTP K in [1 2]
+2026-10-11 01:42:52 PT +0m after stop: GB300 L 22 R 22 MiB, RTX L 47 R 47 MiB
+2026-10-11 01:42:52 PT +0m P1 numerics: b12x fork W4A16 at the TP2 rank shape (H 6144, I 1024), NaN scratch, both RTXs (bar 0 non-finite, cos >= 0.9999)
+2026-10-11 01:43:19 PT +1m P1 rank 0: PASS: rc 0, m [1, 4, 16, 32, 128], bad rows 0
+2026-10-11 01:43:19 PT +1m P1 rank 1: PASS: rc 0, m [1, 4, 16, 32, 128], bad rows 0
+2026-10-11 01:43:19 PT +1m === X3-S6: six tiers (X2 re-run stack, routing broadcast on), spec none, rowmap 
+2026-10-11 01:43:19 PT +1m P2 memory rule: both sidecars prepare + self-test rowmap-x2-s6.json
+2026-10-11 01:53:42 PT +11m P2 rowmap-x2-s6.json: rank 0 rc 0, rank 1 rc 0; r0 prepared 69 layers (7296 experts) in 597s; 71.6 GiB allocated captured 966 graphs; 71.6 GiB allocated, 22.5 GiB free  | r1 prepared 69 layers (7296 experts) in 605s; 71.6 GiB allocated captured 966 graphs; 71.6 GiB allocated, 22.5 GiB free 
+2026-10-11 01:53:42 PT +11m P2 PASS: large-batch peer check rows (128, 475, 1372, 2048) on 2 sidecar(s), worst cos per rows {128: 0.999989, 475: 0.999989, 1372: 0.999989, 2048: 0.999989}
+  r0 peer tp rank 0/2 (RonanLabs X2): I 1024 of 2048 per expert
+  r1 peer tp rank 1/2 (RonanLabs X2): I 1024 of 2048 per expert
+2026-10-11 01:59:22 PT +17m ready after 325 s (X3-S6, spec none)
+2026-10-11 01:59:27 PT +17m X3-S6 KV: GPU KV cache size: 995,755 tokens | Available KV cache memory: 28.35 GiB | DD lines 2 | plan: hotsplit plan (rowmap /w/rowmap-x2-s6.json): 69 layers, hot cells 19200 (168.8 GiB HBM), peer cells 7296 (64.1 GiB on the sidecar), Grace cells 0
+2026-10-11 01:59:28 PT +17m X3-S6 probe 391: '391'
+2026-10-11 01:59:59 PT +17m X3-S6 X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-S6-1791709168, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=979 share 0.119), mean 1.000000; sidecar self-test 30 values min 0.999988; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 619
+2026-10-11 01:59:59 PT +17m X3-S6 X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-S6-1791709168, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=979 share 0.205), mean 1.000000; sidecar self-test 30 values min 0.999989; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 411
+2026-10-11 01:59:59 PT +17m X3-S6 knee (published shape, start nonce) C1,8,16 x3
+  KNEE C1: mean 59.09 agg tok/s over 3 clean runs (per-stream 59.09)
+  KNEE C8: mean 318.3 agg tok/s over 3 clean runs (per-stream 39.79)
+  KNEE C16: mean 501.54 agg tok/s over 3 clean runs (per-stream 31.35)
+2026-10-11 02:00:42 PT +18m X3-S6 real text long (public pool; C1 x3 NP5, C16 NP80; start nonce)
+  RTSUM long C1: decode 61.43 out 55.13 over 3 clean runs, accept_len None
+  RTSUM long C16: decode 331.17 out 304.30 over 1 clean runs, accept_len None
+2026-10-11 02:10:05 PT +27m X3-S6 real text short (public pool; C1 x3 NP5, C16 NP80; start nonce)
+  RTSUM short C1: decode 61.70 out 60.97 over 3 clean runs, accept_len None
+  RTSUM short C16: decode 464.42 out 414.69 over 1 clean runs, accept_len None
+2026-10-11 02:14:50 PT +32m X3-S6 GSM8K-50
+x3-X3-S6: GSM8K 49/50 = 98.0% (request errors 0)
+  rank 0 timeouts_delta 0 words_after 2576805 2576805 0 57240963 73366389 30704989536 2035830 6354932228815996465 6355234726747308544 words_before 897 897 0 218652 289938 68362144 767 6354932228815996465 6355234726747308544
+  rank 1 timeouts_delta 0 words_after 2576805 2576805 0 57240963 73366389 33475748736 2035830 6354932228815996465 6355234726747308545 words_before 897 897 0 218652 289938 55528768 767 6354932228815996465 6355234726747308545
+  counters_equal yes: r0 seq 2576805 rows 57240963 tokens 73366389 wait_ns 30704989536 waits 2035830 | r1 seq 2576805 rows 57240963 tokens 73366389 wait_ns 33475748736 waits 2035830
+2026-10-11 02:15:18 PT +33m X3-S6 rank 0 end-of-boot audit: stray post-startup untagged 0
+2026-10-11 02:15:18 PT +33m X3-S6 rank 1 end-of-boot audit: stray post-startup untagged 0
+2026-10-11 02:15:18 PT +33m X3-S6 ROUTEHASH on PASS: 200 common calls (305065 token-layers), ids_post/w_post identical on 200; flips prevented (pre-broadcast set differs) 137; router input differs on 198, logits on 188
+        5 X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+        2 X3GUARD patched gpu_worker.kernel_warmup (drafter warm-up=full)
+        2 X3GUARD installed pid=1 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=624 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=471 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=470 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=404 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=403 failfast=1 warmup=full stats=on inject=None
+        1 (Worker_TP1 pid=471) X3GUARD drafter warm-up: no draft model (nothing to do)
+        1 (Worker_TP0 pid=624) X3GUARD drafter warm-up: no draft model (nothing to do)
+        1 (EngineCore pid=404) INFO 10-11 08:54:41 [core.py:127] Initializing a V1 LLM engine (v0.29.1rc1.dev422+gd05da62e9) with config: model='/model', speculative_config=None, tokenizer='/model', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_co
+2026-10-11 02:17:46 PT +35m after teardown: L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+  nccl_errors r0 0 r1 0
+  rdma_delta L packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+  rdma_delta R packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+SUMMARY X3-S6 [arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=none guard=x3 ctx=131072 mnbt=2048 seqs=16]: knee C16 501.54 (3 clean) | C1 59.09 (3) | C8 318.30 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: NA | X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-S6-1791709168, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=979 share 0.119) | X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-S6-1791709168, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=979 share 0.205) | timeouts {0: ('0', 0), 1: ('0', 0)} | counters_equal yes: r0 seq 2576805 rows 57240963 tokens 73366389 wait_ns 30704989536 waits 2035830 | r1 seq 2576805 rows | gates: gsm8k=ok runs=ok nccl=ok rdma=ok cosine=ok timeouts=ok counters=ok route_on=ok route_hash=ok guard=ok headroom=ok rt=ok | spec none knee accept_len NA rate NA | RT long-C1 61.43 long-C16 331.17 short-C1 61.70 short-C16 464.42 | headroom MiB {0: 17721, 1: 17722} | guard ok | ROUTEHASH on PASS: 200 common calls (305065 token-layers), ids_post/w_post identical on 20
+2026-10-11 02:17:47 PT +35m === X3-MTP1: six tiers (X2 re-run stack, routing broadcast on), spec mtp1, rowmap rowmap-x2-s6.json
+2026-10-11 02:17:47 PT +35m P2 memory rule: both sidecars prepare + self-test rowmap-x2-s6.json
+2026-10-11 02:28:21 PT +46m P2 rowmap-x2-s6.json: rank 0 rc 0, rank 1 rc 0; r0 prepared 69 layers (7296 experts) in 604s; 71.6 GiB allocated captured 966 graphs; 71.6 GiB allocated, 22.5 GiB free  | r1 prepared 69 layers (7296 experts) in 611s; 71.6 GiB allocated captured 966 graphs; 71.6 GiB allocated, 22.5 GiB free 
+2026-10-11 02:28:21 PT +46m P2 PASS: large-batch peer check rows (128, 475, 1372, 2048) on 2 sidecar(s), worst cos per rows {128: 0.999989, 475: 0.999989, 1372: 0.999989, 2048: 0.999989}
+  r0 peer tp rank 0/2 (RonanLabs X2): I 1024 of 2048 per expert
+  r1 peer tp rank 1/2 (RonanLabs X2): I 1024 of 2048 per expert
+2026-10-11 02:35:40 PT +53m ready after 426 s (X3-MTP1, spec mtp1)
+2026-10-11 02:35:45 PT +53m X3-MTP1 KV: GPU KV cache size: 951,018 tokens | Available KV cache memory: 27.81 GiB | DD lines 2 | plan: hotsplit plan (rowmap /w/rowmap-x2-s6.json): 69 layers, hot cells 19200 (168.8 GiB HBM), peer cells 7296 (64.1 GiB on the sidecar), Grace cells 0
+2026-10-11 02:35:47 PT +53m X3-MTP1 probe 391: '391'
+2026-10-11 02:36:18 PT +54m X3-MTP1 X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-MTP1-1791711347, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=985 share 0.116), mean 1.000000; sidecar self-test 30 values min 0.999988; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 703
+2026-10-11 02:36:18 PT +54m X3-MTP1 X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-MTP1-1791711347, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=985 share 0.207), mean 1.000000; sidecar self-test 30 values min 0.999989; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 386
+2026-10-11 02:36:18 PT +54m X3-MTP1 knee (published shape, start nonce) C1,8,16 x3
+  KNEE C1: mean 91.8 agg tok/s over 3 clean runs (per-stream 91.80)
+  KNEE C8: mean 400.89 agg tok/s over 3 clean runs (per-stream 50.11)
+  KNEE C16: mean 650.21 agg tok/s over 3 clean runs (per-stream 40.64)
+2026-10-11 02:36:50 PT +54m X3-MTP1 real text long (public pool; C1 x3 NP5, C16 NP80; start nonce)
+  RTSUM long C1: decode 103.26 out 86.54 over 3 clean runs, accept_len 1.8326666666666667
+  RTSUM long C16: decode 417.06 out 370.31 over 1 clean runs, accept_len 1.831
+2026-10-11 02:43:42 PT +61m X3-MTP1 real text short (public pool; C1 x3 NP5, C16 NP80; start nonce)
+  RTSUM short C1: decode 100.59 out 98.69 over 3 clean runs, accept_len 1.7933
+  RTSUM short C16: decode 620.91 out 568.34 over 1 clean runs, accept_len 1.8084
+2026-10-11 02:46:54 PT +64m X3-MTP1 GSM8K-50
+x3-X3-MTP1: GSM8K 49/50 = 98.0% (request errors 0)
+  rank 0 timeouts_delta 0 words_after 1443963 1443963 0 58129578 74598246 14858633824 1290544 6354932228815996465 6355234726747308544 words_before 1104 1104 0 225778 298494 69101376 956 6354932228815996465 6355234726747308544
+  rank 1 timeouts_delta 0 words_after 1443963 1443963 0 58129578 74598246 16065445568 1290544 6354932228815996465 6355234726747308545 words_before 1104 1104 0 225778 298494 49860448 956 6354932228815996465 6355234726747308545
+  counters_equal yes: r0 seq 1443963 rows 58129578 tokens 74598246 wait_ns 14858633824 waits 1290544 | r1 seq 1443963 rows 58129578 tokens 74598246 wait_ns 16065445568 waits 1290544
+2026-10-11 02:47:13 PT +65m X3-MTP1 rank 0 end-of-boot audit: stray post-startup untagged 0
+2026-10-11 02:47:13 PT +65m X3-MTP1 rank 1 end-of-boot audit: stray post-startup untagged 0
+2026-10-11 02:47:14 PT +65m X3-MTP1 ROUTEHASH on PASS: 200 common calls (305134 token-layers), ids_post/w_post identical on 200; flips prevented (pre-broadcast set differs) 0; router input differs on 0, logits on 0
+        5 X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+        2 X3GUARD patched gpu_worker.kernel_warmup (drafter warm-up=full)
+        2 X3GUARD installed pid=1 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=764 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=610 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=609 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=544 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=543 failfast=1 warmup=full stats=on inject=None
+        1 (Worker_TP1 pid=610) X3GUARD drafter warm-up done (full): MiMoV2MTP 5 linears, 10400 GEMMs over M 1..2080, 1.7 s; free after 18068 MiB
+        1 (Worker_TP0 pid=764) X3GUARD drafter warm-up done (full): MiMoV2MTP 5 linears, 10400 GEMMs over M 1..2080, 1.6 s; free after 18068 MiB
+        1 (EngineCore pid=544) INFO 10-11 09:29:26 [core.py:127] Initializing a V1 LLM engine (v0.29.1rc1.dev422+gd05da62e9) with config: model='/model', speculative_config=SpeculativeConfig(method='mtp', model='/model', num_spec_tokens=1), tokenizer='/model', skip_tokenizer_init=False, tokenizer_mode
+2026-10-11 02:49:41 PT +67m after teardown: L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+  nccl_errors r0 0 r1 0
+  rdma_delta L packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+  rdma_delta R packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+SUMMARY X3-MTP1 [arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=mtp1 guard=x3 ctx=131072 mnbt=2048 seqs=16]: knee C16 650.21 (3 clean) | C1 91.80 (3) | C8 400.89 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: NA | X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-MTP1-1791711347, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=985 share 0.11 | X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-MTP1-1791711347, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=985 share 0.20 | timeouts {0: ('0', 0), 1: ('0', 0)} | counters_equal yes: r0 seq 1443963 rows 58129578 tokens 74598246 wait_ns 14858633824 waits 1290544 | r1 seq 1443963 rows | gates: gsm8k=ok runs=ok nccl=ok rdma=ok cosine=ok timeouts=ok counters=ok route_on=ok route_hash=ok guard=ok headroom=ok rt=ok spec=ok | spec mtp1 knee accept_len 1.7437 rate 0.7437 | RT long-C1 103.26/acc 1.833 long-C16 417.06/acc 1.831 short-C1 100.59/acc 1.793 short-C16 620.91/acc 1.808 | headroom MiB {0: 17713, 1: 17714} | guard ok | ROUTEHASH on PASS: 200 common calls (305134 token-layers), ids_post/w_post identical on 20
+2026-10-11 02:49:42 PT +67m === X3-MTP2: six tiers (X2 re-run stack, routing broadcast on), spec mtp2, rowmap rowmap-x2-s6.json
+2026-10-11 02:49:42 PT +67m P2 memory rule: both sidecars prepare + self-test rowmap-x2-s6.json
+2026-10-11 03:00:16 PT +78m P2 rowmap-x2-s6.json: rank 0 rc 0, rank 1 rc 0; r0 prepared 69 layers (7296 experts) in 598s; 71.6 GiB allocated captured 966 graphs; 71.6 GiB allocated, 22.5 GiB free  | r1 prepared 69 layers (7296 experts) in 609s; 71.6 GiB allocated captured 966 graphs; 71.6 GiB allocated, 22.5 GiB free 
+2026-10-11 03:00:16 PT +78m P2 PASS: large-batch peer check rows (128, 475, 1372, 2048) on 2 sidecar(s), worst cos per rows {128: 0.999989, 475: 0.999989, 1372: 0.999989, 2048: 0.999989}
+  r0 peer tp rank 0/2 (RonanLabs X2): I 1024 of 2048 per expert
+  r1 peer tp rank 1/2 (RonanLabs X2): I 1024 of 2048 per expert
+2026-10-11 03:07:37 PT +85m ready after 426 s (X3-MTP2, spec mtp2)
+2026-10-11 03:07:42 PT +85m X3-MTP2 KV: GPU KV cache size: 948,788 tokens | Available KV cache memory: 27.74 GiB | DD lines 2 | plan: hotsplit plan (rowmap /w/rowmap-x2-s6.json): 69 layers, hot cells 19200 (168.8 GiB HBM), peer cells 7296 (64.1 GiB on the sidecar), Grace cells 0
+2026-10-11 03:07:44 PT +85m X3-MTP2 probe 391: '391'
+2026-10-11 03:08:15 PT +86m X3-MTP2 X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-MTP2-1791713264, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=981 share 0.119), mean 1.000000; sidecar self-test 30 values min 0.999988; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 707
+2026-10-11 03:08:15 PT +86m X3-MTP2 X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-MTP2-1791713264, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=981 share 0.204), mean 1.000000; sidecar self-test 30 values min 0.999989; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 387
+2026-10-11 03:08:15 PT +86m X3-MTP2 knee (published shape, start nonce) C1,8,16 x3
+  KNEE C1: mean 94.02 agg tok/s over 3 clean runs (per-stream 94.02)
+  KNEE C8: mean 404.69 agg tok/s over 3 clean runs (per-stream 50.59)
+  KNEE C16: mean 634.92 agg tok/s over 3 clean runs (per-stream 39.68)
+2026-10-11 03:08:47 PT +86m X3-MTP2 real text long (public pool; C1 x3 NP5, C16 NP80; start nonce)
+  RTSUM long C1: decode 116.15 out 95.48 over 3 clean runs, accept_len 2.2663666666666664
+  RTSUM long C16: decode 426.39 out 379.13 over 1 clean runs, accept_len 2.2672
+2026-10-11 03:15:17 PT +93m X3-MTP2 real text short (public pool; C1 x3 NP5, C16 NP80; start nonce)
+  RTSUM short C1: decode 108.46 out 107.83 over 3 clean runs, accept_len 2.1593666666666667
+  RTSUM short C16: decode 639.18 out 588.44 over 1 clean runs, accept_len 2.1999
+2026-10-11 03:18:15 PT +96m X3-MTP2 GSM8K-50
+x3-X3-MTP2: GSM8K 49/50 = 98.0% (request errors 0)
+  rank 0 timeouts_delta 0 words_after 1170171 1170171 0 60325255 77721876 11808632704 1100618 6354932228815996465 6355234726747308544 words_before 1311 1311 0 235806 310707 81944960 1165 6354932228815996465 6355234726747308544
+  rank 1 timeouts_delta 0 words_after 1170171 1170171 0 60325255 77721876 12372356256 1100618 6354932228815996465 6355234726747308545 words_before 1311 1311 0 235806 310707 106329152 1165 6354932228815996465 6355234726747308545
+  counters_equal yes: r0 seq 1170171 rows 60325255 tokens 77721876 wait_ns 11808632704 waits 1100618 | r1 seq 1170171 rows 60325255 tokens 77721876 wait_ns 12372356256 waits 1100618
+2026-10-11 03:18:32 PT +96m X3-MTP2 rank 0 end-of-boot audit: stray post-startup untagged 0
+2026-10-11 03:18:32 PT +96m X3-MTP2 rank 1 end-of-boot audit: stray post-startup untagged 0
+2026-10-11 03:18:32 PT +96m X3-MTP2 ROUTEHASH on PASS: 200 common calls (305134 token-layers), ids_post/w_post identical on 200; flips prevented (pre-broadcast set differs) 0; router input differs on 0, logits on 0
+        5 X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+        2 X3GUARD patched gpu_worker.kernel_warmup (drafter warm-up=full)
+        2 X3GUARD installed pid=1 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=625 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=470 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=469 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=405 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=404 failfast=1 warmup=full stats=on inject=None
+        1 (Worker_TP1 pid=470) X3GUARD drafter warm-up done (full): MiMoV2MTP 5 linears, 10480 GEMMs over M 1..2096, 1.6 s; free after 18126 MiB
+        1 (Worker_TP0 pid=625) X3GUARD drafter warm-up done (full): MiMoV2MTP 5 linears, 10480 GEMMs over M 1..2096, 1.5 s; free after 18126 MiB
+        1 (EngineCore pid=405) INFO 10-11 10:01:15 [core.py:127] Initializing a V1 LLM engine (v0.29.1rc1.dev422+gd05da62e9) with config: model='/model', speculative_config=SpeculativeConfig(method='mtp', model='/model', num_spec_tokens=2), tokenizer='/model', skip_tokenizer_init=False, tokenizer_mode
+2026-10-11 03:18:33 PT +96m X3-MTP2 stays up (last arm; the soak may run on this boot)
+  nccl_errors r0 0 r1 0
+  rdma_delta L packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+  rdma_delta R packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+SUMMARY X3-MTP2 [arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=mtp2 guard=x3 ctx=131072 mnbt=2048 seqs=16]: knee C16 634.92 (3 clean) | C1 94.02 (3) | C8 404.69 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: NA | X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-MTP2-1791713264, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=981 share 0.11 | X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-MTP2-1791713264, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=981 share 0.20 | timeouts {0: ('0', 0), 1: ('0', 0)} | counters_equal yes: r0 seq 1170171 rows 60325255 tokens 77721876 wait_ns 11808632704 waits 1100618 | r1 seq 1170171 rows | gates: gsm8k=ok runs=ok nccl=ok rdma=ok cosine=ok timeouts=ok counters=ok route_on=ok route_hash=ok guard=ok headroom=ok rt=ok spec=ok | spec mtp2 knee accept_len 2.0424 rate 0.5212 | RT long-C1 116.15/acc 2.266 long-C16 426.39/acc 2.267 short-C1 108.46/acc 2.159 short-C16 639.18/acc 2.200 | headroom MiB {0: 17681, 1: 17682} | guard ok | ROUTEHASH on PASS: 200 common calls (305134 token-layers), ids_post/w_post identical on 20
+2026-10-11 03:18:33 PT +96m === SOAK: pick X3-MTP1 (spec mtp1) by x3_sum.py --pick-soak; up now: X3-MTP2
+2026-10-11 03:21:03 PT +98m after teardown: L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+2026-10-11 03:21:03 PT +98m P2 memory rule: both sidecars prepare + self-test rowmap-x2-s6.json
+2026-10-11 03:31:37 PT +109m P2 rowmap-x2-s6.json: rank 0 rc 0, rank 1 rc 0; r0 prepared 69 layers (7296 experts) in 599s; 71.6 GiB allocated captured 966 graphs; 71.6 GiB allocated, 22.5 GiB free  | r1 prepared 69 layers (7296 experts) in 610s; 71.6 GiB allocated captured 966 graphs; 71.6 GiB allocated, 22.5 GiB free 
+2026-10-11 03:31:37 PT +109m P2 PASS: large-batch peer check rows (128, 475, 1372, 2048) on 2 sidecar(s), worst cos per rows {128: 0.999989, 475: 0.999989, 1372: 0.999989, 2048: 0.999989}
+  r0 peer tp rank 0/2 (RonanLabs X2): I 1024 of 2048 per expert
+  r1 peer tp rank 1/2 (RonanLabs X2): I 1024 of 2048 per expert
+2026-10-11 03:37:57 PT +115m ready after 366 s (X3-MTP1, spec mtp1)
+2026-10-11 03:38:02 PT +115m SOAK KV: GPU KV cache size: 951,018 tokens | Available KV cache memory: 27.81 GiB | DD lines 2 | plan: hotsplit plan (rowmap /w/rowmap-x2-s6.json): 69 layers, hot cells 19200 (168.8 GiB HBM), peer cells 7296 (64.1 GiB on the sidecar), Grace cells 0
+2026-10-11 03:38:03 PT +115m SOAK probe 391: '391'
+2026-10-11 03:38:34 PT +116m SOAK X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-SOAK-1791715083, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=976 share 0.119), mean 1.000000; sidecar self-test 30 values min 0.999988; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 737
+2026-10-11 03:38:34 PT +116m SOAK X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-SOAK-1791715083, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=976 share 0.202), mean 1.000000; sidecar self-test 30 values min 0.999989; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 424
+2026-10-11 03:38:35 PT +116m SOAK 20 min streaming, C16 (long forced / short natural / knee forced rotation, start nonce, cache_salt)
+  SOAK 20.0 min C16: requests 1044 ok 1044 errors 0 (client timeouts 0) stalls>60.0s 0 max_gap 0.69 s out 499.46 tok/s first5 475.26 last5 549.24 (x1.1556) prefix_hit 0.00% accept_len 1.8096
+2026-10-11 03:58:52 PT +136m SOAK GSM8K-200 (same boot)
+x3-soak: GSM8K 197/200 = 98.5% (request errors 0)
+  rank 0 timeouts_delta 0 words_after 1591485 1591485 0 119046304 156444045 20416957280 1588572 6354932228815996465 6355234726747308544 words_before 3036 3036 0 518355 686274 126411904 2363 6354932228815996465 6355234726747308544
+  rank 1 timeouts_delta 0 words_after 1591485 1591485 0 119046304 156444045 21237009600 1588572 6354932228815996465 6355234726747308545 words_before 3036 3036 0 518355 686274 192540000 2363 6354932228815996465 6355234726747308545
+  counters_equal yes: r0 seq 1591485 rows 119046304 tokens 156444045 wait_ns 20416957280 waits 1588572 | r1 seq 1591485 rows 119046304 tokens 156444045 wait_ns 21237009600 waits 1588572
+        5 X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+        2 X3GUARD patched gpu_worker.kernel_warmup (drafter warm-up=full)
+        2 X3GUARD installed pid=1 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=624 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=470 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=469 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=404 failfast=1 warmup=full stats=on inject=None
+        1 X3GUARD installed pid=403 failfast=1 warmup=full stats=on inject=None
+        1 (Worker_TP1 pid=470) X3GUARD drafter warm-up done (full): MiMoV2MTP 5 linears, 10400 GEMMs over M 1..2080, 1.7 s; free after 18068 MiB
+        1 (Worker_TP0 pid=624) X3GUARD drafter warm-up done (full): MiMoV2MTP 5 linears, 10400 GEMMs over M 1..2080, 1.6 s; free after 18068 MiB
+        1 (EngineCore pid=404) INFO 10-11 10:32:35 [core.py:127] Initializing a V1 LLM engine (v0.29.1rc1.dev422+gd05da62e9) with config: model='/model', speculative_config=SpeculativeConfig(method='mtp', model='/model', num_spec_tokens=1), tokenizer='/model', skip_tokenizer_init=False, tokenizer_mode
+2026-10-11 04:02:30 PT +140m after teardown: L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 47 MiB;NVIDIA GB300, 22 MiB;
+  nccl_errors r0 0 r1 0
+  rdma_delta L packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+  rdma_delta R packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+2026-10-11 04:02:31 PT +140m === X3 verdicts (PREREG; x3_sum.py)
+SUMMARY X3-S6 (control: X2r six-tier, broadcast on, no drafting) [arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=none guard=x3 ctx=131072 mnbt=2048 seqs=16]: knee C16 501.54 (3 clean) | C1 59.09 (3) | C8 318.30 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: NA | X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-S6-1791709168, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=979 share 0.119) | X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-S6-1791709168, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=979 share 0.205) | timeouts {0: ('0', 0), 1: ('0', 0)} | counters_equal yes: r0 seq 2576805 rows 57240963 tokens 73366389 wait_ns 30704989536 waits 2035830 | r1 seq 2576805 rows | gates: gsm8k=ok runs=ok nccl=ok rdma=ok cosine=ok timeouts=ok counters=ok route_on=ok route_hash=ok guard=ok headroom=ok rt=ok | spec none knee accept_len NA rate NA | RT long-C1 61.43 long-C16 331.17 short-C1 61.70 short-C16 464.42 | headroom MiB {0: 17721, 1: 17722} | guard ok | ROUTEHASH on PASS: 200 common calls (305065 token-layers), ids_post/w_post identical on 20
+SUMMARY X3-MTP1 [arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=mtp1 guard=x3 ctx=131072 mnbt=2048 seqs=16]: knee C16 650.21 (3 clean) | C1 91.80 (3) | C8 400.89 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: NA | X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-MTP1-1791711347, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=985 share 0.11 | X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-MTP1-1791711347, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=985 share 0.20 | timeouts {0: ('0', 0), 1: ('0', 0)} | counters_equal yes: r0 seq 1443963 rows 58129578 tokens 74598246 wait_ns 14858633824 waits 1290544 | r1 seq 1443963 rows | gates: gsm8k=ok runs=ok nccl=ok rdma=ok cosine=ok timeouts=ok counters=ok route_on=ok route_hash=ok guard=ok headroom=ok rt=ok spec=ok | spec mtp1 knee accept_len 1.7437 rate 0.7437 | RT long-C1 103.26/acc 1.833 long-C16 417.06/acc 1.831 short-C1 100.59/acc 1.793 short-C16 620.91/acc 1.808 | headroom MiB {0: 17713, 1: 17714} | guard ok | ROUTEHASH on PASS: 200 common calls (305134 token-layers), ids_post/w_post identical on 20
+SUMMARY X3-MTP2 [arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=mtp2 guard=x3 ctx=131072 mnbt=2048 seqs=16]: knee C16 634.92 (3 clean) | C1 94.02 (3) | C8 404.69 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: NA | X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-MTP2-1791713264, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=981 share 0.11 | X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-MTP2-1791713264, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=981 share 0.20 | timeouts {0: ('0', 0), 1: ('0', 0)} | counters_equal yes: r0 seq 1170171 rows 60325255 tokens 77721876 wait_ns 11808632704 waits 1100618 | r1 seq 1170171 rows | gates: gsm8k=ok runs=ok nccl=ok rdma=ok cosine=ok timeouts=ok counters=ok route_on=ok route_hash=ok guard=ok headroom=ok rt=ok spec=ok | spec mtp2 knee accept_len 2.0424 rate 0.5212 | RT long-C1 116.15/acc 2.266 long-C16 426.39/acc 2.267 short-C1 108.46/acc 2.159 short-C16 639.18/acc 2.200 | headroom MiB {0: 17681, 1: 17682} | guard ok | ROUTEHASH on PASS: 200 common calls (305134 token-layers), ids_post/w_post identical on 20
+Context: X3-S6 knee C16 501.54 vs the X2 re-run's X2-S6 503.47 (10-10, cross-session) = 0.996 (information)
+V-X3: PASS -- six-tier MiMo-Pro with its own MTP drafter (mtp1): 650.21 tok/s knee C16 on two Stations, 325.10 per Station (two Stations / 2), 1.296 x the same-session no-drafting control 501.54; knee accept_len 1.7437; primary X3-MTP1 (highest knee C16 of 2 MTP arm(s) with every gate; others X3-MTP2 1.266). Credit: three-tier design, hook, sidecar server: el8 (original-el8/dgx-station-gb300-research @87af662, Apache-2.0), on J-M-Recipes' hotsplit and public histogram (MIT); ours: A16 mode + BF16 wire + b12x W4A16 fixes dce2933e + E8M0 underflow (X1), the TP2 per-rank sidecar shard and the gate (X2); X3: MiMo-V2.6-Pro's own MTP layer (Xiaomi, MIT) through vLLM's MTP path, with the R3.1b protections ported to d05da62e (failfast, drafter warm-up, headroom telemetry)
+V-X3-C1: PASS -- X3-MTP1 knee C1 91.80 vs control 59.09 = 1.554 (bar >= 1.2)
+V-X3-RT: PASS -- X3-MTP1 / control decode on public real text: long C1 1.681 (accept_len 1.8326666666666667); long C16 1.259 (accept_len 1.831); short C1 1.630 (accept_len 1.7933); short C16 1.337 (accept_len 1.8084)
+V-SOAK: PASS -- 20.0 min C16 on [soak on X3-MTP1: arm=s6 rowmap=rowmap-x2-s6.json bcast=1 spec=mtp1 guard=x3 minutes=20 C16 + GSM8K-200]: 1044 requests, 0 errors, 0 client timeouts, 0 stalls > 60.0 s (max gap 0.69 s), 499.46 tok/s out, last5/first5 1.1556, accept_len 1.8096, GSM8K-200 197/200, headroom MiB {0: 17713, 1: 17714}; discharges the owed X2 soak (same six-tier + broadcast stack)
+Context (two Stations / 2, not a one-Station result): X3-S6 250.77 per Station at knee C16 vs J-M 63.0, el8 v2 102.2 (el8 v6 DFlash k=3 87.6), ours B1 76.28 (one-Station figures)
+Context (two Stations / 2, not a one-Station result): X3-MTP1 325.10 per Station at knee C16 vs J-M 63.0, el8 v2 102.2 (el8 v6 DFlash k=3 87.6), ours B1 76.28 (one-Station figures)
+Context (two Stations / 2, not a one-Station result): X3-MTP2 317.46 per Station at knee C16 vs J-M 63.0, el8 v2 102.2 (el8 v6 DFlash k=3 87.6), ours B1 76.28 (one-Station figures)
+2026-10-11 04:14:51 PT +152m X3-ALLDONE: ran; V-X3: PASS -- six-tier MiMo-Pro with its own MTP drafter (mtp1): 650.21 tok/s knee C16 on ; V-SOAK: PASS -- 20.0 min C16 on [soak on X3-MTP1: arm=s6 row; dailies restored, 391 x4
+
+--- X3-S6/arm.txt
+arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=none guard=x3 ctx=131072 mnbt=2048 seqs=16
+
+--- X3-S6/config.txt (image, rank-0 server cmd, selected env, sidecar images and cmds, GPUs)
+image sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71 vllm/vllm-openai:nightly-d05da62e9ccdf8e342b15bf6785d83224cc165af
+repodigests [vllm/vllm-openai@sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71]
+cmd ["--model","/model","--served-model-name","mimo26-pro","--trust-remote-code","--tensor-parallel-size","2","--nnodes","2","--node-rank","0","--master-addr","<rail-ip>","--master-port","29611","--offload-backend","uva","--cpu-offload-gb","64","--cpu-offload-params","routed_experts.w13_weight","routed_experts.w2_weight","--max-model-len","131072","--max-num-seqs","16","--max-num-batched-tokens","2048","--gpu-memory-utilization","0.95","--compilation-config","{\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}","--reasoning-parser","mimo","--generation-config","auto","--moe-backend","marlin","--disable-custom-all-reduce","--host","0.0.0.0","--port","8006"]
+env (selected: HOTSPLIT_* / PEER_* / X2_* / X3_* / PYTHONPATH / VLLM_USE_DEEP_GEMM / VLLM_WEIGHT_* / VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS / NCCL tuner, IB traffic-class and data-path entries) ["HOTSPLIT_COUNTS=/w/expert_hist_mix.json", "HOTSPLIT_FUSED_SEND=0", "HOTSPLIT_MAX_TOKENS=2048", "HOTSPLIT_PEER_CHECK=80", "HOTSPLIT_PEER_CHECK_ARM=/w/gate/ARM", "HOTSPLIT_ROWMAP=/w/rowmap-x2-s6.json", "HOTSPLIT_STAGE_SLOTS=0", "HOTSPLIT_WEIGHTS=decode=1,prefill=0", "NCCL_DMABUF_ENABLE=1", "NCCL_IB_QPS_PER_CONNECTION=4", "NCCL_IB_SPLIT_DATA_ON_QPS=1", "NCCL_IB_TC=106", "NCCL_NET_GDR_LEVEL=SYS", "NCCL_TUNER_CONFIG_FILE=/opt/nccl-tuner/tuner3.csv", "NCCL_TUNER_PLUGIN=/opt/nccl-tuner/libnccl-tuner-example.so", "PEER_ACT=a16", "PEER_MAX_ROWS=8192", "PEER_SHM=/dev/shm/vllm_peer_mimox2", "PEER_TP_RANK=0", "PEER_TP_SIZE=2", "PYTHONPATH=/x3guard", "VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=120", "VLLM_USE_DEEP_GEMM=0", "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY=1", "X2_ROUTE_BENCH=0", "X2_ROUTE_DIR=/x2route", "X2_ROUTE_HASH=200", "X2_ROUTE_HASH_ARM=/w/gate/ARM", "X2_TOPK_BCAST=1", "X3_DRAFT_WARMUP=full", "X3_FAILFAST=1", "X3_GUARD=/x3guard/x3_guard.py", "X3_STATS_DIR=/x3stats"]
+sidecar0 vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b cmd ["-c","exec numactl --membind=0 python3 /w/peer_server_mimo.py --rowmap /w/rowmap-x2-s6.json --model /model --min-cos 0.999"]
+sidecar1 vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+name, uuid, power.limit [W], driver_version
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, <gpu-uuid>, 300.00 W, 595.99.02
+NVIDIA GB300, <gpu-uuid>, 1300.00 W, 595.99.02
+name, uuid, power.limit [W], driver_version
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, <gpu-uuid>, 300.00 W, 595.99.02
+NVIDIA GB300, <gpu-uuid>, 1300.00 W, 595.99.02
+arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=none guard=x3 ctx=131072 mnbt=2048 seqs=16
+
+--- X3-S6/server-rank0.log (guard, vLLM version, NCCL version, routing broadcast, tier plan, drafter, KV)
+X3GUARD installed pid=1 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+(APIServer pid=1) INFO 10-11 08:54:24 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.29.1rc1.dev422+gd05da62e9
+X3GUARD installed pid=403 failfast=1 warmup=full stats=on inject=None
+X3GUARD installed pid=404 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+(EngineCore pid=404) INFO 10-11 08:54:41 [core.py:127] Initializing a V1 LLM engine (v0.29.1rc1.dev422+gd05da62e9) with config: model='/model', speculative_config=None, tokenizer='/model', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=131072, download_dir=None, load_format=auto, tensor_parallel_size=2, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=fp8, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='mimo', reasoning_parser_plugin='', enable_in_reasoning=False), obse [...]
+X3GUARD installed pid=624 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+X3GUARD patched gpu_worker.kernel_warmup (drafter warm-up=full)
+(Worker pid=624) INFO 10-11 08:54:51 [pynccl.py:148] vLLM is using nccl==2.30.7
+(Worker_TP0 pid=624) INFO 10-11 08:57:39 [x2_route.py:300] x2 route installed: bcast=1 hash=200 layers=69 (first 1, last 69) tp rank 0/2 comm=PyNcclCommunicator (RonanLabs X2r)
+(Worker_TP0 pid=624) INFO 10-11 08:57:39 [hotsplit.py:171] hotsplit plan (rowmap /w/rowmap-x2-s6.json): 69 layers, hot cells 19200 (168.8 GiB HBM), peer cells 7296 (64.1 GiB on the sidecar), Grace cells 0; stock HBM experts 168.8 GiB
+(Worker_TP0 pid=624) INFO 10-11 08:57:50 [model_runner.py:419] Model loading took 200.77 GiB memory and 177.095033 seconds
+(Worker_TP0 pid=624) INFO 10-11 08:58:15 [hotsplit.py:579] hotsplit x2 peer tier: TP rank 0/2, sidecar shard words[8]=0x5832545000000200 (RonanLabs X2)
+(Worker_TP0 pid=624) INFO 10-11 08:58:15 [hotsplit.py:581] hotsplit peer tier on: shm /dev/shm/vllm_peer_mimox2, max_rows=8192
+(Worker_TP0 pid=624) INFO 10-11 08:58:15 [hotsplit.py:582] hotsplit peer tier act=a16 (RonanLabs X1; wire 2 byte(s)/element)
+(Worker_TP0 pid=624) INFO 10-11 08:58:43 [gpu_worker.py:645] Available KV cache memory: 28.35 GiB
+(EngineCore pid=404) INFO 10-11 08:58:43 [kv_cache_utils.py:2404] GPU KV cache size: 995,755 tokens, Maximum concurrency for 131,072 tokens per request: 7.60x
+(Worker_TP0 pid=624) X3GUARD drafter warm-up: no draft model (nothing to do)
+
+--- X3-S6/server-rank1.log (guard, routing broadcast, tier plan, drafter, KV)
+X3GUARD installed pid=1 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+X3GUARD installed pid=470 failfast=1 warmup=full stats=on inject=None
+X3GUARD installed pid=471 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+X3GUARD patched gpu_worker.kernel_warmup (drafter warm-up=full)
+(Worker_TP1 pid=471) INFO 10-11 08:57:26 [x2_route.py:300] x2 route installed: bcast=1 hash=200 layers=69 (first 1, last 69) tp rank 1/2 comm=PyNcclCommunicator (RonanLabs X2r)
+(Worker_TP1 pid=471) INFO 10-11 08:57:26 [hotsplit.py:171] hotsplit plan (rowmap /w/rowmap-x2-s6.json): 69 layers, hot cells 19200 (168.8 GiB HBM), peer cells 7296 (64.1 GiB on the sidecar), Grace cells 0; stock HBM experts 168.8 GiB
+(Worker_TP1 pid=471) INFO 10-11 08:57:37 [model_runner.py:419] Model loading took 200.77 GiB memory and 164.323774 seconds
+(Worker_TP1 pid=471) INFO 10-11 08:58:15 [hotsplit.py:579] hotsplit x2 peer tier: TP rank 1/2, sidecar shard words[8]=0x5832545000000201 (RonanLabs X2)
+(Worker_TP1 pid=471) INFO 10-11 08:58:15 [hotsplit.py:581] hotsplit peer tier on: shm /dev/shm/vllm_peer_mimox2, max_rows=8192
+(Worker_TP1 pid=471) INFO 10-11 08:58:15 [hotsplit.py:582] hotsplit peer tier act=a16 (RonanLabs X1; wire 2 byte(s)/element)
+(Worker_TP1 pid=471) INFO 10-11 08:58:43 [gpu_worker.py:645] Available KV cache memory: 28.35 GiB
+(Worker_TP1 pid=471) X3GUARD drafter warm-up: no draft model (nothing to do)
+
+--- X3-S6/knee.log
+knee C1 run1 try1: 59.15 agg tok/s (192 tok / 3.25 s) prefix_hit 0.00%
+knee C1 run2 try1: 59.01 agg tok/s (192 tok / 3.25 s) prefix_hit 0.00%
+knee C1 run3 try1: 59.10 agg tok/s (192 tok / 3.25 s) prefix_hit 0.00%
+KNEE C1: mean 59.09 agg tok/s over 3 clean runs (per-stream 59.09)
+knee C8 run1 try1: 316.35 agg tok/s (1536 tok / 4.86 s) prefix_hit 0.00%
+knee C8 run2 try1: 319.09 agg tok/s (1536 tok / 4.81 s) prefix_hit 0.00%
+knee C8 run3 try1: 319.46 agg tok/s (1536 tok / 4.81 s) prefix_hit 0.00%
+KNEE C8: mean 318.3 agg tok/s over 3 clean runs (per-stream 39.79)
+knee C16 run1 try1: 500.77 agg tok/s (3072 tok / 6.13 s) prefix_hit 0.00%
+knee C16 run2 try1: 502.02 agg tok/s (3072 tok / 6.12 s) prefix_hit 0.00%
+knee C16 run3 try1: 501.82 agg tok/s (3072 tok / 6.12 s) prefix_hit 0.00%
+KNEE C16: mean 501.54 agg tok/s over 3 clean runs (per-stream 31.35)
+
+--- X3-S6/rt-long.log (public text: CNN/DailyMail, 8.2-8.5K in, 1,024 forced out)
+RT long decode-c1-r1 C1 try1: decode 61.43 tok/s (mean TPOT 16.28 ms) out 52.46 tok/s TTFT 2867 ms failed 0 prefix_hit 0.00% accept_len NA accept_rate NA
+RT long decode-c1-r2 C1 try1: decode 61.43 tok/s (mean TPOT 16.28 ms) out 56.49 tok/s TTFT 1472 ms failed 0 prefix_hit 0.00% accept_len NA accept_rate NA
+RT long decode-c1-r3 C1 try1: decode 61.43 tok/s (mean TPOT 16.28 ms) out 56.43 tok/s TTFT 1492 ms failed 0 prefix_hit 0.00% accept_len NA accept_rate NA
+RT long decode-c16-r1 C16 try1: decode 331.17 tok/s (mean TPOT 48.31 ms) out 304.30 tok/s TTFT 4273 ms failed 0 prefix_hit 0.00% accept_len NA accept_rate NA
+RTSUM long C1: decode 61.43 out 55.13 over 3 clean runs, accept_len None
+RTSUM long C16: decode 331.17 out 304.30 over 1 clean runs, accept_len None
+
+--- X3-S6/rt-short.log (public text: ShareGPT first turns, 16-612 in, natural out <= 1,024)
+RT short decode-c1-r1 C1 try1: decode 61.69 tok/s (mean TPOT 16.21 ms) out 61.02 tok/s TTFT 139 ms failed 0 prefix_hit 0.00% accept_len NA accept_rate NA
+RT short decode-c1-r2 C1 try1: decode 61.61 tok/s (mean TPOT 16.23 ms) out 60.86 tok/s TTFT 147 ms failed 0 prefix_hit 0.00% accept_len NA accept_rate NA
+RT short decode-c1-r3 C1 try1: decode 61.80 tok/s (mean TPOT 16.18 ms) out 61.04 tok/s TTFT 143 ms failed 0 prefix_hit 0.00% accept_len NA accept_rate NA
+RT short decode-c16-r1 C16 try1: decode 464.42 tok/s (mean TPOT 34.45 ms) out 414.69 tok/s TTFT 244 ms failed 0 prefix_hit 0.00% accept_len NA accept_rate NA
+RTSUM short C1: decode 61.70 out 60.97 over 3 clean runs, accept_len None
+RTSUM short C16: decode 464.42 out 414.69 over 1 clean runs, accept_len None
+
+--- X3-S6/cosgate-r0.txt
+X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-S6-1791709168, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=979 share 0.119), mean 1.000000; sidecar self-test 30 values min 0.999988; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 619
+INFO real-prompt T values {533: 11, 2048: 69}; registered prompt max tokens 2581
+INFO not the gate: per-row min cos 0.99994 (live rows below 0.999: 0); old bf16(out+peer)-out metric min 0.98669 (3 below 0.999); MXFP8-matched reference (direct vs Marlin on x_hat) min 0.973562 (24 below 0.999); format floor (Marlin bf16 vs Marlin x_hat) min 0.973562
+
+--- X3-S6/cosgate-r1.txt
+X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-S6-1791709168, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=979 share 0.205), mean 1.000000; sidecar self-test 30 values min 0.999989; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 411
+INFO real-prompt T values {533: 11, 2048: 69}; registered prompt max tokens 2581
+INFO not the gate: per-row min cos 0.99976 (live rows below 0.999: 0); old bf16(out+peer)-out metric min 0.98683 (4 below 0.999); MXFP8-matched reference (direct vs Marlin on x_hat) min 0.973179 (25 below 0.999); format floor (Marlin bf16 vs Marlin x_hat) min 0.973179
+
+--- X3-S6/timeouts.txt (sidecar shared-memory words per rank; words[2] = timeouts)
+rank 0 timeouts_delta 0 words_after 2576805 2576805 0 57240963 73366389 30704989536 2035830 6354932228815996465 6355234726747308544 words_before 897 897 0 218652 289938 68362144 767 6354932228815996465 6355234726747308544
+rank 1 timeouts_delta 0 words_after 2576805 2576805 0 57240963 73366389 33475748736 2035830 6354932228815996465 6355234726747308545 words_before 897 897 0 218652 289938 55528768 767 6354932228815996465 6355234726747308545
+
+--- X3-S6/counters.txt
+counters_equal yes: r0 seq 2576805 rows 57240963 tokens 73366389 wait_ns 30704989536 waits 2035830 | r1 seq 2576805 rows 57240963 tokens 73366389 wait_ns 33475748736 waits 2035830
+
+--- X3-S6/route-hash.txt (first line)
+ROUTEHASH on PASS: 200 common calls (305065 token-layers), ids_post/w_post identical on 200; flips prevented (pre-broadcast set differs) 137; router input differs on 198, logits on 188
+
+--- X3-S6/health.txt
+nccl_errors r0 0 r1 0
+rdma_delta L packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+rdma_delta R packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+
+--- X3-S6/x3-stats-rank0.json, x3-stats-rank1.json (guard telemetry: failfast count, drafter warm-up, minimum free GB300 memory in bytes)
+{"time": 1791710117.955318, "failfast": 0, "injected": 0, "proposals": 0, "warmup": {"mode": "full", "drafter": null}, "mem_free_min": 18582798336, "mem_free_last": 18582798336, "mem_total": 268235309056, "rank": 0, "pid": 624}
+{"time": 1791710114.3041477, "failfast": 0, "injected": 0, "proposals": 0, "warmup": {"mode": "full", "drafter": null}, "mem_free_min": 18582863872, "mem_free_last": 18582863872, "mem_total": 268235309056, "rank": 1, "pid": 471}
+
+--- X3-S6/gsm8k.json (summary fields)
+{"label": "x3-X3-S6", "n": 50, "correct": 49, "errors": 0}
+
+--- X3-MTP1/arm.txt
+arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=mtp1 guard=x3 ctx=131072 mnbt=2048 seqs=16
+
+--- X3-MTP1/config.txt (image, rank-0 server cmd, selected env, sidecar images and cmds, GPUs)
+image sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71 vllm/vllm-openai:nightly-d05da62e9ccdf8e342b15bf6785d83224cc165af
+repodigests [vllm/vllm-openai@sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71]
+cmd ["--model","/model","--served-model-name","mimo26-pro","--trust-remote-code","--tensor-parallel-size","2","--nnodes","2","--node-rank","0","--master-addr","<rail-ip>","--master-port","29611","--offload-backend","uva","--cpu-offload-gb","64","--cpu-offload-params","routed_experts.w13_weight","routed_experts.w2_weight","--max-model-len","131072","--max-num-seqs","16","--max-num-batched-tokens","2048","--gpu-memory-utilization","0.95","--compilation-config","{\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}","--reasoning-parser","mimo","--generation-config","auto","--moe-backend","marlin","--disable-custom-all-reduce","--host","0.0.0.0","--port","8006","--speculative-config","{\"method\":\"mtp\",\"num_speculative_tokens\":1}"]
+env (selected: HOTSPLIT_* / PEER_* / X2_* / X3_* / PYTHONPATH / VLLM_USE_DEEP_GEMM / VLLM_WEIGHT_* / VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS / NCCL tuner, IB traffic-class and data-path entries) ["HOTSPLIT_COUNTS=/w/expert_hist_mix.json", "HOTSPLIT_FUSED_SEND=0", "HOTSPLIT_MAX_TOKENS=2048", "HOTSPLIT_PEER_CHECK=80", "HOTSPLIT_PEER_CHECK_ARM=/w/gate/ARM", "HOTSPLIT_ROWMAP=/w/rowmap-x2-s6.json", "HOTSPLIT_STAGE_SLOTS=0", "HOTSPLIT_WEIGHTS=decode=1,prefill=0", "NCCL_DMABUF_ENABLE=1", "NCCL_IB_QPS_PER_CONNECTION=4", "NCCL_IB_SPLIT_DATA_ON_QPS=1", "NCCL_IB_TC=106", "NCCL_NET_GDR_LEVEL=SYS", "NCCL_TUNER_CONFIG_FILE=/opt/nccl-tuner/tuner3.csv", "NCCL_TUNER_PLUGIN=/opt/nccl-tuner/libnccl-tuner-example.so", "PEER_ACT=a16", "PEER_MAX_ROWS=8192", "PEER_SHM=/dev/shm/vllm_peer_mimox2", "PEER_TP_RANK=0", "PEER_TP_SIZE=2", "PYTHONPATH=/x3guard", "VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=120", "VLLM_USE_DEEP_GEMM=0", "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY=1", "X2_ROUTE_BENCH=0", "X2_ROUTE_DIR=/x2route", "X2_ROUTE_HASH=200", "X2_ROUTE_HASH_ARM=/w/gate/ARM", "X2_TOPK_BCAST=1", "X3_DRAFT_WARMUP=full", "X3_FAILFAST=1", "X3_GUARD=/x3guard/x3_guard.py", "X3_STATS_DIR=/x3stats"]
+sidecar0 vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b cmd ["-c","exec numactl --membind=0 python3 /w/peer_server_mimo.py --rowmap /w/rowmap-x2-s6.json --model /model --min-cos 0.999"]
+sidecar1 vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+name, uuid, power.limit [W], driver_version
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, <gpu-uuid>, 300.00 W, 595.99.02
+NVIDIA GB300, <gpu-uuid>, 1300.00 W, 595.99.02
+name, uuid, power.limit [W], driver_version
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, <gpu-uuid>, 300.00 W, 595.99.02
+NVIDIA GB300, <gpu-uuid>, 1300.00 W, 595.99.02
+arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=mtp1 guard=x3 ctx=131072 mnbt=2048 seqs=16
+
+--- X3-MTP1/server-rank0.log (guard, vLLM version, NCCL version, routing broadcast, tier plan, drafter, KV, first spec-decode metrics lines)
+X3GUARD installed pid=1 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+(APIServer pid=1) INFO 10-11 09:29:01 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.29.1rc1.dev422+gd05da62e9
+(APIServer pid=1) INFO 10-11 09:29:14 [speculative.py:1653] Overriding draft model max model len from 1048576 to 131072
+X3GUARD installed pid=543 failfast=1 warmup=full stats=on inject=None
+X3GUARD installed pid=544 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+(EngineCore pid=544) INFO 10-11 09:29:26 [core.py:127] Initializing a V1 LLM engine (v0.29.1rc1.dev422+gd05da62e9) with config: model='/model', speculative_config=SpeculativeConfig(method='mtp', model='/model', num_spec_tokens=1), tokenizer='/model', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=131072, download_dir=None, load_format=auto, tensor_parallel_size=2, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=fp8, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='mimo' [...]
+X3GUARD installed pid=764 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+X3GUARD patched gpu_worker.kernel_warmup (drafter warm-up=full)
+(Worker pid=764) INFO 10-11 09:29:44 [pynccl.py:148] vLLM is using nccl==2.30.7
+(Worker_TP0 pid=764) INFO 10-11 09:32:41 [x2_route.py:300] x2 route installed: bcast=1 hash=200 layers=69 (first 1, last 69) tp rank 0/2 comm=PyNcclCommunicator (RonanLabs X2r)
+(Worker_TP0 pid=764) INFO 10-11 09:32:41 [hotsplit.py:171] hotsplit plan (rowmap /w/rowmap-x2-s6.json): 69 layers, hot cells 19200 (168.8 GiB HBM), peer cells 7296 (64.1 GiB on the sidecar), Grace cells 0; stock HBM experts 168.8 GiB
+(Worker_TP0 pid=764) WARNING 10-11 09:33:22 [hotsplit.py:156] hotsplit: no eligible MXFP4 MoE layers found; nothing to do
+(Worker_TP0 pid=764) INFO 10-11 09:33:23 [model_runner.py:419] Model loading took 201.22 GiB memory and 217.299621 seconds
+(Worker_TP0 pid=764) INFO 10-11 09:34:25 [hotsplit.py:579] hotsplit x2 peer tier: TP rank 0/2, sidecar shard words[8]=0x5832545000000200 (RonanLabs X2)
+(Worker_TP0 pid=764) INFO 10-11 09:34:25 [hotsplit.py:581] hotsplit peer tier on: shm /dev/shm/vllm_peer_mimox2, max_rows=8192
+(Worker_TP0 pid=764) INFO 10-11 09:34:25 [hotsplit.py:582] hotsplit peer tier act=a16 (RonanLabs X1; wire 2 byte(s)/element)
+(Worker_TP0 pid=764) INFO 10-11 09:34:56 [gpu_worker.py:645] Available KV cache memory: 27.81 GiB
+(EngineCore pid=544) INFO 10-11 09:34:56 [kv_cache_utils.py:2404] GPU KV cache size: 951,018 tokens, Maximum concurrency for 131,072 tokens per request: 7.26x
+(Worker_TP0 pid=764) X3GUARD drafter warm-up done (full): MiMoV2MTP 5 linears, 10400 GEMMs over M 1..2080, 1.6 s; free after 18068 MiB
+(APIServer pid=1) INFO 10-11 09:35:50 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.00, Accepted throughput: 0.16 tokens/s, Drafted throughput: 0.16 tokens/s, Accepted: 2 tokens, Drafted: 2 tokens, Per-position acceptance rate: 1.000, Avg Draft acceptance rate: 100.0%
+(APIServer pid=1) INFO 10-11 09:36:10 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.60, Accepted throughput: 0.30 tokens/s, Drafted throughput: 0.50 tokens/s, Accepted: 6 tokens, Drafted: 10 tokens, Per-position acceptance rate: 0.600, Avg Draft acceptance rate: 60.0%
+(APIServer pid=1) INFO 10-11 09:36:20 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.78, Accepted throughput: 8.00 tokens/s, Drafted throughput: 10.20 tokens/s, Accepted: 80 tokens, Drafted: 102 tokens, Per-position acceptance rate: 0.784, Avg Draft acceptance rate: 78.4%
+(APIServer pid=1) INFO 10-11 09:36:30 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.75, Accepted throughput: 105.80 tokens/s, Drafted throughput: 141.90 tokens/s, Accepted: 1058 tokens, Drafted: 1419 tokens, Per-position acceptance rate: 0.746, Avg Draft acceptance rate: 74.6%
+
+--- X3-MTP1/server-rank1.log (guard, routing broadcast, tier plan, drafter, KV)
+X3GUARD installed pid=1 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+INFO 10-11 09:29:06 [speculative.py:1653] Overriding draft model max model len from 1048576 to 131072
+X3GUARD installed pid=609 failfast=1 warmup=full stats=on inject=None
+X3GUARD installed pid=610 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+X3GUARD patched gpu_worker.kernel_warmup (drafter warm-up=full)
+(Worker_TP1 pid=610) INFO 10-11 09:32:20 [x2_route.py:300] x2 route installed: bcast=1 hash=200 layers=69 (first 1, last 69) tp rank 1/2 comm=PyNcclCommunicator (RonanLabs X2r)
+(Worker_TP1 pid=610) INFO 10-11 09:32:20 [hotsplit.py:171] hotsplit plan (rowmap /w/rowmap-x2-s6.json): 69 layers, hot cells 19200 (168.8 GiB HBM), peer cells 7296 (64.1 GiB on the sidecar), Grace cells 0; stock HBM experts 168.8 GiB
+(Worker_TP1 pid=610) WARNING 10-11 09:33:01 [hotsplit.py:156] hotsplit: no eligible MXFP4 MoE layers found; nothing to do
+(Worker_TP1 pid=610) INFO 10-11 09:33:01 [model_runner.py:419] Model loading took 201.22 GiB memory and 195.600250 seconds
+(Worker_TP1 pid=610) INFO 10-11 09:34:25 [hotsplit.py:579] hotsplit x2 peer tier: TP rank 1/2, sidecar shard words[8]=0x5832545000000201 (RonanLabs X2)
+(Worker_TP1 pid=610) INFO 10-11 09:34:25 [hotsplit.py:581] hotsplit peer tier on: shm /dev/shm/vllm_peer_mimox2, max_rows=8192
+(Worker_TP1 pid=610) INFO 10-11 09:34:25 [hotsplit.py:582] hotsplit peer tier act=a16 (RonanLabs X1; wire 2 byte(s)/element)
+(Worker_TP1 pid=610) INFO 10-11 09:34:56 [gpu_worker.py:645] Available KV cache memory: 27.81 GiB
+(Worker_TP1 pid=610) X3GUARD drafter warm-up done (full): MiMoV2MTP 5 linears, 10400 GEMMs over M 1..2080, 1.7 s; free after 18068 MiB
+
+--- X3-MTP1/knee.log
+knee C1 run1 try1: 91.48 agg tok/s (192 tok / 2.10 s) prefix_hit 0.00%
+knee C1 run2 try1: 92.46 agg tok/s (192 tok / 2.08 s) prefix_hit 0.00%
+knee C1 run3 try1: 91.47 agg tok/s (192 tok / 2.10 s) prefix_hit 0.00%
+KNEE C1: mean 91.8 agg tok/s over 3 clean runs (per-stream 91.80)
+knee C8 run1 try1: 401.24 agg tok/s (1536 tok / 3.83 s) prefix_hit 0.00%
+knee C8 run2 try1: 401.51 agg tok/s (1536 tok / 3.83 s) prefix_hit 0.00%
+knee C8 run3 try1: 399.92 agg tok/s (1536 tok / 3.84 s) prefix_hit 0.00%
+KNEE C8: mean 400.89 agg tok/s over 3 clean runs (per-stream 50.11)
+knee C16 run1 try1: 650.59 agg tok/s (3072 tok / 4.72 s) prefix_hit 0.00%
+knee C16 run2 try1: 654.30 agg tok/s (3072 tok / 4.70 s) prefix_hit 0.00%
+knee C16 run3 try1: 645.73 agg tok/s (3072 tok / 4.76 s) prefix_hit 0.00%
+KNEE C16: mean 650.21 agg tok/s over 3 clean runs (per-stream 40.64)
+
+--- X3-MTP1/knee-m0.json, knee-m1.json (/metrics spec-decode counters before / after the knee; acc = accepted tokens, drafts, dtok = draft tokens, pos = accepted per position)
+{"hits": 0.0, "queries": 5582.0, "acc": 15.0, "drafts": 20.0, "dtok": 20.0, "pos": {"0": 15.0}}
+{"hits": 0.0, "queries": 9690.0, "acc": 6147.0, "drafts": 8265.0, "dtok": 8265.0, "pos": {"0": 6147.0}}
+
+--- X3-MTP1/rt-long.log (public text: CNN/DailyMail, 8.2-8.5K in, 1,024 forced out)
+RT long decode-c1-r1 C1 try1: decode 103.65 tok/s (mean TPOT 9.65 ms) out 80.15 tok/s TTFT 2906 ms failed 0 prefix_hit 0.00% accept_len 1.842 accept_rate 0.842
+RT long decode-c1-r2 C1 try1: decode 103.27 tok/s (mean TPOT 9.68 ms) out 89.87 tok/s TTFT 1489 ms failed 0 prefix_hit 0.00% accept_len 1.8317 accept_rate 0.8317
+RT long decode-c1-r3 C1 try1: decode 102.87 tok/s (mean TPOT 9.72 ms) out 89.60 tok/s TTFT 1483 ms failed 0 prefix_hit 0.00% accept_len 1.8243 accept_rate 0.8243
+RT long decode-c16-r1 C16 try1: decode 417.06 tok/s (mean TPOT 38.36 ms) out 370.31 tok/s TTFT 4749 ms failed 0 prefix_hit 0.00% accept_len 1.831 accept_rate 0.831
+RTSUM long C1: decode 103.26 out 86.54 over 3 clean runs, accept_len 1.8326666666666667
+RTSUM long C16: decode 417.06 out 370.31 over 1 clean runs, accept_len 1.831
+
+--- X3-MTP1/rt-short.log (public text: ShareGPT first turns, 16-612 in, natural out <= 1,024)
+RT short decode-c1-r1 C1 try1: decode 101.22 tok/s (mean TPOT 9.88 ms) out 98.26 tok/s TTFT 150 ms failed 0 prefix_hit 0.00% accept_len 1.7949 accept_rate 0.7949
+RT short decode-c1-r2 C1 try1: decode 98.26 tok/s (mean TPOT 10.18 ms) out 97.28 tok/s TTFT 151 ms failed 0 prefix_hit 0.00% accept_len 1.7683 accept_rate 0.7683
+RT short decode-c1-r3 C1 try1: decode 102.30 tok/s (mean TPOT 9.78 ms) out 100.55 tok/s TTFT 148 ms failed 0 prefix_hit 0.00% accept_len 1.8167 accept_rate 0.8167
+RT short decode-c16-r1 C16 try1: decode 620.91 tok/s (mean TPOT 25.77 ms) out 568.34 tok/s TTFT 253 ms failed 0 prefix_hit 0.00% accept_len 1.8084 accept_rate 0.8084
+RTSUM short C1: decode 100.59 out 98.69 over 3 clean runs, accept_len 1.7933
+RTSUM short C16: decode 620.91 out 568.34 over 1 clean runs, accept_len 1.8084
+
+--- X3-MTP1/cosgate-r0.txt
+X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-MTP1-1791711347, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=985 share 0.116), mean 1.000000; sidecar self-test 30 values min 0.999988; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 703
+INFO real-prompt T values {534: 11, 2048: 69}; registered prompt max tokens 2582
+INFO not the gate: per-row min cos 0.99995 (live rows below 0.999: 0); old bf16(out+peer)-out metric min 0.98662 (3 below 0.999); MXFP8-matched reference (direct vs Marlin on x_hat) min 0.968137 (24 below 0.999); format floor (Marlin bf16 vs Marlin x_hat) min 0.968137
+
+--- X3-MTP1/cosgate-r1.txt
+X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-MTP1-1791711347, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=985 share 0.207), mean 1.000000; sidecar self-test 30 values min 0.999989; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 386
+INFO real-prompt T values {534: 11, 2048: 69}; registered prompt max tokens 2582
+INFO not the gate: per-row min cos 0.99993 (live rows below 0.999: 0); old bf16(out+peer)-out metric min 0.98690 (4 below 0.999); MXFP8-matched reference (direct vs Marlin on x_hat) min 0.969815 (26 below 0.999); format floor (Marlin bf16 vs Marlin x_hat) min 0.969815
+
+--- X3-MTP1/timeouts.txt (sidecar shared-memory words per rank; words[2] = timeouts)
+rank 0 timeouts_delta 0 words_after 1443963 1443963 0 58129578 74598246 14858633824 1290544 6354932228815996465 6355234726747308544 words_before 1104 1104 0 225778 298494 69101376 956 6354932228815996465 6355234726747308544
+rank 1 timeouts_delta 0 words_after 1443963 1443963 0 58129578 74598246 16065445568 1290544 6354932228815996465 6355234726747308545 words_before 1104 1104 0 225778 298494 49860448 956 6354932228815996465 6355234726747308545
+
+--- X3-MTP1/counters.txt
+counters_equal yes: r0 seq 1443963 rows 58129578 tokens 74598246 wait_ns 14858633824 waits 1290544 | r1 seq 1443963 rows 58129578 tokens 74598246 wait_ns 16065445568 waits 1290544
+
+--- X3-MTP1/route-hash.txt (first line)
+ROUTEHASH on PASS: 200 common calls (305134 token-layers), ids_post/w_post identical on 200; flips prevented (pre-broadcast set differs) 0; router input differs on 0, logits on 0
+
+--- X3-MTP1/health.txt
+nccl_errors r0 0 r1 0
+rdma_delta L packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+rdma_delta R packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+
+--- X3-MTP1/x3-stats-rank0.json, x3-stats-rank1.json (guard telemetry: failfast count, drafter warm-up, minimum free GB300 memory in bytes)
+{"time": 1791712031.6997912, "failfast": 0, "injected": 0, "proposals": 0, "warmup": {"mode": "full", "drafter": "MiMoV2MTP", "linears": 5, "shapes": [["down_proj", 8192], ["eh_proj", 12288], ["gate_up_proj", 6144], ["o_proj", 8192], ["qkv_proj", 6144]], "max_m": 2080, "gemms": 10400, "seconds": 1.58, "free_after_mib": 18068}, "mem_free_min": 18574409728, "mem_free_last": 18574409728, "mem_total": 268235309056, "rank": 0, "pid": 764}
+{"time": 1791712031.87015, "failfast": 0, "injected": 0, "proposals": 0, "warmup": {"mode": "full", "drafter": "MiMoV2MTP", "linears": 5, "shapes": [["down_proj", 8192], ["eh_proj", 12288], ["gate_up_proj", 6144], ["o_proj", 8192], ["qkv_proj", 6144]], "max_m": 2080, "gemms": 10400, "seconds": 1.68, "free_after_mib": 18068}, "mem_free_min": 18574475264, "mem_free_last": 18574475264, "mem_total": 268235309056, "rank": 1, "pid": 610}
+
+--- X3-MTP1/gsm8k.json (summary fields)
+{"label": "x3-X3-MTP1", "n": 50, "correct": 49, "errors": 0}
+
+--- X3-MTP2/arm.txt
+arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=mtp2 guard=x3 ctx=131072 mnbt=2048 seqs=16
+
+--- X3-MTP2/config.txt (image, rank-0 server cmd, selected env, sidecar images and cmds, GPUs)
+image sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71 vllm/vllm-openai:nightly-d05da62e9ccdf8e342b15bf6785d83224cc165af
+repodigests [vllm/vllm-openai@sha256:f29125bcc6d276ed38a67c9dfd4e51ccbaba09ad92847a0913c0df38d9c05c71]
+cmd ["--model","/model","--served-model-name","mimo26-pro","--trust-remote-code","--tensor-parallel-size","2","--nnodes","2","--node-rank","0","--master-addr","<rail-ip>","--master-port","29611","--offload-backend","uva","--cpu-offload-gb","64","--cpu-offload-params","routed_experts.w13_weight","routed_experts.w2_weight","--max-model-len","131072","--max-num-seqs","16","--max-num-batched-tokens","2048","--gpu-memory-utilization","0.95","--compilation-config","{\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}","--reasoning-parser","mimo","--generation-config","auto","--moe-backend","marlin","--disable-custom-all-reduce","--host","0.0.0.0","--port","8006","--speculative-config","{\"method\":\"mtp\",\"num_speculative_tokens\":2}"]
+env (selected: HOTSPLIT_* / PEER_* / X2_* / X3_* / PYTHONPATH / VLLM_USE_DEEP_GEMM / VLLM_WEIGHT_* / VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS / NCCL tuner, IB traffic-class and data-path entries) ["HOTSPLIT_COUNTS=/w/expert_hist_mix.json", "HOTSPLIT_FUSED_SEND=0", "HOTSPLIT_MAX_TOKENS=2048", "HOTSPLIT_PEER_CHECK=80", "HOTSPLIT_PEER_CHECK_ARM=/w/gate/ARM", "HOTSPLIT_ROWMAP=/w/rowmap-x2-s6.json", "HOTSPLIT_STAGE_SLOTS=0", "HOTSPLIT_WEIGHTS=decode=1,prefill=0", "NCCL_DMABUF_ENABLE=1", "NCCL_IB_QPS_PER_CONNECTION=4", "NCCL_IB_SPLIT_DATA_ON_QPS=1", "NCCL_IB_TC=106", "NCCL_NET_GDR_LEVEL=SYS", "NCCL_TUNER_CONFIG_FILE=/opt/nccl-tuner/tuner3.csv", "NCCL_TUNER_PLUGIN=/opt/nccl-tuner/libnccl-tuner-example.so", "PEER_ACT=a16", "PEER_MAX_ROWS=8192", "PEER_SHM=/dev/shm/vllm_peer_mimox2", "PEER_TP_RANK=0", "PEER_TP_SIZE=2", "PYTHONPATH=/x3guard", "VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=120", "VLLM_USE_DEEP_GEMM=0", "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY=1", "X2_ROUTE_BENCH=0", "X2_ROUTE_DIR=/x2route", "X2_ROUTE_HASH=200", "X2_ROUTE_HASH_ARM=/w/gate/ARM", "X2_TOPK_BCAST=1", "X3_DRAFT_WARMUP=full", "X3_FAILFAST=1", "X3_GUARD=/x3guard/x3_guard.py", "X3_STATS_DIR=/x3stats"]
+sidecar0 vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b cmd ["-c","exec numactl --membind=0 python3 /w/peer_server_mimo.py --rowmap /w/rowmap-x2-s6.json --model /model --min-cos 0.999"]
+sidecar1 vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+name, uuid, power.limit [W], driver_version
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, <gpu-uuid>, 300.00 W, 595.99.02
+NVIDIA GB300, <gpu-uuid>, 1300.00 W, 595.99.02
+name, uuid, power.limit [W], driver_version
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, <gpu-uuid>, 300.00 W, 595.99.02
+NVIDIA GB300, <gpu-uuid>, 1300.00 W, 595.99.02
+arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=mtp2 guard=x3 ctx=131072 mnbt=2048 seqs=16
+
+--- X3-MTP2/server-rank0.log (guard, vLLM version, NCCL version, routing broadcast, tier plan, drafter, KV, first spec-decode metrics lines)
+X3GUARD installed pid=1 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+(APIServer pid=1) INFO 10-11 10:00:58 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.29.1rc1.dev422+gd05da62e9
+(APIServer pid=1) WARNING 10-11 10:01:03 [speculative.py:1360] Enabling num_speculative_tokens > 1 will run multiple times of forward on same MTP layer,which may result in lower acceptance rate
+(APIServer pid=1) INFO 10-11 10:01:03 [speculative.py:1653] Overriding draft model max model len from 1048576 to 131072
+X3GUARD installed pid=404 failfast=1 warmup=full stats=on inject=None
+X3GUARD installed pid=405 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+(EngineCore pid=405) INFO 10-11 10:01:15 [core.py:127] Initializing a V1 LLM engine (v0.29.1rc1.dev422+gd05da62e9) with config: model='/model', speculative_config=SpeculativeConfig(method='mtp', model='/model', num_spec_tokens=2), tokenizer='/model', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=131072, download_dir=None, load_format=auto, tensor_parallel_size=2, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=fp8, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='mimo' [...]
+X3GUARD installed pid=625 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+X3GUARD patched gpu_worker.kernel_warmup (drafter warm-up=full)
+(Worker pid=625) INFO 10-11 10:01:33 [pynccl.py:148] vLLM is using nccl==2.30.7
+(Worker_TP0 pid=625) INFO 10-11 10:04:30 [x2_route.py:300] x2 route installed: bcast=1 hash=200 layers=69 (first 1, last 69) tp rank 0/2 comm=PyNcclCommunicator (RonanLabs X2r)
+(Worker_TP0 pid=625) INFO 10-11 10:04:30 [hotsplit.py:171] hotsplit plan (rowmap /w/rowmap-x2-s6.json): 69 layers, hot cells 19200 (168.8 GiB HBM), peer cells 7296 (64.1 GiB on the sidecar), Grace cells 0; stock HBM experts 168.8 GiB
+(Worker_TP0 pid=625) WARNING 10-11 10:05:12 [hotsplit.py:156] hotsplit: no eligible MXFP4 MoE layers found; nothing to do
+(Worker_TP0 pid=625) INFO 10-11 10:05:12 [model_runner.py:419] Model loading took 201.22 GiB memory and 218.360184 seconds
+(Worker_TP0 pid=625) INFO 10-11 10:06:14 [hotsplit.py:579] hotsplit x2 peer tier: TP rank 0/2, sidecar shard words[8]=0x5832545000000200 (RonanLabs X2)
+(Worker_TP0 pid=625) INFO 10-11 10:06:14 [hotsplit.py:581] hotsplit peer tier on: shm /dev/shm/vllm_peer_mimox2, max_rows=8192
+(Worker_TP0 pid=625) INFO 10-11 10:06:14 [hotsplit.py:582] hotsplit peer tier act=a16 (RonanLabs X1; wire 2 byte(s)/element)
+(Worker_TP0 pid=625) INFO 10-11 10:06:45 [gpu_worker.py:645] Available KV cache memory: 27.74 GiB
+(EngineCore pid=405) INFO 10-11 10:06:45 [kv_cache_utils.py:2404] GPU KV cache size: 948,788 tokens, Maximum concurrency for 131,072 tokens per request: 7.24x
+(Worker_TP0 pid=625) X3GUARD drafter warm-up done (full): MiMoV2MTP 5 linears, 10480 GEMMs over M 1..2096, 1.5 s; free after 18126 MiB
+(APIServer pid=1) INFO 10-11 10:07:49 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.00, Accepted throughput: 0.09 tokens/s, Drafted throughput: 0.18 tokens/s, Accepted: 2 tokens, Drafted: 4 tokens, Per-position acceptance rate: 1.000, 0.000, Avg Draft acceptance rate: 50.0%
+(APIServer pid=1) INFO 10-11 10:08:09 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.29, Accepted throughput: 0.90 tokens/s, Drafted throughput: 1.40 tokens/s, Accepted: 18 tokens, Drafted: 28 tokens, Per-position acceptance rate: 0.714, 0.571, Avg Draft acceptance rate: 64.3%
+(APIServer pid=1) INFO 10-11 10:08:19 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.98, Accepted throughput: 19.10 tokens/s, Drafted throughput: 39.00 tokens/s, Accepted: 191 tokens, Drafted: 390 tokens, Per-position acceptance rate: 0.718, 0.262, Avg Draft acceptance rate: 49.0%
+(APIServer pid=1) INFO 10-11 10:08:29 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.01, Accepted throughput: 164.89 tokens/s, Drafted throughput: 324.99 tokens/s, Accepted: 1649 tokens, Drafted: 3250 tokens, Per-position acceptance rate: 0.729, 0.286, Avg Draft acceptance rate: 50.7%
+
+--- X3-MTP2/server-rank1.log (guard, routing broadcast, tier plan, drafter, KV)
+X3GUARD installed pid=1 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+WARNING 10-11 10:00:54 [speculative.py:1360] Enabling num_speculative_tokens > 1 will run multiple times of forward on same MTP layer,which may result in lower acceptance rate
+INFO 10-11 10:00:54 [speculative.py:1653] Overriding draft model max model len from 1048576 to 131072
+X3GUARD installed pid=469 failfast=1 warmup=full stats=on inject=None
+X3GUARD installed pid=470 failfast=1 warmup=full stats=on inject=None
+X3GUARD patched WorkerProc._execute_worker_rpc (failfast=1, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens', 'take_draft_token_ids'])
+X3GUARD patched gpu_worker.kernel_warmup (drafter warm-up=full)
+(Worker_TP1 pid=470) INFO 10-11 10:04:10 [x2_route.py:300] x2 route installed: bcast=1 hash=200 layers=69 (first 1, last 69) tp rank 1/2 comm=PyNcclCommunicator (RonanLabs X2r)
+(Worker_TP1 pid=470) INFO 10-11 10:04:10 [hotsplit.py:171] hotsplit plan (rowmap /w/rowmap-x2-s6.json): 69 layers, hot cells 19200 (168.8 GiB HBM), peer cells 7296 (64.1 GiB on the sidecar), Grace cells 0; stock HBM experts 168.8 GiB
+(Worker_TP1 pid=470) WARNING 10-11 10:04:50 [hotsplit.py:156] hotsplit: no eligible MXFP4 MoE layers found; nothing to do
+(Worker_TP1 pid=470) INFO 10-11 10:04:51 [model_runner.py:419] Model loading took 201.22 GiB memory and 196.718647 seconds
+(Worker_TP1 pid=470) INFO 10-11 10:06:14 [hotsplit.py:579] hotsplit x2 peer tier: TP rank 1/2, sidecar shard words[8]=0x5832545000000201 (RonanLabs X2)
+(Worker_TP1 pid=470) INFO 10-11 10:06:14 [hotsplit.py:581] hotsplit peer tier on: shm /dev/shm/vllm_peer_mimox2, max_rows=8192
+(Worker_TP1 pid=470) INFO 10-11 10:06:14 [hotsplit.py:582] hotsplit peer tier act=a16 (RonanLabs X1; wire 2 byte(s)/element)
+(Worker_TP1 pid=470) INFO 10-11 10:06:45 [gpu_worker.py:645] Available KV cache memory: 27.74 GiB
+(Worker_TP1 pid=470) X3GUARD drafter warm-up done (full): MiMoV2MTP 5 linears, 10480 GEMMs over M 1..2096, 1.6 s; free after 18126 MiB
+
+--- X3-MTP2/knee.log
+knee C1 run1 try1: 93.37 agg tok/s (192 tok / 2.06 s) prefix_hit 0.00%
+knee C1 run2 try1: 92.94 agg tok/s (192 tok / 2.07 s) prefix_hit 0.00%
+knee C1 run3 try1: 95.75 agg tok/s (192 tok / 2.01 s) prefix_hit 0.00%
+KNEE C1: mean 94.02 agg tok/s over 3 clean runs (per-stream 94.02)
+knee C8 run1 try1: 403.77 agg tok/s (1536 tok / 3.80 s) prefix_hit 0.00%
+knee C8 run2 try1: 408.12 agg tok/s (1536 tok / 3.76 s) prefix_hit 0.00%
+knee C8 run3 try1: 402.20 agg tok/s (1536 tok / 3.82 s) prefix_hit 0.00%
+KNEE C8: mean 404.69 agg tok/s over 3 clean runs (per-stream 50.59)
+knee C16 run1 try1: 635.71 agg tok/s (3072 tok / 4.83 s) prefix_hit 0.00%
+knee C16 run2 try1: 633.57 agg tok/s (3072 tok / 4.85 s) prefix_hit 0.00%
+knee C16 run3 try1: 635.49 agg tok/s (3072 tok / 4.83 s) prefix_hit 0.00%
+KNEE C16: mean 634.92 agg tok/s over 3 clean runs (per-stream 39.68)
+
+--- X3-MTP2/knee-m0.json, knee-m1.json (/metrics spec-decode counters before / after the knee; acc = accepted tokens, drafts, dtok = draft tokens, pos = accepted per position)
+{"hits": 0.0, "queries": 5582.0, "acc": 20.0, "drafts": 16.0, "dtok": 32.0, "pos": {"0": 12.0, "1": 8.0}}
+{"hits": 0.0, "queries": 9690.0, "acc": 7365.0, "drafts": 7062.0, "dtok": 14124.0, "pos": {"0": 5228.0, "1": 2137.0}}
+
+--- X3-MTP2/rt-long.log (public text: CNN/DailyMail, 8.2-8.5K in, 1,024 forced out)
+RT long decode-c1-r1 C1 try1: decode 117.28 tok/s (mean TPOT 8.53 ms) out 88.29 tok/s TTFT 2876 ms failed 0 prefix_hit 0.00% accept_len 2.2874 accept_rate 0.6437
+RT long decode-c1-r2 C1 try1: decode 115.56 tok/s (mean TPOT 8.65 ms) out 99.06 tok/s TTFT 1484 ms failed 0 prefix_hit 0.00% accept_len 2.2542 accept_rate 0.6271
+RT long decode-c1-r3 C1 try1: decode 115.60 tok/s (mean TPOT 8.65 ms) out 99.10 tok/s TTFT 1483 ms failed 0 prefix_hit 0.00% accept_len 2.2575 accept_rate 0.6287
+RT long decode-c16-r1 C16 try1: decode 426.39 tok/s (mean TPOT 37.52 ms) out 379.13 tok/s TTFT 4517 ms failed 0 prefix_hit 0.00% accept_len 2.2672 accept_rate 0.6336
+RTSUM long C1: decode 116.15 out 95.48 over 3 clean runs, accept_len 2.2663666666666664
+RTSUM long C16: decode 426.39 out 379.13 over 1 clean runs, accept_len 2.2672
+
+--- X3-MTP2/rt-short.log (public text: ShareGPT first turns, 16-612 in, natural out <= 1,024)
+RT short decode-c1-r1 C1 try1: decode 108.50 tok/s (mean TPOT 9.22 ms) out 106.24 tok/s TTFT 154 ms failed 0 prefix_hit 0.00% accept_len 2.1423 accept_rate 0.5712
+RT short decode-c1-r2 C1 try1: decode 105.02 tok/s (mean TPOT 9.52 ms) out 107.36 tok/s TTFT 152 ms failed 0 prefix_hit 0.00% accept_len 2.1384 accept_rate 0.5692
+RT short decode-c1-r3 C1 try1: decode 111.86 tok/s (mean TPOT 8.94 ms) out 109.89 tok/s TTFT 154 ms failed 0 prefix_hit 0.00% accept_len 2.1974 accept_rate 0.5987
+RT short decode-c16-r1 C16 try1: decode 639.18 tok/s (mean TPOT 25.03 ms) out 588.44 tok/s TTFT 268 ms failed 0 prefix_hit 0.00% accept_len 2.1999 accept_rate 0.6
+RTSUM short C1: decode 108.46 out 107.83 over 3 clean runs, accept_len 2.1593666666666667
+RTSUM short C16: decode 639.18 out 588.44 over 1 clean runs, accept_len 2.1999
+
+--- X3-MTP2/cosgate-r0.txt
+X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-MTP2-1791713264, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=981 share 0.119), mean 1.000000; sidecar self-test 30 values min 0.999988; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 707
+INFO real-prompt T values {534: 11, 2048: 69}; registered prompt max tokens 2582
+INFO not the gate: per-row min cos 0.99995 (live rows below 0.999: 0); old bf16(out+peer)-out metric min 0.98642 (3 below 0.999); MXFP8-matched reference (direct vs Marlin on x_hat) min 0.970669 (25 below 0.999); format floor (Marlin bf16 vs Marlin x_hat) min 0.970669
+
+--- X3-MTP2/cosgate-r1.txt
+X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-MTP2-1791713264, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=981 share 0.204), mean 1.000000; sidecar self-test 30 values min 0.999989; warm-up checks ignored 0; stray post-startup untagged 0; other-tag 0; T above registered prompt 0; startup line 387
+INFO real-prompt T values {534: 11, 2048: 69}; registered prompt max tokens 2582
+INFO not the gate: per-row min cos 0.99998 (live rows below 0.999: 0); old bf16(out+peer)-out metric min 0.98701 (4 below 0.999); MXFP8-matched reference (direct vs Marlin on x_hat) min 0.971094 (26 below 0.999); format floor (Marlin bf16 vs Marlin x_hat) min 0.971094
+
+--- X3-MTP2/timeouts.txt (sidecar shared-memory words per rank; words[2] = timeouts)
+rank 0 timeouts_delta 0 words_after 1170171 1170171 0 60325255 77721876 11808632704 1100618 6354932228815996465 6355234726747308544 words_before 1311 1311 0 235806 310707 81944960 1165 6354932228815996465 6355234726747308544
+rank 1 timeouts_delta 0 words_after 1170171 1170171 0 60325255 77721876 12372356256 1100618 6354932228815996465 6355234726747308545 words_before 1311 1311 0 235806 310707 106329152 1165 6354932228815996465 6355234726747308545
+
+--- X3-MTP2/counters.txt
+counters_equal yes: r0 seq 1170171 rows 60325255 tokens 77721876 wait_ns 11808632704 waits 1100618 | r1 seq 1170171 rows 60325255 tokens 77721876 wait_ns 12372356256 waits 1100618
+
+--- X3-MTP2/route-hash.txt (first line)
+ROUTEHASH on PASS: 200 common calls (305134 token-layers), ids_post/w_post identical on 200; flips prevented (pre-broadcast set differs) 0; router input differs on 0, logits on 0
+
+--- X3-MTP2/health.txt
+nccl_errors r0 0 r1 0
+rdma_delta L packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+rdma_delta R packet_seq_err=0 out_of_sequence=0 (other error-like deltas: none)
+
+--- X3-MTP2/x3-stats-rank0.json, x3-stats-rank1.json (guard telemetry: failfast count, drafter warm-up, minimum free GB300 memory in bytes)
+{"time": 1791713908.7764268, "failfast": 0, "injected": 0, "proposals": 0, "warmup": {"mode": "full", "drafter": "MiMoV2MTP", "linears": 5, "shapes": [["down_proj", 8192], ["eh_proj", 12288], ["gate_up_proj", 6144], ["o_proj", 8192], ["qkv_proj", 6144]], "max_m": 2096, "gemms": 10480, "seconds": 1.54, "free_after_mib": 18126}, "mem_free_min": 18540855296, "mem_free_last": 18540855296, "mem_total": 268235309056, "rank": 0, "pid": 625}
+{"time": 1791713908.708875, "failfast": 0, "injected": 0, "proposals": 0, "warmup": {"mode": "full", "drafter": "MiMoV2MTP", "linears": 5, "shapes": [["down_proj", 8192], ["eh_proj", 12288], ["gate_up_proj", 6144], ["o_proj", 8192], ["qkv_proj", 6144]], "max_m": 2096, "gemms": 10480, "seconds": 1.56, "free_after_mib": 18126}, "mem_free_min": 18540920832, "mem_free_last": 18540920832, "mem_total": 268235309056, "rank": 1, "pid": 470}
+
+--- X3-MTP2/gsm8k.json (summary fields)
+{"label": "x3-X3-MTP2", "n": 50, "correct": 49, "errors": 0}
+
+--- x3-verdicts.txt
+SUMMARY X3-S6 (control: X2r six-tier, broadcast on, no drafting) [arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=none guard=x3 ctx=131072 mnbt=2048 seqs=16]: knee C16 501.54 (3 clean) | C1 59.09 (3) | C8 318.30 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: NA | X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-S6-1791709168, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=979 share 0.119) | X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-S6-1791709168, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=979 share 0.205) | timeouts {0: ('0', 0), 1: ('0', 0)} | counters_equal yes: r0 seq 2576805 rows 57240963 tokens 73366389 wait_ns 30704989536 waits 2035830 | r1 seq 2576805 rows | gates: gsm8k=ok runs=ok nccl=ok rdma=ok cosine=ok timeouts=ok counters=ok route_on=ok route_hash=ok guard=ok headroom=ok rt=ok | spec none knee accept_len NA rate NA | RT long-C1 61.43 long-C16 331.17 short-C1 61.70 short-C16 464.42 | headroom MiB {0: 17721, 1: 17722} | guard ok | ROUTEHASH on PASS: 200 common calls (305065 token-layers), ids_post/w_post identical on 20
+SUMMARY X3-MTP1 [arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=mtp1 guard=x3 ctx=131072 mnbt=2048 seqs=16]: knee C16 650.21 (3 clean) | C1 91.80 (3) | C8 400.89 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: NA | X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-MTP1-1791711347, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=985 share 0.11 | X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-MTP1-1791711347, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=985 share 0.20 | timeouts {0: ('0', 0), 1: ('0', 0)} | counters_equal yes: r0 seq 1443963 rows 58129578 tokens 74598246 wait_ns 14858633824 waits 1290544 | r1 seq 1443963 rows | gates: gsm8k=ok runs=ok nccl=ok rdma=ok cosine=ok timeouts=ok counters=ok route_on=ok route_hash=ok guard=ok headroom=ok rt=ok spec=ok | spec mtp1 knee accept_len 1.7437 rate 0.7437 | RT long-C1 103.26/acc 1.833 long-C16 417.06/acc 1.831 short-C1 100.59/acc 1.793 short-C16 620.91/acc 1.808 | headroom MiB {0: 17713, 1: 17714} | guard ok | ROUTEHASH on PASS: 200 common calls (305134 token-layers), ids_post/w_post identical on 20
+SUMMARY X3-MTP2 [arm=s6 rowmap=rowmap-x2-s6.json act=a16 tp=2 b12x=dce2933e+uffix bcast=1 spec=mtp2 guard=x3 ctx=131072 mnbt=2048 seqs=16]: knee C16 634.92 (3 clean) | C1 94.02 (3) | C8 404.69 (3) | GSM8K-50 49/50 | nccl ('0', '0') | rdma L pse=0 oos=0; R pse=0 oos=0 | 8192/1024 C16: NA | X2GATE rank 0 PASS: 80 real-prompt checks (tag x3-X3-MTP2-1791713264, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=981 share 0.11 | X2GATE rank 1 PASS: 80 real-prompt checks (tag x3-X3-MTP2-1791713264, act a16) over 69 layers, direct-vs-marlin(bf16) min cos 1.000000 (layer 1 T=2048 rows=981 share 0.20 | timeouts {0: ('0', 0), 1: ('0', 0)} | counters_equal yes: r0 seq 1170171 rows 60325255 tokens 77721876 wait_ns 11808632704 waits 1100618 | r1 seq 1170171 rows | gates: gsm8k=ok runs=ok nccl=ok rdma=ok cosine=ok timeouts=ok counters=ok route_on=ok route_hash=ok guard=ok headroom=ok rt=ok spec=ok | spec mtp2 knee accept_len 2.0424 rate 0.5212 | RT long-C1 116.15/acc 2.266 long-C16 426.39/acc 2.267 short-C1 108.46/acc 2.159 short-C16 639.18/acc 2.200 | headroom MiB {0: 17681, 1: 17682} | guard ok | ROUTEHASH on PASS: 200 common calls (305134 token-layers), ids_post/w_post identical on 20
+Context: X3-S6 knee C16 501.54 vs the X2 re-run's X2-S6 503.47 (10-10, cross-session) = 0.996 (information)
+V-X3: PASS -- six-tier MiMo-Pro with its own MTP drafter (mtp1): 650.21 tok/s knee C16 on two Stations, 325.10 per Station (two Stations / 2), 1.296 x the same-session no-drafting control 501.54; knee accept_len 1.7437; primary X3-MTP1 (highest knee C16 of 2 MTP arm(s) with every gate; others X3-MTP2 1.266). Credit: three-tier design, hook, sidecar server: el8 (original-el8/dgx-station-gb300-research @87af662, Apache-2.0), on J-M-Recipes' hotsplit and public histogram (MIT); ours: A16 mode + BF16 wire + b12x W4A16 fixes dce2933e + E8M0 underflow (X1), the TP2 per-rank sidecar shard and the gate (X2); X3: MiMo-V2.6-Pro's own MTP layer (Xiaomi, MIT) through vLLM's MTP path, with the R3.1b protections ported to d05da62e (failfast, drafter warm-up, headroom telemetry)
+V-X3-C1: PASS -- X3-MTP1 knee C1 91.80 vs control 59.09 = 1.554 (bar >= 1.2)
+V-X3-RT: PASS -- X3-MTP1 / control decode on public real text: long C1 1.681 (accept_len 1.8326666666666667); long C16 1.259 (accept_len 1.831); short C1 1.630 (accept_len 1.7933); short C16 1.337 (accept_len 1.8084)
+V-SOAK: PASS -- 20.0 min C16 on [soak on X3-MTP1: arm=s6 rowmap=rowmap-x2-s6.json bcast=1 spec=mtp1 guard=x3 minutes=20 C16 + GSM8K-200]: 1044 requests, 0 errors, 0 client timeouts, 0 stalls > 60.0 s (max gap 0.69 s), 499.46 tok/s out, last5/first5 1.1556, accept_len 1.8096, GSM8K-200 197/200, headroom MiB {0: 17713, 1: 17714}; discharges the owed X2 soak (same six-tier + broadcast stack)
+Context (two Stations / 2, not a one-Station result): X3-S6 250.77 per Station at knee C16 vs J-M 63.0, el8 v2 102.2 (el8 v6 DFlash k=3 87.6), ours B1 76.28 (one-Station figures)
+Context (two Stations / 2, not a one-Station result): X3-MTP1 325.10 per Station at knee C16 vs J-M 63.0, el8 v2 102.2 (el8 v6 DFlash k=3 87.6), ours B1 76.28 (one-Station figures)
+Context (two Stations / 2, not a one-Station result): X3-MTP2 317.46 per Station at knee C16 vs J-M 63.0, el8 v2 102.2 (el8 v6 DFlash k=3 87.6), ours B1 76.28 (one-Station figures)
