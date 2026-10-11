@@ -67,6 +67,8 @@ Every number here is a row in this repo with its log; the recipe and its limits 
 
 Thanks to el8 (Jason Cook) for the three-tier design and his help, to J-M-Recipes (James Meadlock) for the recipe it builds on, and to Local Inference Lab for b12x.
 
+**Update (Oct 11):** with MiMo-V2.6-Pro's own built-in drafter turned on, the same six-tier setup reached 650 tok/s at 16 users (1.30x) and 1.55x for one user, and passed a 20-minute stability run (rows `mimo-x3-1011-*`; [recipe](../../recipes/mimo-v2.6-pro/)).
+
 ## Sources for every number
 
 Rows are in [`results.jsonl`](../../results.jsonl).
@@ -85,6 +87,7 @@ Rows are in [`results.jsonl`](../../results.jsonl).
 | Broadcast cost ~1-2% at 16 users, ~5% one user | mimo-1010-x2-bcast-cost-s6-c16 (0.9869), -t0-c16 (0.9813), -s6-c1 (0.9508) |
 | Routing divergence (rows differed before the fix, 0 after) | mimo-1010-x2s6-first-counters-rows-diff (-10), mimo-1010-x2s6-counters-rows-diff (0); rate 1 per ~164k on the gate prompt: recipe README / COUNTERS-DIAG |
 | ~494 GiB experts; per Station 168.8 GiB HBM hot cells, 64 GiB Grace offload (plain split), 7,296 experts / 71.6 GiB allocated on the 6000 | recipes/mimo-v2.6-pro/README.md line 3; logs/mimo/x2-two-stations-rerun.log lines 18, 42, 91 |
+| Update: 650.21 vs 501.54 (1.30x), one user 1.55x, 20-min soak | mimo-x3-1011-mtp1-knee-c16, -s6-knee-c16, mimo-x3-1011-v-x3, -v-x3-c1, -soak-minutes, -soak-errors |
 | Underflow rows L1 91, L11 49, L19 -5 1621 -> 0; V4-Pro identical | FlashInfer issue #6316 / PR #6317 (filed 2026-10-10) |
 
 Figures: drawn from the values above. Cover: an image of our rig, title set by us.
