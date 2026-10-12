@@ -1,0 +1,182 @@
+# TensorFold native 1.0.7 (Ash Hart), Nemotron 3.5 Lightning 30B-A3B, one DGX Station: RTX PRO 6000 vs GB300 (sm_103)
+# 2026-10-11 PT. Excerpt of the run log, per-request bench summaries, smoke check and Ash's tf-cuda-test on the GB300 (scrubbed).
+# N6 = RTX PRO 6000, Ash's release archive tensorfold-1.0.7-linux-aarch64.tar.gz (sha256 1bc88821...), MLX 4-bit checkpoint.
+# G4 / GF = GB300, our sm_103 build of 1.0.7 source e7c523eb: zig 0.17.0, in nvcr.io/nvidia/pytorch:26.07-py3:
+#   zig build -Dnvcc=/usr/local/cuda/bin/nvcc -Dsm=103 -Doptimize=fast native   -> tensorfold-native (sha256 8d9be885...)
+#   G4 = MLX 4-bit checkpoint, GF = NVIDIA NVFP4 checkpoint.
+# Server (Ash's runbook): tensorfold-native serve MODEL --parallel 1 --context 40960 --temperature 0 --no-thinking, one GPU, --network none.
+# Bench: prose prompts, fresh seeds; decode = mean of per-request decode tok/s over 5 requests per rep; C1 x3 reps; C4 queued (--parallel 1).
+# The first GB300 attempt (18:38) used the CLI binary (no serve) and failed 'unknown option --name'; the arms below are the 19:45 re-run.
+
+## run 20261011-1836
+[2026-10-11 18:36:26 PDT] [N6] tensorfold native on RTX PRO 6000 : TensorFold__NVIDIA-Nemotron-3.5-Lightning-30B-A3B-MLX-4bit-d9d758fb
+[2026-10-11 18:36:31 PDT] [N6] up after 5 s; RTX PRO 6000 used 19329 MiB
+[2026-10-11 18:36:41 PDT] [N6] warm-short: C1 max_tokens 256 seed 101
+[2026-10-11 18:36:43 PDT] [N6] c1-r1: C1 max_tokens 1024 seed 111
+[2026-10-11 18:36:48 PDT] [N6] c1-r2: C1 max_tokens 1024 seed 112
+[2026-10-11 18:36:56 PDT] [N6] c1-r3: C1 max_tokens 1024 seed 113
+[2026-10-11 18:37:03 PDT] [N6] c4-r1: C4 max_tokens 1024 seed 141
+[2026-10-11 18:37:22 PDT] [N6] warm-long8k: C1 max_tokens 64 seed 181
+[2026-10-11 18:37:22 PDT] [N6] prefill8k: C1 max_tokens 16 seed 182
+[2026-10-11 18:37:24 PDT] [N6] c1long-r1: C1 max_tokens 1024 seed 183
+[2026-10-11 18:37:31 PDT] [N6] warm-long32k: C1 max_tokens 16 seed 321
+[2026-10-11 18:37:33 PDT] [N6] prefill32k: C1 max_tokens 16 seed 322
+[N6] C1 decode mean of 3: 557.7 [608.7, 540.0, 524.5]
+[N6] C4 (queued, --parallel 1) aggregate: 508.0
+[N6] C1 decode after 8K: 539.3274975678893 | prefill 8K / 32K: 19511.30979983688 / 17472.04339349044
+[N6] max cached fraction: 0.0 | contaminated: []
+[2026-10-11 18:37:45 PDT] [N6] RTX PRO 6000 used after teardown: 47 MiB
+## N6 per-request bench summaries
+N6 c1-r1: conc 1 requests 5 decode_tps mean 608.7 | aggregate_output_tps 605.4 | prefill_tps mean 4949.1 | ttft mean 0.022 s | max_cached_frac 0.0 | contaminated False
+N6 c1-r2: conc 1 requests 5 decode_tps mean 540.0 | aggregate_output_tps 529.2 | prefill_tps mean 2924.8 | ttft mean 0.020 s | max_cached_frac 0.0 | contaminated False
+N6 c1-r3: conc 1 requests 5 decode_tps mean 524.5 | aggregate_output_tps 514.3 | prefill_tps mean 3019.2 | ttft mean 0.020 s | max_cached_frac 0.0 | contaminated False
+N6 c1long-r1: conc 1 requests 3 decode_tps mean 539.3 | aggregate_output_tps 440.3 | prefill_tps mean 19781.2 | ttft mean 0.428 s | max_cached_frac 0.0 | contaminated False
+N6 c4-r1: conc 4 requests 16 decode_tps mean 553.1 | aggregate_output_tps 508.0 | prefill_tps mean 65.6 | ttft mean 3.224 s | max_cached_frac 0.0 | contaminated False
+N6 prefill32k: conc 1 requests 3 decode_tps mean 336.3 | aggregate_output_tps 8.1 | prefill_tps mean 17472.0 | ttft mean 1.935 s | max_cached_frac 0.0 | contaminated False
+N6 prefill8k: conc 1 requests 3 decode_tps mean 701.1 | aggregate_output_tps 34.7 | prefill_tps mean 19511.3 | ttft mean 0.436 s | max_cached_frac 0.0 | contaminated False
+N6 warm-long32k: conc 1 requests 1 decode_tps mean 440.2 | aggregate_output_tps 8.1 | prefill_tps mean 17445.5 | ttft mean 1.941 s | max_cached_frac 0.0 | contaminated False
+N6 warm-long8k: conc 1 requests 1 decode_tps mean 554.0 | aggregate_output_tps 115.6 | prefill_tps mean 19214.5 | ttft mean 0.439 s | max_cached_frac 0.0 | contaminated False
+N6 warm-short: conc 1 requests 4 decode_tps mean 557.4 | aggregate_output_tps 535.1 | prefill_tps mean 2902.6 | ttft mean 0.021 s | max_cached_frac 0.0 | contaminated False
+## N6 smoke (3 code + 2 tool prompts)
+--- code: 'Write a Python function `merge_intervals(intervals)` that me'
+    finish=stop tool_calls=[]
+--- code: 'In C, write a function `int is_balanced(const char *s)` that'
+    finish=stop tool_calls=[]
+--- code: 'Here is a buggy JavaScript function. Find the bug and give t'
+    finish=stop tool_calls=[]
+--- tool: "What's the weather in Reykjavik right now, in Celsius?"
+    finish=stop tool_calls=[]
+--- tool: 'How much is 250 US dollars in euros? Then tell me the weathe'
+    finish=tool_calls tool_calls=[('convert_currency', '{"amount":250,"from":"USD","to":"EUR"}')]
+## run 20261011-1945
+[2026-10-11 19:45:47 PDT] [G4] tensorfold native on GB300 : TensorFold__NVIDIA-Nemotron-3.5-Lightning-30B-A3B-MLX-4bit-d9d758fb
+[2026-10-11 19:45:53 PDT] [G4] up after 5 s; GB300 used 19430 MiB
+[2026-10-11 19:46:03 PDT] [G4] warm-short: C1 max_tokens 256 seed 101
+[2026-10-11 19:46:05 PDT] [G4] c1-r1: C1 max_tokens 1024 seed 111
+[2026-10-11 19:46:10 PDT] [G4] c1-r2: C1 max_tokens 1024 seed 112
+[2026-10-11 19:46:18 PDT] [G4] c1-r3: C1 max_tokens 1024 seed 113
+[2026-10-11 19:46:26 PDT] [G4] c4-r1: C4 max_tokens 1024 seed 141
+[2026-10-11 19:46:46 PDT] [G4] warm-long8k: C1 max_tokens 64 seed 181
+[2026-10-11 19:46:46 PDT] [G4] prefill8k: C1 max_tokens 16 seed 182
+[2026-10-11 19:46:48 PDT] [G4] c1long-r1: C1 max_tokens 1024 seed 183
+[2026-10-11 19:46:55 PDT] [G4] warm-long32k: C1 max_tokens 16 seed 321
+[2026-10-11 19:46:57 PDT] [G4] prefill32k: C1 max_tokens 16 seed 322
+[G4] C1 decode mean of 3: 534.8 [588.6, 517.5, 498.4]
+[G4] C4 (queued, --parallel 1) aggregate: 487.7
+[G4] C1 decode after 8K: 509.73985865967626 | prefill 8K / 32K: 20403.792796373076 / 18418.77850687881
+[G4] max cached fraction: 0.0 | contaminated: []
+[2026-10-11 19:47:08 PDT] [G4] GB300 used after teardown: 22 MiB
+[2026-10-11 19:47:08 PDT] [GF] tensorfold native on GB300 : nvidia__NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4-bee75962
+[2026-10-11 19:47:19 PDT] [GF] up after 11 s; GB300 used 20508 MiB
+[2026-10-11 19:47:32 PDT] [GF] warm-short: C1 max_tokens 256 seed 101
+[2026-10-11 19:47:34 PDT] [GF] c1-r1: C1 max_tokens 1024 seed 111
+[2026-10-11 19:47:41 PDT] [GF] c1-r2: C1 max_tokens 1024 seed 112
+[2026-10-11 19:47:52 PDT] [GF] c1-r3: C1 max_tokens 1024 seed 113
+[2026-10-11 19:48:00 PDT] [GF] c4-r1: C4 max_tokens 1024 seed 141
+[2026-10-11 19:48:23 PDT] [GF] warm-long8k: C1 max_tokens 64 seed 181
+[2026-10-11 19:48:24 PDT] [GF] prefill8k: C1 max_tokens 16 seed 182
+[2026-10-11 19:48:25 PDT] [GF] c1long-r1: C1 max_tokens 1024 seed 183
+[2026-10-11 19:48:34 PDT] [GF] warm-long32k: C1 max_tokens 16 seed 321
+[2026-10-11 19:48:36 PDT] [GF] prefill32k: C1 max_tokens 16 seed 322
+[GF] C1 decode mean of 3: 411.5 [391.0, 422.6, 421.0]
+[GF] C4 (queued, --parallel 1) aggregate: 408.0
+[GF] C1 decode after 8K: 433.3659930569284 | prefill 8K / 32K: 19513.08003199166 / 17747.89910273372
+[GF] max cached fraction: 0.0 | contaminated: []
+[2026-10-11 19:48:47 PDT] [GF] GB300 used after teardown: 22 MiB
+## G4 per-request bench summaries
+G4 c1-r1: conc 1 requests 5 decode_tps mean 588.6 | aggregate_output_tps 582.4 | prefill_tps mean 5049.2 | ttft mean 0.021 s | max_cached_frac 0.0 | contaminated False
+G4 c1-r2: conc 1 requests 5 decode_tps mean 517.5 | aggregate_output_tps 506.2 | prefill_tps mean 3082.4 | ttft mean 0.019 s | max_cached_frac 0.0 | contaminated False
+G4 c1-r3: conc 1 requests 5 decode_tps mean 498.4 | aggregate_output_tps 487.7 | prefill_tps mean 3108.2 | ttft mean 0.020 s | max_cached_frac 0.0 | contaminated False
+G4 c1long-r1: conc 1 requests 3 decode_tps mean 509.7 | aggregate_output_tps 422.4 | prefill_tps mean 20351.6 | ttft mean 0.416 s | max_cached_frac 0.0 | contaminated False
+G4 c4-r1: conc 4 requests 16 decode_tps mean 526.3 | aggregate_output_tps 487.7 | prefill_tps mean 60.3 | ttft mean 3.359 s | max_cached_frac 0.0 | contaminated False
+G4 prefill32k: conc 1 requests 3 decode_tps mean 319.2 | aggregate_output_tps 8.5 | prefill_tps mean 18418.8 | ttft mean 1.836 s | max_cached_frac 0.0 | contaminated False
+G4 prefill8k: conc 1 requests 3 decode_tps mean 777.3 | aggregate_output_tps 36.3 | prefill_tps mean 20403.8 | ttft mean 0.417 s | max_cached_frac 0.0 | contaminated False
+G4 warm-long32k: conc 1 requests 1 decode_tps mean 408.6 | aggregate_output_tps 8.5 | prefill_tps mean 18316.8 | ttft mean 1.849 s | max_cached_frac 0.0 | contaminated False
+G4 warm-long8k: conc 1 requests 1 decode_tps mean 505.0 | aggregate_output_tps 115.1 | prefill_tps mean 19605.8 | ttft mean 0.430 s | max_cached_frac 0.0 | contaminated False
+G4 warm-short: conc 1 requests 4 decode_tps mean 533.3 | aggregate_output_tps 514.0 | prefill_tps mean 3038.3 | ttft mean 0.020 s | max_cached_frac 0.0 | contaminated False
+## G4 smoke (3 code + 2 tool prompts)
+--- code: 'Write a Python function `merge_intervals(intervals)` that me'
+    finish=stop tool_calls=[]
+--- code: 'In C, write a function `int is_balanced(const char *s)` that'
+    finish=stop tool_calls=[]
+--- code: 'Here is a buggy JavaScript function. Find the bug and give t'
+    finish=stop tool_calls=[]
+--- tool: "What's the weather in Reykjavik right now, in Celsius?"
+    finish=stop tool_calls=[]
+--- tool: 'How much is 250 US dollars in euros? Then tell me the weathe'
+    finish=tool_calls tool_calls=[('convert_currency', '{"amount":250,"from":"USD","to":"EUR"}')]
+## GF per-request bench summaries
+GF c1-r1: conc 1 requests 5 decode_tps mean 391.0 | aggregate_output_tps 388.2 | prefill_tps mean 4628.3 | ttft mean 0.023 s | max_cached_frac 0.0 | contaminated False
+GF c1-r2: conc 1 requests 5 decode_tps mean 422.6 | aggregate_output_tps 411.1 | prefill_tps mean 2799.5 | ttft mean 0.021 s | max_cached_frac 0.0 | contaminated False
+GF c1-r3: conc 1 requests 5 decode_tps mean 421.0 | aggregate_output_tps 413.4 | prefill_tps mean 2872.0 | ttft mean 0.021 s | max_cached_frac 0.0 | contaminated False
+GF c1long-r1: conc 1 requests 3 decode_tps mean 433.4 | aggregate_output_tps 365.9 | prefill_tps mean 19467.6 | ttft mean 0.435 s | max_cached_frac 0.0 | contaminated False
+GF c4-r1: conc 4 requests 16 decode_tps mean 431.4 | aggregate_output_tps 408.0 | prefill_tps mean 51.7 | ttft mean 3.924 s | max_cached_frac 0.0 | contaminated False
+GF prefill32k: conc 1 requests 3 decode_tps mean 403.2 | aggregate_output_tps 8.2 | prefill_tps mean 17747.9 | ttft mean 1.905 s | max_cached_frac 0.0 | contaminated False
+GF prefill8k: conc 1 requests 3 decode_tps mean 424.1 | aggregate_output_tps 33.8 | prefill_tps mean 19513.1 | ttft mean 0.436 s | max_cached_frac 0.0 | contaminated False
+GF warm-long32k: conc 1 requests 1 decode_tps mean 393.1 | aggregate_output_tps 8.2 | prefill_tps mean 17649.9 | ttft mean 1.919 s | max_cached_frac 0.0 | contaminated False
+GF warm-long8k: conc 1 requests 1 decode_tps mean 365.1 | aggregate_output_tps 102.8 | prefill_tps mean 18792.0 | ttft mean 0.449 s | max_cached_frac 0.0 | contaminated False
+GF warm-short: conc 1 requests 4 decode_tps mean 468.0 | aggregate_output_tps 450.6 | prefill_tps mean 2770.2 | ttft mean 0.021 s | max_cached_frac 0.0 | contaminated False
+## GF smoke (3 code + 2 tool prompts)
+--- code: 'Write a Python function `merge_intervals(intervals)` that me'
+    finish=stop tool_calls=[]
+--- code: 'In C, write a function `int is_balanced(const char *s)` that'
+    finish=stop tool_calls=[]
+--- code: 'Here is a buggy JavaScript function. Find the bug and give t'
+    finish=stop tool_calls=[]
+--- tool: "What's the weather in Reykjavik right now, in Celsius?"
+    finish=tool_calls tool_calls=[('get_weather', '{"city":"Reykjavik","unit":"c"}')]
+--- tool: 'How much is 250 US dollars in euros? Then tell me the weathe'
+    finish=tool_calls tool_calls=[('convert_currency', '{"amount":250,"from":"USD","to":"EUR"}')]
+## GT: Ash's tf-cuda-test on the GB300 with our sm_103 build (18:38 run)
+--- info
+RESULT driver CUDA 13020, device NVIDIA GB300, sm_103, 152 SMs, 255809 MiB total, 255104 MiB free, kernels embedded true
+--- smoke
+PASS blocking copies: 1 MiB host -> device -> device -> host equal
+PASS async copies, memset8 and memset32
+PASS launches: fill, fill, axpy over 100000 elements exact
+PASS mapped host memory: a kernel's 1024 writes read on the host after the stream syncs
+PASS module global: cuModuleGetGlobal write, kernel read
+PASS argument packing: by-value struct, bool, int8, double, int64
+PASS refusals: oversized block, absent kernel symbol
+--- graph
+PASS stream capture: 8 launches captured, nothing run, 3 replays = 108
+PASS exec kernel-node update: new arguments in place, replay adds 80
+PASS explicit graph: fill->axpy edge exact; exec update from a same-topology graph; topology change refused (topology_changed) and the exec kept
+--- launch-ex
+PASS cuLaunchKernelEx clusters: ranks 0..1 and 0..3 in clusters of 2 and 4 (spread policy on the second)
+PASS cuLaunchKernelEx cooperative grid of 152 blocks
+PASS cuLaunchKernelEx PDL: 100 dependent steps exact on a stream and twice from a captured graph
+--- ptx
+PASS PTX: hand-written sm_80 PTX JIT-compiled and exact; broken PTX refused with log "ptxas application ptx input, line 3; fatal   : Parsing error near 'not': syntax "
+--- symbols
+RESULT gdn tree<0,8,4,true>: 125 registers, max 128 threads
+RESULT gdn tree<1,8,4,false>: 120 registers, max 128 threads
+RESULT gdn tree<2,8,2,false>: 120 registers, max 64 threads
+RESULT gdn tree<2,4,4,false>: 80 registers, max 128 threads
+RESULT gdn tree<4,2,4,false>: 64 registers, max 128 threads
+RESULT gdn tree<8,2,4,false>: 64 registers, max 128 threads
+RESULT gdn tree<16,2,2,false>: 64 registers, max 64 threads
+RESULT gdn tree<32,2,1,false>: 64 registers, max 32 threads
+PASS symbols: 2 replay and 8 tree instantiations resolve in the gdn fatbin
+--- overhead 1000 20
+RESULT overhead plain n=1000 reps=20: enqueue 1.328 us/launch, wall 1.338 us/launch, gpu 1.330 us/launch
+RESULT overhead graph n=1000 reps=20: cuGraphLaunch 3.0 us per graph, wall 0.693 us/kernel, gpu 0.686 us/kernel, instantiate 1.2 ms
+RESULT graph patch n=1000: node argument update 0.196 us/node, recapture 0.432 us/kernel, whole-exec update 0.088 us/node
+PASS launch cost: every one of 43200 dependent kernels ran exactly once
+--- overhead 10000 10
+RESULT overhead plain n=10000 reps=10: enqueue 1.336 us/launch, wall 1.337 us/launch, gpu 1.336 us/launch
+RESULT overhead graph n=10000 reps=10: cuGraphLaunch 24.0 us per graph, wall 0.683 us/kernel, gpu 0.682 us/kernel, instantiate 12.1 ms
+RESULT graph patch n=10000: node argument update 0.202 us/node, recapture 0.424 us/kernel, whole-exec update 0.091 us/node
+PASS launch cost: every one of 230200 dependent kernels ran exactly once
+--- overhead-pdl 1000 20
+RESULT overhead pdl plain n=1000 reps=20: enqueue 1.294 us/launch, wall 1.304 us/launch, gpu 1.297 us/launch
+RESULT overhead pdl graph n=1000 reps=20: cuGraphLaunch 2.9 us per graph, wall 0.535 us/kernel, gpu 0.527 us/kernel, instantiate 1.4 ms
+PASS launch cost: every one of 42200 dependent kernels ran exactly once
+--- overhead-pdl 10000 10
+RESULT overhead pdl plain n=10000 reps=10: enqueue 1.299 us/launch, wall 1.300 us/launch, gpu 1.300 us/launch
+RESULT overhead pdl graph n=10000 reps=10: cuGraphLaunch 23.3 us per graph, wall 0.525 us/kernel, gpu 0.525 us/kernel, instantiate 14.2 ms
+PASS launch cost: every one of 220200 dependent kernels ran exactly once
+--- cublaslt
+PASS cuBLASLt 130101: bf16 x bf16 -> fp32 (16x256x512), reruns bit-equal, max abs error 2.505723387002945e-6 vs fp64, workspace 0 B
+nccl.log: FAIL nccl: LibraryUnavailable
+nccl.log: rc=1 for nccl
