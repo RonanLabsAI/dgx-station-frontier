@@ -1,0 +1,95 @@
+# L7: one-shot RDMA all-reduce inside vLLM, DeepSeek-V4-Pro on two DGX Station GB300s (TP2+EP2, one 400G rail)
+# Run 2026-10-11 16:03-18:14 PT. Excerpt of the controller master log + the summary verdicts (scrubbed: hosts -> left/right, paths elided).
+# Arms (same session, fresh boots): S0 = stack with stock NCCL all-reduce; S1 = same + one-shot hook (ONESHOT=1); S0b = S0 again (drift).
+# Expert maps: public-only (rowmap-e3-on-e2-v4ppub). Prompts: catid = 8,192 random-token in / 1,024 forced out; public long/short x thinking on/off.
+# Pre-registration amendment L1 (made before this run): liveness of the one-shot is read from the hook's own per-rank stats events,
+# because its INFO log lines do not reach the server log (so 'one-shot lines r0 0' below is expected; V-L7-VALID reads the stats files).
+
+2026-10-11 16:04:56 PT +1m G0 PASS: oneshot_live, bitwise/gather/health OK on rank 0, rc 0/0; lambda 1:13.12us(True) 2:13.80us(True) 4:15.36us(True) 8:18.11us(True) 16:22.32us(True) 64:56.84us(True) 146:110.64us(True) 147:136.59us(False) 512:288.76us(False)
+2026-10-11 16:12:13 PT +8m === S0: launcher <kit> ONESHOT=0; stages [peer0 gate flips2 catid public gsm peer1 div]
+2026-10-11 16:19:36 PT +16m S0 ready 2026-10-11 16:19:36 after 430 s | ARGS PARITY OK: 49 args identical on both ranks (rank flags excluded); model=DeepSeek-V4-Pro-0813
+2026-10-11 16:19:37 PT +16m S0 probe 391: '391'
+2026-10-11 16:52:57 PT +49m S0 stages exit 0
+   "PASS": true
+  16:20:42 flips S0 pass 1: {"positions": 3944, "flips": 136, "flip_pct": 3.448, "cont_positions": 3405, "cont_flips": 92, "cont_flip_pct": 2.702, "free_identical": 7, "n_prompts": 32} | spec 18 90 36 -> 1056 5280 2411
+  16:21:32 flips S0 pass 2: {"positions": 3944, "flips": 148, "flip_pct": 3.753, "cont_positions": 3405, "cont_flips": 104, "cont_flip_pct": 3.054, "free_identical": 6, "n_prompts": 32} | spec 1056 5280 2411 -> 2067 10335 4750
+  catid-c1-r1 seed 9911: decode_agg 40.06 (TPOT 24.96 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 2.446 drafts 186 | running mean 0.9 max 1 waiting mean 0.0
+  catid-c1-r2 seed 9912: decode_agg 38.05 (TPOT 26.28 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.000 drafts 48 | running mean 0.9 max 1 waiting mean 0.0
+  catid-c1-r3 seed 9913: decode_agg 38.01 (TPOT 26.31 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.000 drafts 48 | running mean 0.9 max 1 waiting mean 0.0
+  catid-c16-r1 seed 10061: decode_agg 159.74 (TPOT 100.16 ms) failed 0 hit 0.00% (0/262144 tok) acc_len 1.047 drafts 128 | running mean 14.0 max 16 waiting mean 1.0
+  long think-off long-off-c1-r1 try1 seed 761450002 warmseed 761450001: decode_agg 93.02 tok/s (C1 x 1000/meanTPOT 10.75 ms) | out_tput 78.03 | meanTTFT 2120.90 ms | in 24612 out 3072 tok in 39.37 s | dspark_acc_len 3.357 draft_acc 47.1% | fa
+  long think-off long-off-c1-r2 try1 seed 761450004 warmseed 761450003: decode_agg 93.02 tok/s (C1 x 1000/meanTPOT 10.75 ms) | out_tput 77.96 | meanTTFT 2134.92 ms | in 24612 out 3072 tok in 39.40 s | dspark_acc_len 3.374 draft_acc 47.5% | fa
+  long think-off long-off-c1-r3 try1 seed 761450006 warmseed 761450005: decode_agg 89.77 tok/s (C1 x 1000/meanTPOT 11.14 ms) | out_tput 75.64 | meanTTFT 2144.99 ms | in 24612 out 3072 tok in 40.61 s | dspark_acc_len 3.258 draft_acc 45.2% | fa
+  long think-off long-off-c16-r1 try1 seed 761450008 warmseed 761450007: decode_agg 281.44 tok/s (C16 x 1000/meanTPOT 56.85 ms) | out_tput 210.66 | meanTTFT 18218.57 ms | in 131262 out 16384 tok in 77.77 s | dspark_acc_len 2.903 draft_acc 63.
+  long think-on long-on-c1-r1 try1 seed 761745002 warmseed 761745001: decode_agg 82.30 tok/s (C1 x 1000/meanTPOT 12.15 ms) | out_tput 70.15 | meanTTFT 2165.17 ms | in 24611 out 3072 tok in 43.79 s | dspark_acc_len 2.958 draft_acc 39.2% | fail
+  long think-on long-on-c1-r2 try1 seed 761745004 warmseed 761745003: decode_agg 82.24 tok/s (C1 x 1000/meanTPOT 12.16 ms) | out_tput 70.17 | meanTTFT 2151.65 ms | in 24611 out 3072 tok in 43.78 s | dspark_acc_len 2.971 draft_acc 39.4% | fail
+  long think-on long-on-c1-r3 try1 seed 761745006 warmseed 761745005: decode_agg 80.45 tok/s (C1 x 1000/meanTPOT 12.43 ms) | out_tput 68.81 | meanTTFT 2161.32 ms | in 24612 out 3072 tok in 44.64 s | dspark_acc_len 2.895 draft_acc 37.9% | fail
+  long think-on long-on-c16-r1 try1 seed 761745008 warmseed 761745007: decode_agg 266.40 tok/s (C16 x 1000/meanTPOT 60.06 ms) | out_tput 200.20 | meanTTFT 18231.89 ms | in 131263 out 16384 tok in 81.84 s | dspark_acc_len 2.688 draft_acc 56.0%
+  short think-off short-off-c1-r1 try1 seed 762049002 warmseed 762049001: decode_agg 79.68 tok/s (C1 x 1000/meanTPOT 12.55 ms) | out_tput 78.58 | meanTTFT 175.56 ms | in 139 out 2000 tok in 25.45 s | dspark_acc_len 3.229 draft_acc 44.6% | fai
+  short think-off short-off-c1-r2 try1 seed 762049004 warmseed 762049003: decode_agg 110.99 tok/s (C1 x 1000/meanTPOT 9.01 ms) | out_tput 108.34 | meanTTFT 240.78 ms | in 333 out 1754 tok in 16.19 s | dspark_acc_len 5.226 draft_acc 84.5% | fa
+  short think-off short-off-c1-r3 try1 seed 762049006 warmseed 762049005: decode_agg 94.16 tok/s (C1 x 1000/meanTPOT 10.62 ms) | out_tput 89.71 | meanTTFT 235.53 ms | in 420 out 1618 tok in 18.04 s | dspark_acc_len 3.497 draft_acc 49.9% | fai
+  short think-off short-off-c16-r1 try1 seed 762049008 warmseed 762049007: decode_agg 293.20 tok/s (C16 x 1000/meanTPOT 54.57 ms) | out_tput 231.28 | meanTTFT 743.04 ms | in 3811 out 20317 tok in 87.85 s | dspark_acc_len 2.890 draft_acc 61.1%
+  short think-on short-on-c1-r1 try1 seed 762275002 warmseed 762275001: decode_agg 85.62 tok/s (C1 x 1000/meanTPOT 11.68 ms) | out_tput 81.66 | meanTTFT 154.51 ms | in 127 out 2223 tok in 27.22 s | dspark_acc_len 3.092 draft_acc 41.8% | faile
+  short think-on short-on-c1-r2 try1 seed 762275004 warmseed 762275003: decode_agg 81.77 tok/s (C1 x 1000/meanTPOT 12.23 ms) | out_tput 80.90 | meanTTFT 144.93 ms | in 145 out 3072 tok in 37.97 s | dspark_acc_len 3.046 draft_acc 40.9% | faile
+  short think-on short-on-c1-r3 try1 seed 762275006 warmseed 762275005: decode_agg 78.00 tok/s (C1 x 1000/meanTPOT 12.82 ms) | out_tput 76.61 | meanTTFT 248.47 ms | in 447 out 3072 tok in 40.10 s | dspark_acc_len 3.109 draft_acc 42.2% | faile
+  short think-on short-on-c16-r1 try1 seed 762275008 warmseed 762275007: decode_agg 313.85 tok/s (C16 x 1000/meanTPOT 50.98 ms) | out_tput 252.71 | meanTTFT 681.65 ms | in 2854 out 27651 tok in 109.42 s | dspark_acc_len 2.678 draft_acc 55.3%
+  {"n": 50, "correct": 49, "acc": 98.0, "runaways": 0, "errors": 0, "wall_s": 210, "median_ctoks": 231, "effort": "high"}
+  16:52:57 div server-rank0.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=3 shm_stall=0 nccl_err=0 l7_poison=0
+  16:52:57 div server-rank1-copy.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=1 shm_stall=0 nccl_err=0 l7_poison=0
+2026-10-11 17:00:59 PT +57m S1 ready 2026-10-11 17:00:59 after 445 s | ARGS PARITY OK: 49 args identical on both ranks (rank flags excluded); model=DeepSeek-V4-Pro-0813
+2026-10-11 17:01:00 PT +57m S1 probe 391: '391'
+2026-10-11 17:31:31 PT +88m S1 stages exit 0
+   "PASS": true
+  17:02:00 flips S1 pass 1: {"positions": 3944, "flips": 146, "flip_pct": 3.702, "cont_positions": 3405, "cont_flips": 104, "cont_flip_pct": 3.054, "free_identical": 5, "n_prompts": 32} | spec 16 80 35 -> 1014 5070 2386
+  17:02:48 flips S1 pass 2: {"positions": 3944, "flips": 161, "flip_pct": 4.082, "cont_positions": 3405, "cont_flips": 109, "cont_flip_pct": 3.201, "free_identical": 8, "n_prompts": 32} | spec 1014 5070 2386 -> 2026 10130 4802
+  catid-c1-r1 seed 9911: decode_agg 40.24 (TPOT 24.85 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.038 drafts 52 | running mean 0.9 max 1 waiting mean 0.0
+  catid-c1-r2 seed 9912: decode_agg 40.26 (TPOT 24.84 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.042 drafts 48 | running mean 0.8 max 1 waiting mean 0.0
+  catid-c1-r3 seed 9913: decode_agg 40.31 (TPOT 24.81 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.021 drafts 48 | running mean 0.8 max 1 waiting mean 0.0
+  catid-c16-r1 seed 10061: decode_agg 164.9 (TPOT 97.03 ms) failed 0 hit 0.00% (0/262144 tok) acc_len 1.047 drafts 128 | running mean 14.0 max 16 waiting mean 1.0
+  long think-off long-off-c1-r1 try1 seed 763909002 warmseed 763909001: decode_agg 98.04 tok/s (C1 x 1000/meanTPOT 10.2 ms) | out_tput 81.56 | meanTTFT 2117.00 ms | in 24609 out 3072 tok in 37.66 s | dspark_acc_len 3.440 draft_acc 48.8% | fai
+  long think-off long-off-c1-r2 try1 seed 763909004 warmseed 763909003: decode_agg 98.91 tok/s (C1 x 1000/meanTPOT 10.11 ms) | out_tput 82.12 | meanTTFT 2130.23 ms | in 24609 out 3072 tok in 37.41 s | dspark_acc_len 3.338 draft_acc 46.8% | fa
+  long think-off long-off-c1-r3 try1 seed 763909006 warmseed 763909005: decode_agg 100.81 tok/s (C1 x 1000/meanTPOT 9.92 ms) | out_tput 83.40 | meanTTFT 2134.15 ms | in 24609 out 3072 tok in 36.83 s | dspark_acc_len 3.397 draft_acc 47.9% | fa
+  long think-off long-off-c16-r1 try1 seed 763909008 warmseed 763909007: decode_agg 288.60 tok/s (C16 x 1000/meanTPOT 55.44 ms) | out_tput 211.65 | meanTTFT 18115.45 ms | in 131246 out 16384 tok in 77.41 s | dspark_acc_len 2.924 draft_acc 63.
+  long think-on long-on-c1-r1 try1 seed 764195002 warmseed 764195001: decode_agg 86.13 tok/s (C1 x 1000/meanTPOT 11.61 ms) | out_tput 73.00 | meanTTFT 2149.29 ms | in 24608 out 3072 tok in 42.08 s | dspark_acc_len 2.863 draft_acc 37.3% | fail
+  long think-on long-on-c1-r2 try1 seed 764195004 warmseed 764195003: decode_agg 93.20 tok/s (C1 x 1000/meanTPOT 10.73 ms) | out_tput 78.01 | meanTTFT 2154.27 ms | in 24608 out 3072 tok in 39.38 s | dspark_acc_len 3.091 draft_acc 41.8% | fail
+  long think-on long-on-c1-r3 try1 seed 764195006 warmseed 764195005: decode_agg 89.21 tok/s (C1 x 1000/meanTPOT 11.21 ms) | out_tput 75.08 | meanTTFT 2166.97 ms | in 24609 out 3072 tok in 40.91 s | dspark_acc_len 3.012 draft_acc 40.2% | fail
+  long think-on long-on-c16-r1 try1 seed 764195008 warmseed 764195007: decode_agg 274.54 tok/s (C16 x 1000/meanTPOT 58.28 ms) | out_tput 205.88 | meanTTFT 18104.96 ms | in 131247 out 16384 tok in 79.58 s | dspark_acc_len 2.690 draft_acc 56.2%
+  short think-off short-off-c1-r1 try1 seed 764488002 warmseed 764488001: decode_agg 82.51 tok/s (C1 x 1000/meanTPOT 12.12 ms) | out_tput 76.61 | meanTTFT 158.16 ms | in 136 out 1687 tok in 22.02 s | dspark_acc_len 2.912 draft_acc 38.2% | fai
+  short think-off short-off-c1-r2 try1 seed 764488004 warmseed 764488003: decode_agg 120.19 tok/s (C1 x 1000/meanTPOT 8.32 ms) | out_tput 115.46 | meanTTFT 220.07 ms | in 330 out 1837 tok in 15.91 s | dspark_acc_len 5.186 draft_acc 83.7% | fa
+  short think-off short-off-c1-r3 try1 seed 764488006 warmseed 764488005: decode_agg 102.77 tok/s (C1 x 1000/meanTPOT 9.73 ms) | out_tput 95.63 | meanTTFT 230.96 ms | in 417 out 1732 tok in 18.11 s | dspark_acc_len 3.478 draft_acc 49.6% | fai
+  short think-off short-off-c16-r1 try1 seed 764488008 warmseed 764488007: decode_agg 291.23 tok/s (C16 x 1000/meanTPOT 54.94 ms) | out_tput 231.50 | meanTTFT 680.22 ms | in 3779 out 20403 tok in 88.14 s | dspark_acc_len 2.849 draft_acc 59.9%
+  short think-on short-on-c1-r1 try1 seed 764709002 warmseed 764709001: decode_agg 92.25 tok/s (C1 x 1000/meanTPOT 10.84 ms) | out_tput 86.82 | meanTTFT 152.55 ms | in 124 out 2192 tok in 25.25 s | dspark_acc_len 3.127 draft_acc 42.5% | faile
+  short think-on short-on-c1-r2 try1 seed 764709004 warmseed 764709003: decode_agg 86.96 tok/s (C1 x 1000/meanTPOT 11.5 ms) | out_tput 85.96 | meanTTFT 151.30 ms | in 142 out 3072 tok in 35.74 s | dspark_acc_len 3.103 draft_acc 42.1% | failed
+  short think-on short-on-c1-r3 try1 seed 764709006 warmseed 764709005: decode_agg 82.58 tok/s (C1 x 1000/meanTPOT 12.11 ms) | out_tput 80.79 | meanTTFT 286.48 ms | in 444 out 3072 tok in 38.02 s | dspark_acc_len 3.092 draft_acc 41.8% | faile
+  short think-on short-on-c16-r1 try1 seed 764709008 warmseed 764709007: decode_agg 318.53 tok/s (C16 x 1000/meanTPOT 50.23 ms) | out_tput 256.84 | meanTTFT 649.86 ms | in 2822 out 27801 tok in 108.24 s | dspark_acc_len 2.685 draft_acc 55.4%
+  {"n": 50, "correct": 49, "acc": 98.0, "runaways": 0, "errors": 0, "wall_s": 95, "median_ctoks": 233, "effort": "high"}
+  17:31:29 div server-rank0.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=3 shm_stall=0 nccl_err=0 l7_poison=0
+  17:31:29 div server-rank1-copy.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=1 shm_stall=0 nccl_err=0 l7_poison=0
+  17:31:31 l7 one-shot lines r0 0 (live 0) r1 0 (live 0); stats files 20
+2026-10-11 17:31:56 PT +88m === S0b: launcher <kit> ONESHOT=0; stages [peer0 gate catid public peer1 div]
+2026-10-11 17:39:34 PT +96m S0b ready 2026-10-11 17:39:34 after 445 s | ARGS PARITY OK: 49 args identical on both ranks (rank flags excluded); model=DeepSeek-V4-Pro-0813
+2026-10-11 17:39:35 PT +96m S0b probe 391: '391'
+2026-10-11 17:48:16 PT +104m S0b stages exit 0
+   "PASS": true
+  catid-c1-r1 seed 9911: decode_agg 38.04 (TPOT 26.29 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.000 drafts 52 | running mean 0.9 max 1 waiting mean 0.0
+  catid-c1-r2 seed 9912: decode_agg 38.1 (TPOT 26.25 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.042 drafts 48 | running mean 0.9 max 1 waiting mean 0.0
+  catid-c1-r3 seed 9913: decode_agg 38.21 (TPOT 26.17 ms) failed 0 hit 0.00% (0/24576 tok) acc_len 1.021 drafts 48 | running mean 0.9 max 1 waiting mean 0.0
+  long think-off long-off-c1-r1 try1 seed 765907002 warmseed 765907001: decode_agg 88.42 tok/s (C1 x 1000/meanTPOT 11.31 ms) | out_tput 74.80 | meanTTFT 2124.04 ms | in 24618 out 3072 tok in 41.07 s | dspark_acc_len 3.341 draft_acc 46.8% | fa
+  long think-off long-off-c1-r2 try1 seed 765907004 warmseed 765907003: decode_agg 93.63 tok/s (C1 x 1000/meanTPOT 10.68 ms) | out_tput 78.55 | meanTTFT 2112.02 ms | in 24618 out 3072 tok in 39.11 s | dspark_acc_len 3.372 draft_acc 47.4% | fa
+  long think-off long-off-c1-r3 try1 seed 765907006 warmseed 765907005: decode_agg 92.76 tok/s (C1 x 1000/meanTPOT 10.78 ms) | out_tput 77.95 | meanTTFT 2107.90 ms | in 24618 out 3072 tok in 39.41 s | dspark_acc_len 3.335 draft_acc 46.7% | fa
+  17:48:16 div server-rank0.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=3 shm_stall=0 nccl_err=0 l7_poison=0
+  17:48:16 div server-rank1-copy.log: exc=0 failfast=0 cuda_oom=0 alloc_oom=1 shm_stall=0 nccl_err=0 l7_poison=0
+
+# ---- verdicts (l7n2_sum.py) ----
+V-L7-VALID: YES -- one-shot live r0 True r1 True; captured all-reduces one-shot r0 6666 r1 6666, stock r0 738 r1 738 (prefill-size graphs may stay stock); stats files 21; G0 PASS: oneshot_live, bitwise/gather/health OK on rank 0, rc 0/0; lambda 1:13.12us(True) 2:13.80us(True) 4:15.36us(True) 8:18.11us(True) 16:22.32us(True) 64:56.84us(True) 146:110.64us(True) 147:136.59us(False) 512:288.76us(False)
+V-L7-CORRECT: PASS -- S1 cos gate PASS (min 0.999992, S0 min 0.999991); flips S0 3.601% S1 3.892% (|d| <= 1.0 pt: True; passes [3.448, 3.753] / [3.702, 4.082]); GSM8K-50 S0 49 S1 49 (>= S0-2: True)
+V-L7-HYGIENE: PASS -- S0: 20 runs, contaminated 0, max prefix hit 0.00%, failed-request runs 0, sidecar timeouts r0 0 r1 0 (calls [1769793, 1769793]), log flags none; S1: 20 runs, contaminated 0, max prefix hit 0.00%, failed-request runs 0, sidecar timeouts r0 0 r1 0 (calls [1684576, 1684576]), log flags none; S0b: 6 runs, contaminated 0, max prefix hit 0.00%, failed-request runs 0, sidecar timeouts r0 0 r1 0 (calls [752618, 752618]), log flags none
+V-L7-C1 (measurement, pre-registered model catid +4-5% / public +5-6%): catid +4.04% (within the model range); public geo-mean over 4 sets +7.87% (above); S0 rep spread (max-min)/mean: catid 5.3%, long-off 3.5%, long-on 2.3%, short-off 33.0%, short-on 9.3%
+V-L7-C16 (measurement, single rep, model +2-3%): catid +3.23%, long-off +2.54%, long-on +3.06%, short-off -0.67%, short-on +1.49%
+V-L7-DRIFT: catid S0b/S0 -1.52%; long-off S0b/S0 -0.36% (an S1-S0 delta smaller than this drift is not distinguishable)
+  C1 catid: S0 [40.06, 38.05, 38.01] S1 [40.24, 40.26, 40.31] -> +4.04%
+  C1 long-off: S0 [93.02, 93.02, 89.77] S1 [98.04, 98.91, 100.81] -> +7.96%
+  C1 long-on: S0 [82.3, 82.24, 80.45] S1 [86.13, 93.2, 89.21] -> +9.61%
+  C1 short-off: S0 [79.68, 110.99, 94.16] S1 [82.51, 120.19, 102.77] -> +7.25%
+  C1 short-on: S0 [85.62, 81.77, 78.0] S1 [92.25, 86.96, 82.58] -> +6.68%
+  C16 catid +3.23%, long-off +2.54%, long-on +3.06%, short-off -0.67%, short-on +1.49%

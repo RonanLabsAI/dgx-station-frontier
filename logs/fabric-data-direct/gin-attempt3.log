@@ -1,0 +1,114 @@
+# GIN (NCCL Device API, GPU-initiated networking, GDAKI) all-reduce vs our one-shot vs NCCL, two DGX Station GB300s over one 400G RoCE rail
+# Run 2026-10-11 18:52-19:20 PT, model-free microbenchmark. Excerpt of the master log + verdicts (scrubbed).
+# P0 = NCCL + one-shot reference; P1 = GIN GDAKI on NCCL 2.30.7 (image); P2 = GIN GDAKI on NCCL 2.32.3 (LD_PRELOAD); P3 proxy; P4 GDAKI + CPU NIC handler.
+# inter = interleaved with ~50 us compute between collectives; b2b = back to back. Pre-registered gate: GIN <= 8.0 us at 12 KB interleaved, bitwise vs NCCL.
+
+2026-10-11 18:54:40 PT +2m === P0 (NCCL for GIN phases: 230): production NCCL env (CUMEM 0, DD overlay, tuner3) + one-shot: the reference curve
+2026-10-11 18:58:21 PT +5m P0 rc 0/0 in 221 s
+2026-10-11 18:58:22 PT +5m === S230 (NCCL for GIN phases: 230): GIN smoke, NCCL 2.30.7 (image), GDAKI: init + 100 ping-pongs at 8 B + one parity size
+2026-10-11 18:58:27 PT +5m S230 rc 0/0 in 5 s; S230 pingpong bytes=8 oneway_us=8.373;
+2026-10-11 18:58:27 PT +5m === S232 (NCCL for GIN phases: 232): GIN smoke, NCCL 2.32.3 (staged wheel, LD_PRELOAD), GDAKI
+2026-10-11 18:58:32 PT +5m S232 rc 0/0 in 5 s; S232 pingpong bytes=8 oneway_us=8.518;
+2026-10-11 18:58:32 PT +5m === P1 (NCCL for GIN phases: 230): GIN GDAKI on NCCL 2.30.7 (pre-registered gate config A): gin + one-shot + nccl, same process
+2026-10-11 19:01:50 PT +9m P1 rc 0/0 in 198 s
+2026-10-11 19:01:50 PT +9m === P2 (NCCL for GIN phases: 232): GIN GDAKI on NCCL 2.32.3 (pre-registered gate config B): gin + one-shot + nccl, same process
+2026-10-11 19:05:10 PT +12m P2 rc 0/0 in 200 s
+2026-10-11 19:05:10 PT +12m === P3 (NCCL for GIN phases: 230): diagnostic: GIN PROXY backend (NCCL_GIN_TYPE=2, CPU proxy thread posts the WQEs), NCCL 230
+2026-10-11 19:05:48 PT +13m P3 rc 0/0 in 38 s; P3 pingpong bytes=8 oneway_us=7.058;P3 pingpong bytes=16384 oneway_us=8.257;P3 arm=nccl mode=b2b bytes=12288 us=19.518 reps=[19.518];P3 arm=nccl mode=inter bytes=12288 us=19.494 reps=[19.494];P3 arm=gin mode=b2b bytes=12288 us=14.262 reps=[14.262];P3 arm=gin mode=inter bytes=12288 us=13.972 reps=[13.972];
+2026-10-11 19:05:48 PT +13m === P4 (NCCL for GIN phases: 230): diagnostic: GDAKI with NCCL_GIN_GDAKI_NIC_HANDLER=1 (CPU NIC handler instead of the SM doorbell), NCCL 230
+2026-10-11 19:06:24 PT +13m P4 rc 0/0 in 36 s; P4 pingpong bytes=8 oneway_us=8.240;P4 pingpong bytes=16384 oneway_us=9.616;P4 arm=nccl mode=b2b bytes=12288 us=19.511 reps=[19.511];P4 arm=nccl mode=inter bytes=12288 us=19.507 reps=[19.507];P4 arm=gin mode=b2b bytes=12288 us=15.253 reps=[15.253];P4 arm=gin mode=inter bytes=12288 us=15.144 reps=[15.144];
+2026-10-11 19:06:47 PT +14m T16 rc 0/0 in 23 s; T16 arm=nccl mode=inter bytes=12288 us=19.468 reps=[19.468];T16 arm=gin mode=inter bytes=12288 us=15.2 reps=[15.2];
+2026-10-11 19:07:08 PT +14m T128 rc 0/0 in 21 s; T128 arm=nccl mode=inter bytes=12288 us=19.581 reps=[19.581];T128 arm=gin mode=inter bytes=12288 us=15.314 reps=[15.314];
+2026-10-11 19:07:29 PT +14m TCTA rc 0/0 in 21 s; TCTA arm=nccl mode=inter bytes=12288 us=19.521 reps=[19.521];TCTA arm=gin mode=inter bytes=12288 us=13.666 reps=[13.666];
+2026-10-11 19:07:46 PT +15m TTHR rc 0/0 in 16 s; TTHR arm=nccl mode=inter bytes=12288 us=19.451 reps=[19.451];TTHR arm=gin mode=inter bytes=12288 us=14.09 reps=[14.09];
+2026-10-11 19:08:08 PT +15m TEAGER rc 0/0 in 21 s; TEAGER arm=nccl mode=inter bytes=12288 us=19.447 reps=[19.447];TEAGER arm=gin mode=inter bytes=12288 us=15.32 reps=[15.32];
+2026-10-11 19:08:32 PT +15m TCTX1 rc 0/0 in 24 s; TCTX1 arm=nccl mode=inter bytes=12288 us=19.484 reps=[19.484];TCTX1 arm=gin mode=inter bytes=12288 us=15.561 reps=[15.561];
+2026-10-11 19:09:03 PT +16m D0 rc 0/0 in 31 s; D0 arm=nccl mode=b2b bytes=12288 us=19.431 reps=[19.537, 19.325];D0 arm=nccl mode=inter bytes=12288 us=19.422 reps=[19.535, 19.31];D0 arm=oneshot mode=b2b bytes=12288 us=12.928 reps=[12.978, 12.877];D0 arm=oneshot mode=inter bytes=12288 us=13.397 reps=[13.41, 13.385];
+2026-10-11 19:09:34 PT +16m D1 rc 0/0 in 31 s; D1 pingpong bytes=16384 oneway_us=9.247;D1 arm=nccl mode=b2b bytes=12288 us=19.588 reps=[19.681, 19.495];D1 arm=nccl mode=inter bytes=12288 us=19.462 reps=[19.471, 19.452];D1 arm=gin mode=b2b bytes=12288 us=14.054 reps=[14.052, 14.057];D1 arm=gin mode=inter bytes=12288 us=13.957 reps=[13.957, 13.958];
+
+
+# ---- full results per phase (from the per-phase JSON written by gin_bench.py; us = median over reps) ----
+## P0: versions {"torch": "2.13.0+cu130", "torch_cuda": "13.0", "nccl_torch": "2.29.7", "device": "NVIDIA GB300", "sm_count": 152, "cc": "10.3", "host": "left"}
+P0 inter (us) | bytes | nccl | nccl_torch | oneshot
+P0 inter | 4096 | 17.023 | 16.988 | 11.787
+P0 inter | 8192 | 19.100 | 19.163 | 12.212
+P0 inter | 12288 | 19.398 | 19.371 | 13.562
+P0 inter | 14336 | 19.540 | 19.553 | 13.399
+P0 inter | 16384 | 19.594 | 19.565 | 13.878
+P0 inter | 32768 | 21.073 | 21.120 | 13.889
+P0 inter | 65536 | 26.692 | 26.575 | 16.016
+P0 inter | 98304 | 29.406 | 29.311 | 17.888
+P0 inter | 131072 | 33.366 | 33.183 | 19.101
+P0 inter | 196608 | 35.573 | 35.696 | 21.230
+P0 inter | 229376 | 35.430 | 35.595 | 22.837
+P0 inter | 262144 | 35.494 | 35.663 | 23.858
+P0 inter | 524288 | 40.755 | 40.569 | 38.355
+P0 inter | 1048576 | 54.882 | 54.859 | 63.130
+P0 inter | 2097152 | 87.115 | 87.470 | 110.561
+P0 inter | 4194304 | 141.363 | 141.567 | -
+P0 inter | 8388608 | 234.902 | 236.161 | -
+P0 parity: [{"arm": "nccl_torch", "bytes": 4096, "bitwise_vs_nccl": true, "ranks_equal": true, "nccl_ranks_equal": true, "maxabs": 0.0}, {"arm": "oneshot", "bytes": 4096, "bitwise_vs_nccl": true, "ranks_equal": true, "nccl_ranks_equal": true, "maxabs": 0.0}, {"arm": "nccl_torch", "bytes": 8192, "bitwise_vs_nccl": true, "ranks_equal": true, "nccl_ranks_equal": true, "maxabs": 0.0}, {"arm": "oneshot", "bytes":
+## P1: versions {"torch": "2.13.0+cu130", "torch_cuda": "13.0", "nccl_torch": "2.29.7", "device": "NVIDIA GB300", "sm_count": 152, "cc": "10.3", "host": "left"}
+P1 pingpong bytes=8 oneway_us=8.205 iters=1000
+P1 pingpong bytes=16384 oneway_us=9.828 iters=1000
+P1 pingpong bytes=262144 oneway_us=14.913 iters=1000
+P1 inter (us) | bytes | gin | nccl | oneshot
+P1 inter | 4096 | 12.920 | 16.926 | 11.323
+P1 inter | 8192 | 14.263 | 19.054 | 12.353
+P1 inter | 12288 | 15.001 | 19.438 | 13.405
+P1 inter | 14336 | 15.066 | 19.589 | 13.536
+P1 inter | 16384 | 15.142 | 19.646 | 13.606
+P1 inter | 32768 | 16.780 | 21.248 | 13.873
+P1 inter | 65536 | 17.769 | 26.554 | 15.031
+P1 inter | 98304 | 18.292 | 29.379 | 16.643
+P1 inter | 131072 | 18.683 | 33.287 | 18.018
+P1 inter | 196608 | 20.441 | 35.634 | 20.499
+P1 inter | 229376 | 21.058 | 35.283 | 21.629
+P1 inter | 262144 | 21.642 | 35.311 | 22.794
+P1 inter | 524288 | 27.406 | 40.888 | 37.843
+P1 inter | 1048576 | 38.479 | 54.685 | 62.611
+P1 inter | 2097152 | 59.882 | 87.282 | 109.779
+P1 inter | 4194304 | 103.324 | 141.473 | -
+P1 inter | 8388608 | 191.074 | 235.104 | -
+P1 parity: [{"arm": "oneshot", "bytes": 4096, "bitwise_vs_nccl": true, "ranks_equal": true, "nccl_ranks_equal": true, "maxabs": 0.0}, {"arm": "gin", "bytes": 4096, "bitwise_vs_nccl": true, "ranks_equal": true, "nccl_ranks_equal": true, "maxabs": 0.0}, {"arm": "oneshot", "bytes": 8192, "bitwise_vs_nccl": true, "ranks_equal": true, "nccl_ranks_equal": true, "maxabs": 0.0}, {"arm": "gin", "bytes": 8192, "bitwis
+## P2: versions {"torch": "2.13.0+cu130", "torch_cuda": "13.0", "nccl_torch": "2.29.7", "device": "NVIDIA GB300", "sm_count": 152, "cc": "10.3", "host": "left"}
+P2 pingpong bytes=8 oneway_us=8.507 iters=1000
+P2 pingpong bytes=16384 oneway_us=10.112 iters=1000
+P2 pingpong bytes=262144 oneway_us=15.219 iters=1000
+P2 inter (us) | bytes | gin | nccl | oneshot
+P2 inter | 4096 | 14.964 | 17.094 | 11.202
+P2 inter | 8192 | 16.378 | 17.250 | 12.673
+P2 inter | 12288 | 17.161 | 17.668 | 13.572
+P2 inter | 14336 | 17.231 | 18.713 | 13.567
+P2 inter | 16384 | 17.305 | 19.793 | 13.548
+P2 inter | 32768 | 18.956 | 21.316 | 14.173
+P2 inter | 65536 | 19.480 | 26.854 | 15.993
+P2 inter | 98304 | 19.944 | 29.598 | 17.641
+P2 inter | 131072 | 20.127 | 33.772 | 19.144
+P2 inter | 196608 | 21.835 | 35.856 | 21.508
+P2 inter | 229376 | 22.329 | 35.717 | 22.677
+P2 inter | 262144 | 22.867 | 35.629 | 24.459
+P2 inter | 524288 | 28.595 | 41.090 | 38.460
+P2 inter | 1048576 | 39.765 | 54.652 | 63.074
+P2 inter | 2097152 | 61.127 | 87.181 | 111.017
+P2 inter | 4194304 | 104.656 | 141.562 | -
+P2 inter | 8388608 | 192.267 | 234.621 | -
+P2 parity: [{"arm": "oneshot", "bytes": 4096, "bitwise_vs_nccl": true, "ranks_equal": true, "nccl_ranks_equal": true, "maxabs": 0.0}, {"arm": "gin", "bytes": 4096, "bitwise_vs_nccl": true, "ranks_equal": true, "nccl_ranks_equal": true, "maxabs": 0.0}, {"arm": "oneshot", "bytes": 8192, "bitwise_vs_nccl": true, "ranks_equal": true, "nccl_ranks_equal": true, "maxabs": 0.0}, {"arm": "gin", "bytes": 8192, "bitwis
+
+# ---- verdicts (gin_sum.py) ----
+V-VALID YES | P0 reference present; GIN configs run: ['P1', 'P2']; smokes run: ['S230', 'S232']
+V-GIN-INIT-A GDAKI | P1 NCCL 2.30.7: nccl=23007 deviceApi=1 ginType=3 railedGinType=3 nLsaTeams=2 ginContextCount=4 maxBlocks=256 chunk=32768 max=8388608 window_flags=0 rsm=0 flushLazy=1 tc=106 timeout_s=2.0
+V-GIN-CORRECT-A PASS | P1: 17 parity sizes bitwise + ranks equal; 3 stress graphs bitwise; health ok
+V-GIN-12K-A 15.00 | P1 gin inter @12288 B us (b2b 15.27)
+V-GIN-INIT-B GDAKI | P2 NCCL 2.32.3: nccl=23203 deviceApi=1 ginType=3 railedGinType=3 nLsaTeams=2 ginContextCount=4 maxBlocks=256 chunk=32768 max=8388608 window_flags=4 rsm=0 flushLazy=1 tc=106 timeout_s=2.0
+V-GIN-CORRECT-B PASS | P2: 17 parity sizes bitwise + ranks equal; 3 stress graphs bitwise; health ok
+V-GIN-12K-B 17.16 | P2 gin inter @12288 B us (b2b 17.22)
+V-GATE FAIL | GIN interleaved @12 KB = 15.00 us (config A/P1; bar <= 8.0 us); eligible: A=15.00, B=17.16
+V-CURVE GIN < one-shot (inter) at 6/17 sizes | P1: gin beats one-shot at [196608, 229376, 262144, 524288, 1048576, 2097152]; largest 2097152
+V-PP 9.83 us one-way @16 KB (P1); P3-A GO <= 4 us: NO | [(9.828, 'P1'), (10.112, 'P2')]
+V-DOORBELL P1:GDAKI/15.00 P2:GDAKI/17.16 P3:PROXY/13.97 P4:GDAKI/15.14 | {'P1': {'init': 'GDAKI', 'inter_12k': 15.001, 'b2b_12k': 15.272}, 'P2': {'init': 'GDAKI', 'inter_12k': 17.161, 'b2b_12k': 17.218}, 'P3': {'init': 'PROXY', 'inter_12k': 13.972, 'b2b_12k': 14.262}, 'P4': {'init': 'GDAKI', 'inter_12k': 15.144, 'b2b_12k': 15.253}}
+V-TUNE exploratory (not a gate input) | {'T128': {12288: 15.314, 229376: 26.527, 2097152: 65.54, 8388608: 196.099}, 'T16': {12288: 15.2, 229376: 21.606, 2097152: 73.463, 8388608: 253.951}, 'TCTA': {12288: 13.666, 229376: 21.051, 2097152: 59.465, 8388608: 190.709}, 'TCTX1': {12288: 15.561, 229376: 26.474, 2097152: 110.157, 8388608: 393.595
+V-DRIFT within 10% | {'nccl@12K': 0.0012, 'oneshot@12K': -0.0122, 'gin@12K': -0.0696}
+V-HEALTH CLEAN | no fatal Xid, no mlx5 errors, rdma error counters unchanged
+V-REF P0 @12K inter: nccl 19.40 us, one-shot 13.56 us; b2b: nccl 19.52, one-shot 12.94 |
+MODEL [C] fused GLM C1: -0.252 ms/token saved vs one-shot -> 102.0 -> 99.5 tok/s (158 collectives/token, step 9.8 ms)
