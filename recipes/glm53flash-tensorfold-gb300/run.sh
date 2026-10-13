@@ -5,7 +5,8 @@
 # usage: CONFIG=gb300|mia DRAFTS=dflash2|none ./run.sh [steps...]
 #   steps (default): preflight env serve smoke gsm8k bench bench16 teardown   (bench16 = C8 x 64 prompts)
 #   CONFIG=mia   : Mia's recipe defaults, changed only where one GPU needs it (TP=1, COMM=nccl, SPLIT=0), PARALLEL 4
-#   CONFIG=gb300 : + PARALLEL 8, TF_GLM_L2PF=0, TF_GLM_SPLIT_TARGET=576, TF_GLM_SHAPE_SK=0 (measured faster on GB300)
+#   CONFIG=gb300 : + PARALLEL 8, TF_GLM_L2PF=0, TF_GLM_SPLIT_TARGET=576, TF_GLM_SHAPE_SK=0 (measured faster on GB300),
+#                  and the host-gap settings TF_GLM_MULTI_LONE=1 TF_GLM_MULTI_ASYNC=1 TF_GLM_MULTI_SAMPLER=packed (replies unchanged)
 # knobs: MODELS_DIR (where prepare.sh put the weights), OUT_ROOT (logs), EXTRA_ENV="K=V ...", IMAGE_TAG, PROFILE=1 (nsys)
 #
 # Isolation: --network none (loopback only; the bench client runs inside via docker exec), mounts = checkpoint (ro),
@@ -23,7 +24,7 @@ RUN="${RUN:-$(date +%Y%m%d-%H%M)-$CONFIG-$DENSE-$DRAFTS}"
 OUT="$OUT_ROOT/$RUN"
 if [[ "$CONFIG" == gb300 ]]; then
   PARALLEL="${PARALLEL:-8}"; BENCH16_CONC="${BENCH16_CONC:-8}"
-  EXTRA_ENV="TF_GLM_L2PF=0 TF_GLM_SPLIT_TARGET=576 TF_GLM_SHAPE_SK=0 ${EXTRA_ENV:-}"
+  EXTRA_ENV="TF_GLM_L2PF=0 TF_GLM_SPLIT_TARGET=576 TF_GLM_SHAPE_SK=0 TF_GLM_MULTI_LONE=1 TF_GLM_MULTI_ASYNC=1 TF_GLM_MULTI_SAMPLER=packed ${EXTRA_ENV:-}"
 fi
 CONTEXT="${CONTEXT:-1048576}"; PARALLEL="${PARALLEL:-4}"; MAX_TOKENS="${MAX_TOKENS:-32768}"; BENCH16_CONC="${BENCH16_CONC:-4}"
 RESERVE_GIB="${RESERVE_GIB:-16}"; KV_POOL_GIB="${KV_POOL_GIB:-40}"

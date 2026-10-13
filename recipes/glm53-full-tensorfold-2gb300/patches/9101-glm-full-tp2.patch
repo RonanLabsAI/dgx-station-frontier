@@ -1,0 +1,11 @@
+--- tensorfold/families/glm_moe_dsa/__init__.py
++++ tensorfold/families/glm_moe_dsa/__init__.py
+@@ -13,7 +13,7 @@
+ LANES = False
+ MODELS = ("Mia-AiLab/GLM-5.3-EXL3-2.75bpw-TensorFold",)
+ QUANT_METHODS = {"cuda": ("exl3",)}
+-CUDA_TP = (3, 4)                       # GPUs (one per machine): ~86 GiB of weights a rank at three
++CUDA_TP = (2, 3, 4)                    # GPUs (one per machine): ~86 GiB of weights a rank at three; 2 = two GB300s (~136 GiB a rank)
+ SCOPE = "glm53_routed_experts_only"    # EXL3 routed experts (any width a tensor, mcg codebook), BF16 elsewhere
+ 
+ 

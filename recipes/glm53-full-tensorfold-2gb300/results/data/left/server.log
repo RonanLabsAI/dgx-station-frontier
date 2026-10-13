@@ -1,0 +1,198 @@
+[tensorfold] GLM-5.3 runs on three NVIDIA GPUs with 128 GB each (three DGX Sparks): serve with --tp 3 on each, the checkpoint readable on all three
+[tensorfold] loading model: GLM-5.3 (glm_moe_dsa) on CUDA, rank 0 of 2
+<left-node>:1:1 [0] NCCL INFO ncclOsDlopen(libnccl-env.so) failed: libnccl-env.so: cannot open shared object file: No such file or directory
+<left-node>:1:1 [0] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+<left-node>:1:1 [0] NCCL INFO NCCL_SOCKET_IFNAME set to enP1p3s0f1np1
+<left-node>:1:1 [0] NCCL INFO cudaDriverVersion 13020
+<left-node>:1:1 [0] NCCL INFO NCCL version 2.30.7+cuda13.3
+<left-node>:1:1 [0] NCCL INFO NCCL git version HEAD a5187fa2e
+<left-node>:1:1 [0] NCCL INFO NCCL_NET_PLUGIN set by environment to spcx
+<left-node>:1:1 [0] NCCL INFO ncclOsDlopen(spcx) failed: spcx: cannot open shared object file: No such file or directory
+<left-node>:1:1 [0] NCCL INFO NET/Plugin: Loaded net plugin SPCX (v12)
+<left-node>:1:1 [0] NCCL INFO NET/Plugin: Loaded collnet plugin SPCX (v12)
+<left-node>:1:1 [0] NCCL INFO Successfully loaded external network plugin /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so
+<left-node>:1:1 [0] NCCL INFO Registering new plugin entry for commId: 2107679059042892353
+<left-node>:1:1 [0] NCCL INFO Plugin Path : /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so (SPCX Ver. 1.4-0)
+<left-node>:1:1 [0] NCCL INFO NCCL_SOCKET_IFNAME set to enP1p3s0f1np1
+<left-node>:1:1 [0] NCCL INFO NCCL_IB_HCA set to =mlx5_1:1
+<left-node>:1:1 [0] NCCL INFO NET/DEVX : device:mlx5_1 hcaCaps=0xd
+
+[2026-10-11 19:06:20] <left-node>:1:1 [0] init.cc:449 NCCL WARN Spectrum-X (SPCX) NCCL plugin is not supported on device:mlx5_1, skipping ..
+<left-node>:1:1 [0] NCCL INFO NET/IB : No device found.
+<left-node>:1:1 [0] NCCL INFO NET/IB : Using [RO]; OOB enP1p3s0f1np1:<RAIL_IP_A><0>
+<left-node>:1:1 [0] NCCL INFO Failed to initialize NET plugin SPCX
+<left-node>:1:1 [0] NCCL INFO Deregistering plugin entry for commId: 2107679059042892353
+<left-node>:1:1 [0] NCCL INFO NCCL_IB_HCA set to =mlx5_1:1
+<left-node>:1:1 [0] NCCL INFO NET/IB: Data Direct DMA Interface is detected for device mlx5_1
+<left-node>:1:1 [0] NCCL INFO NET/IB: [0] mlx5_1:uverbs1:1/RoCE provider=Mlx5 speed=256000 context=0x2398ce80 pciPath=/sys/devices/pci0009:00/0009:00:00.0/0009:01:00.0/0009:02:00.0/0009:03:00.0 ar=0 oooRqSize=0
+<left-node>:1:1 [0] NCCL INFO NET/IB : Made virtual device [0] name=mlx5_1_dma speed=256000 ndevs=1 rail=-1 plane=-1
+<left-node>:1:1 [0] NCCL INFO NET/IB : Using [0]mlx5_1_dma:1/RoCE [RO]; OOB enP1p3s0f1np1:<RAIL_IP_A><0>
+<left-node>:1:1 [0] NCCL INFO Initialized NET plugin IB
+<left-node>:1:1 [0] NCCL INFO Assigned NET plugin IB to comm
+<left-node>:1:1 [0] NCCL INFO ncclOsDlopen(libnccl-rma.so) failed: libnccl-rma.so: cannot open shared object file: No such file or directory
+<left-node>:1:1 [0] NCCL INFO RMA/Plugin: Could not find: libnccl-rma.so
+<left-node>:1:1 [0] NCCL INFO RMA/Plugin: Failed to load external plugin /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so, dlHandle: (nil), ncclRma: (nil)
+<left-node>:1:1 [0] NCCL INFO RMA/Plugin: Loaded rma plugin SPCX_RMA (v13)
+<left-node>:1:1 [0] NCCL INFO RMA/Plugin: Successfully loaded external plugin /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so
+<left-node>:1:1 [0] NCCL INFO Registering new plugin entry for commId: 2107679059042892353
+<left-node>:1:1 [0] NCCL INFO Plugin Path : /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so (SPCX Ver. 1.4-0)
+<left-node>:1:1 [0] NCCL INFO GIN: no IB devices found
+<left-node>:1:1 [0] NCCL INFO plugin/rma/rma_v13.cc:18 (ncclRma_init) -> 3
+<left-node>:1:1 [0] NCCL INFO RMA/Plugin: Assigned plugin RMA_IB_PROXY to comm
+<left-node>:1:1 [0] NCCL INFO ncclOsDlopen(libnccl-gin.so) failed: libnccl-gin.so: cannot open shared object file: No such file or directory
+<left-node>:1:1 [0] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+<left-node>:1:1 [0] NCCL INFO GIN/Plugin: Failed to load external plugin /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so, dlHandle: (nil), ncclGin: (nil)
+<left-node>:1:1 [0] NCCL INFO GIN/Plugin: Loaded gin plugin SPCX_GIN (v13)
+<left-node>:1:1 [0] NCCL INFO GIN/Plugin: Successfully loaded external plugin /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so
+<left-node>:1:1 [0] NCCL INFO Plugin Path : /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so (SPCX Ver. 1.4-0)
+<left-node>:1:1 [0] NCCL INFO GIN: no IB devices found
+<left-node>:1:1 [0] NCCL INFO GIN/Plugin: Assigned plugin GIN_IB_GDAKI type 3 to comm
+<left-node>:1:1 [0] NCCL INFO Using network IB
+<left-node>:1:1 [0] NCCL INFO Loaded NVML from libnvidia-ml.so.1
+<left-node>:1:1 [0] NCCL INFO DMA-BUF is available on GPU device 0
+<left-node>:1:1 [0] NCCL INFO [Rank 0] ncclCommInitRank comm 0x1a75fd30 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 906000 commId 0x1d3ffaefeec7fa41 - Init START
+<left-node>:1:1 [0] NCCL INFO RAS client listening socket at ::1<28028>
+<left-node>:1:1 [0] NCCL INFO NET/GIN_IB_GDAKI : GPU Direct RDMA Enabled for HCA 0 'mlx5_1_dma'
+<left-node>:1:1 [0] NCCL INFO NET/RMA_IB_PROXY : GPU Direct RDMA Enabled for HCA 0 'mlx5_1_dma'
+<left-node>:1:1 [0] NCCL INFO NET/IB : GPU Direct RDMA Enabled for HCA 0 'mlx5_1_dma'
+<left-node>:1:1 [0] NCCL INFO NCCL_NET_GDR_LEVEL set by environment to SYS
+<left-node>:1:1 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is 0-71. (GPU affinity = 0-71 ; CPU affinity = 0-71).
+<left-node>:1:1 [0] NCCL INFO Rank 0: 1 Net devices
+<left-node>:1:1 [0] NCCL INFO Rank 0: 0 CollNet devices
+<left-node>:1:1 [0] NCCL INFO Local Net device counts across ranks: min 1 max 1
+<left-node>:1:1 [0] NCCL INFO Local CollNet device counts across ranks: min 0 max 0
+<left-node>:1:1 [0] NCCL INFO comm 0x1a75fd30 rank 0 nRanks 2 nNodes 2 localRanks 1 localRank 0 MNNVL 0
+<left-node>:1:1 [0] NCCL INFO Channel 00/04 : 0 1
+<left-node>:1:1 [0] NCCL INFO Channel 01/04 : 0 1
+<left-node>:1:1 [0] NCCL INFO Channel 02/04 : 0 1
+<left-node>:1:1 [0] NCCL INFO Channel 03/04 : 0 1
+<left-node>:1:1 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1 [2] -1/-1/-1->0->1 [3] -1/-1/-1->0->1
+<left-node>:1:1 [0] NCCL INFO P2P Chunksize set to 262144
+<left-node>:1:1 [0] NCCL INFO Tuning P2P operations with maxP2pPeers = 2
+<left-node>:1:1 [0] NCCL INFO ncclOsDlopen(libnccl-profiler.so) failed: libnccl-profiler.so: cannot open shared object file: No such file or directory
+<left-node>:1:1 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+<left-node>:1:1 [0] NCCL INFO ncclOsDlsym(ncclProfiler_v6) failed: /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so: undefined symbol: ncclProfiler_v6
+<left-node>:1:1 [0] NCCL INFO ncclOsDlsym(ncclProfiler_v5) failed: /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so: undefined symbol: ncclProfiler_v5
+<left-node>:1:1 [0] NCCL INFO ncclOsDlsym(ncclProfiler_v4) failed: /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so: undefined symbol: ncclProfiler_v4
+<left-node>:1:1 [0] NCCL INFO ncclOsDlsym(ncclProfiler_v3) failed: /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so: undefined symbol: ncclProfiler_v3
+<left-node>:1:1 [0] NCCL INFO ncclOsDlsym(ncclProfiler_v2) failed: /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so: undefined symbol: ncclProfiler_v2
+<left-node>:1:1 [0] NCCL INFO ncclOsDlsym(ncclProfiler_v1) failed: /opt/hpcx/nccl_spectrum-x_plugin/lib/libnccl-net-spcx.so: undefined symbol: ncclProfiler_v1
+<left-node>:1:1 [0] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+<left-node>:1:87 [0] NCCL INFO [Proxy Service] Device 0 CPU core 60
+<left-node>:1:87 [0] NCCL INFO proxy listening socket at <RAIL_IP_A><42887>
+<left-node>:1:88 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 61
+<left-node>:1:1 [0] NCCL INFO ncclOsDlopen(libnccl-tuner.so) failed: libnccl-tuner.so: cannot open shared object file: No such file or directory
+<left-node>:1:1 [0] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+<left-node>:1:1 [0] NCCL INFO TUNER/Plugin: Using SPCX (v5)
+<left-node>:1:1 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+<left-node>:1:1 [0] NCCL INFO 4 coll channels, 4 collnet channels, 0 nvls channels, 4 p2p channels, 4 p2p channels per peer
+<left-node>:1:1 [0] NCCL INFO CC Off, workFifoBytes 1048576
+<left-node>:1:1 [0] NCC[tensorfold] CUDA rank 0 startup estimate 136.12 GiB within 234.64 GiB; native 1048576, allocated prompt/reply window 163840, cache slots 163856
+L INFO ncclCommInitRank comm 0x1a75fd30 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 906000 commId 0x1d3ffaefeec7fa41 - Init COMPLETE
+<left-node>:1:1 [0] NCCL INFO Init timings - ncclCommInitRank: rank 0 nranks 2 total 0.31 (kernels 0.14, alloc 0.02, bootstrap 0.13, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+<left-node>:1:1 [0] NCCL INFO Symmetric VA size=252GB
+<left-node>:1:89 [0] NCCL INFO [Proxy Progress] Device 0 CPU core 62
+<left-node>:1:1 [0] NCCL INFO Channel 00/0 : 1[0] -> 0[0] [receive] via NET/IB/0/GDRDMA(PCI)
+<left-node>:1:1 [0] NCCL INFO Channel 01/0 : 1[0] -> 0[0] [receive] via NET/IB/0/GDRDMA(PCI)
+<left-node>:1:1 [0] NCCL INFO Channel 02/0 : 1[0] -> 0[0] [receive] via NET/IB/0/GDRDMA(PCI)
+<left-node>:1:1 [0] NCCL INFO Channel 03/0 : 1[0] -> 0[0] [receive] via NET/IB/0/GDRDMA(PCI)
+<left-node>:1:1 [0] NCCL INFO Channel 00/0 : 0[0] -> 1[0] [send] via NET/IB/0/GDRDMA(PCI)
+<left-node>:1:1 [0] NCCL INFO Channel 01/0 : 0[0] -> 1[0] [send] via NET/IB/0/GDRDMA(PCI)
+<left-node>:1:1 [0] NCCL INFO Channel 02/0 : 0[0] -> 1[0] [send] via NET/IB/0/GDRDMA(PCI)
+<left-node>:1:1 [0] NCCL INFO Channel 03/0 : 0[0] -> 1[0] [send] via NET/IB/0/GDRDMA(PCI)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the send communicator (comm=0xed98ec010000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the recv communicator (comm=0xed98ec080000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbRecvCommInit: Receive work requests will be posted on-demand
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsCreate: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10594 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: NCCL Dev 0 IbDev 0 Port 1 qp_num 10594 mtu 5 GID 3 (0/165A8C0FFFF0000) ctsFifoRkey=0x1b3934 ctsFifoLkey=0x1b3934
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: IbDev 0 Port 1 qp_num 10594 query_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the send communicator (comm=0xed98ec170000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the recv communicator (comm=0xed98ec1e0000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbRecvCommInit: Receive work requests will be posted on-demand
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the send communicator (comm=0xed98ec260000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10595 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: Flush QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10596 pkey=0 pd=0xed98ec00fd30
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the recv communicator (comm=0xed98ec370000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbRecvCommInit: Receive work requests will be posted on-demand
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsToRts: Set ECE: IbDev 0 Port 1 qp_num 10594 set_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsCreate: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10597 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: NCCL Dev 0 IbDev 0 Port 1 qp_num 10597 mtu 5 GID 3 (0/165A8C0FFFF0000) ctsFifoRkey=0x1b130e ctsFifoLkey=0x1b130e
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: IbDev 0 Port 1 qp_num 10597 query_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10598 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: Flush QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10599 pkey=0 pd=0xed98ec00fd30
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsCreate: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10600 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: NCCL Dev 0 IbDev 0 Port 1 qp_num 10600 mtu 5 GID 3 (0/165A8C0FFFF0000) ctsFifoRkey=0x1b605b ctsFifoLkey=0x1b605b
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: IbDev 0 Port 1 qp_num 10600 query_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the send communicator (comm=0xed98ec4f0000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsToRts: Set ECE: IbDev 0 Port 1 qp_num 10597 set_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the recv communicator (comm=0xed98ec560000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbRecvCommInit: Receive work requests will be posted on-demand
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10601 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: Flush QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10602 pkey=0 pd=0xed98ec00fd30
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsToRts: Set ECE: IbDev 0 Port 1 qp_num 10600 set_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsCreate: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10603 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: NCCL Dev 0 IbDev 0 Port 1 qp_num 10603 mtu 5 GID 3 (0/165A8C0FFFF0000) ctsFifoRkey=0x19605b ctsFifoLkey=0x19605b
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: IbDev 0 Port 1 qp_num 10603 query_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10604 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: Flush QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10605 pkey=0 pd=0xed98ec00fd30
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsToRts: Set ECE: IbDev 0 Port 1 qp_num 10603 set_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:1 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+<left-node>:1:1 [0] NCCL INFO Channel 00/1 : 1[0] -> 0[0] [receive] via NET/IB/0/GDRDMA(PCI)/Shared
+<left-node>:1:1 [0] NCCL INFO Channel 01/1 : 1[0] -> 0[0] [receive] via NET/IB/0/GDRDMA(PCI)/Shared
+<left-node>:1:1 [0] NCCL INFO Channel 02/1 : 1[0] -> 0[0] [receive] via NET/IB/0/GDRDMA(PCI)/Shared
+<left-node>:1:1 [0] NCCL INFO Channel 03/1 : 1[0] -> 0[0] [receive] via NET/IB/0/GDRDMA(PCI)/Shared
+<left-node>:1:1 [0] NCCL INFO Channel 00/1 : 0[0] -> 1[0] [send] via NET/IB/0/GDRDMA(PCI)/Shared
+<left-node>:1:1 [0] NCCL INFO Channel 01/1 : 0[0] -> 1[0] [send] via NET/IB/0/GDRDMA(PCI)/Shared
+<left-node>:1:1 [0] NCCL INFO Channel 02/1 : 0[0] -> 1[0] [send] via NET/IB/0/GDRDMA(PCI)/Shared
+<left-node>:1:1 [0] NCCL INFO Channel 03/1 : 0[0] -> 1[0] [send] via NET/IB/0/GDRDMA(PCI)/Shared
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the send communicator (comm=0xed98ec6b0000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the recv communicator (comm=0xed98ec700000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbRecvCommInit: Receive work requests will be posted on-demand
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the send communicator (comm=0xed98ec760000)
+[tensorfold] the checkpoint's MTP head is not loaded (TF_GLM_MTP=0): DFlash2 drafts every request
+[tensorfold] building CUDA extension tensorfold_exl3_mpe_v5 (first start after an install or update; later starts reuse it)
+[tensorfold] building CUDA extension tensorfold_exl3_prompt_experts_m1 (first start after an install or update; later starts reuse it)
+[tensorfold] building CUDA extension tensorfold_glm_msa_v7 (first start after an install or update; later starts reuse it)
+[tensorfold] building CUDA extension tensorfold_qmm_v4 (first start after an install or update; later starts reuse it)
+[tensorfold] building CUDA extension tensorfold_exl3_experts_v4 (first start after an install or update; later starts reuse it)
+[tensorfold] prompt chunks' hyper-connections: rows split between the ranks, exchanges by send/receive on a second stream in 2 pieces (chunks of 64+ rows)
+[tensorfold] copy drafts vetted by DSpark (TF_GLM_COPY_HYBRID): 4-token matches, a copy agreeing with its top 1 at every block slot extends to 15 drafts; unvetted when matching 8 (prompt) / 24 (reply) tokens
+[tensorfold] verify windows up to 16 rows, CUDA graphs for 1, 2, 3, 4, 5, 6, 7, 8, 9 rows (TF_GLM_MAX_ROWS, TF_GLM_WIDE_GRAPHS)
+[tensorfold] TF_GLM_KV=fp8: the latent cache as e4m3 rows with a power-of-two scale each (lossy; drafted replies still equal serial ones)
+[tensorfold] shared-prefix prompt states: kept where a prompt stops sharing another and at the end of its system block, when they add 256+ tokens (TF_GLM_SHARED_PREFIX)
+[tensorfold] drafter timings (ms, fastest of 7; verify widths the mean of 4 windows): {'block': 1.57, 'taps8': 0.22, 'v1': 22.18, 'v2': 26.65, 'v3': 30.27, 'v4': 33.59, 'v5': 37.08, 'v6': 40.82, 'v7': 43.94, 'v8': 46.74, 'v9': 49.0}
+[tensorfold] drafter costs (ms): verify 22.2 26.6 30.3 33.6 37.1 40.8 43.9 46.7 49.0; DFlash2 block 1.57 (+0.028 a tap row)
+[tensorfold] serving model at http://127.0.0.1:8898/v1 on CUDA, rank 0 of 2 (sampling: temperature 1.0, top_p 0.95; drafts: on; prompts: bf16 activations; context: 163840; loaded in 301.5s)
+0925:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the recv communicator (comm=0xed98ec7d0000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbRecvCommInit: Receive work requests will be posted on-demand
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the send communicator (comm=0xed98ec850000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the recv communicator (comm=0xed98ec8c0000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbRecvCommInit: Receive work requests will be posted on-demand
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the send communicator (comm=0xed98ec940000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbResiliencyInit: Resiliency is disabled on the recv communicator (comm=0xed98ec9b0000)
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbRecvCommInit: Receive work requests will be posted on-demand
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsCreate: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10606 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: NCCL Dev 0 IbDev 0 Port 1 qp_num 10606 mtu 5 GID 3 (0/165A8C0FFFF0000) ctsFifoRkey=0x1b544f ctsFifoLkey=0x1b544f
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: IbDev 0 Port 1 qp_num 10606 query_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10607 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: Flush QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10608 pkey=0 pd=0xed98ec00fd30
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsCreate: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10609 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: NCCL Dev 0 IbDev 0 Port 1 qp_num 10609 mtu 5 GID 3 (0/165A8C0FFFF0000) ctsFifoRkey=0x1a4f4a ctsFifoLkey=0x1a4f4a
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: IbDev 0 Port 1 qp_num 10609 query_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10610 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: Flush QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10611 pkey=0 pd=0xed98ec00fd30
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsCreate: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10612 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: NCCL Dev 0 IbDev 0 Port 1 qp_num 10612 mtu 5 GID 3 (0/165A8C0FFFF0000) ctsFifoRkey=0x1b4940 ctsFifoLkey=0x1b4940
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: IbDev 0 Port 1 qp_num 10612 query_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsCreate: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10613 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: NCCL Dev 0 IbDev 0 Port 1 qp_num 10613 mtu 5 GID 3 (0/165A8C0FFFF0000) ctsFifoRkey=0x1a726d ctsFifoLkey=0x1a726d
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbConnectImpl: IbDev 0 Port 1 qp_num 10613 query_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsToRts: Set ECE: IbDev 0 Port 1 qp_num 10606 set_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsToRts: Set ECE: IbDev 0 Port 1 qp_num 10609 set_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsToRts: Set ECE: IbDev 0 Port 1 qp_num 10612 set_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10614 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: Flush QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10615 pkey=0 pd=0xed98ec00fd30
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10616 pkey=0 pd=0xed98ec00fd30 oooRq=0
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbReceiverQpsCreateToRts: Flush QP created: port=1 dev=0 devName=mlx5_1_dma ndevs=1 nmdevs=1 qp_num=10617 pkey=0 pd=0xed98ec00fd30
+<left-node>:1:87 [0] NCCL INFO NET/IB: ncclIbSenderQpsToRts: Set ECE: IbDev 0 Port 1 qp_num 10613 set_ece={supported=1, vendor_id=0x15b3, options=0x30000002, comp_mask=0x0}
+<left-node>:1:6011 [0] NCCL INFO Connected binomial trees

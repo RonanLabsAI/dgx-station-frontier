@@ -1,0 +1,38 @@
+{
+ "label": "c8-r1",
+ "slot": "/opt/b1/pool/c16-r1.jsonl",
+ "conc": 8,
+ "seed": 1611,
+ "think": 0,
+ "max_tokens": 1024,
+ "requests": 64,
+ "wall_s": 104.2533420890104,
+ "sum_completion_tokens": 42001,
+ "aggregate_output_tps": 402.8743746568814,
+ "decode_tps": {
+  "mean": 55.91407491376113,
+  "median": 51.530428179343325,
+  "n": 64
+ },
+ "output_tps": {
+  "mean": 53.67863113818248,
+  "median": 48.88521781299043,
+  "n": 64
+ },
+ "ttft_s": {
+  "mean": 0.22290415431416477,
+  "median": 0.16479298297781497,
+  "n": 64
+ },
+ "prefill_tps": {
+  "mean": 255.97466449158853,
+  "median": 187.8302074693262,
+  "n": 64
+ },
+ "max_cached_frac": 0.0,
+ "finish_reasons": [
+  "length",
+  "stop"
+ ],
+ "contaminated": false
+}

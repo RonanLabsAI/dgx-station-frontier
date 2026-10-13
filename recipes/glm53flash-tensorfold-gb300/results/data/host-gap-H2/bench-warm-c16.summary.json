@@ -1,0 +1,38 @@
+{
+ "label": "warm-c16",
+ "slot": "/opt/b1/pool/warm-c16.jsonl",
+ "conc": 8,
+ "seed": 1601,
+ "think": 0,
+ "max_tokens": 256,
+ "requests": 16,
+ "wall_s": 10.562059247051366,
+ "sum_completion_tokens": 3917,
+ "aggregate_output_tps": 370.8557117868391,
+ "decode_tps": {
+  "mean": 58.33407888458395,
+  "median": 52.269864368877705,
+  "n": 16
+ },
+ "output_tps": {
+  "mean": 52.194751631007,
+  "median": 48.65403368266465,
+  "n": 16
+ },
+ "ttft_s": {
+  "mean": 0.5126779130659997,
+  "median": 0.5638562234817073,
+  "n": 16
+ },
+ "prefill_tps": {
+  "mean": 231.39224787775052,
+  "median": 143.7689983900117,
+  "n": 16
+ },
+ "max_cached_frac": 0.0,
+ "finish_reasons": [
+  "length",
+  "stop"
+ ],
+ "contaminated": false
+}

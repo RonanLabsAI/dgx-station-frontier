@@ -1,0 +1,37 @@
+{
+ "label": "prefill32k",
+ "slot": "/opt/b1/pool/prefill32k.jsonl",
+ "conc": 1,
+ "seed": 322,
+ "think": 0,
+ "max_tokens": 16,
+ "requests": 3,
+ "wall_s": 21.900590383913368,
+ "sum_completion_tokens": 48,
+ "aggregate_output_tps": 2.1917217371115902,
+ "decode_tps": {
+  "mean": 264.41901787088904,
+  "median": 277.91472786505574,
+  "n": 3
+ },
+ "output_tps": {
+  "mean": 2.1921145481933784,
+  "median": 2.192104300823864,
+  "n": 3
+ },
+ "ttft_s": {
+  "mean": 7.241690973984078,
+  "median": 7.234294025925919,
+  "n": 3
+ },
+ "prefill_tps": {
+  "mean": 4525.748232955467,
+  "median": 4530.366042981678,
+  "n": 3
+ },
+ "max_cached_frac": 0.0,
+ "finish_reasons": [
+  "length"
+ ],
+ "contaminated": false
+}

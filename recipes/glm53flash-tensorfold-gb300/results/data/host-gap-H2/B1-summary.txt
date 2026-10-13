@@ -1,0 +1,6 @@
+C1 decode tok/s (mean of 3 runs): 175.1 [171.0, 166.5, 187.9]
+C1 output tok/s (mean of 3 runs): 170.2
+C4 aggregate output tok/s: 315.9 | per-request decode 85.04400962925864
+C1 decode after 8K prompt: 175.21883067138128
+prefill tok/s 8K / 32K: 4503.564810326278 / 4525.748232955467
+max cached fraction over all runs: 0.0 | contaminated: []

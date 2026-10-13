@@ -5,13 +5,17 @@ Mia's GLM-5.3-Flash EXL3 recipe (built for 2-4 DGX Sparks) on Ash Hart's TensorF
 
 | | Mia's defaults (`CONFIG=mia`) | Tuned for GB300 (`CONFIG=gb300`) |
 |---|---|---|
-| Decode, one request (mean of 3 runs, DFlash2 drafts) | 160.4 tok/s | **173.1 tok/s** |
+| Decode, one request (mean of 3 runs, DFlash2 drafts) | 160.4 tok/s | **181.1 tok/s** (173.1 before the host-gap settings) |
 | Decode, one request, no drafts | 91.7 tok/s | — |
-| 4 requests at once, aggregate | 306 tok/s | 314 tok/s |
-| 8 requests at once, aggregate | — | **404 tok/s** |
-| Prefill, 8K / 32K prompt | ~4,470 / ~4,500 tok/s | ~4,500 / ~4,518 tok/s |
+| 4 requests at once, aggregate | 306 tok/s | 316 tok/s |
+| 8 requests at once, aggregate | — | **406 tok/s** |
+| Prefill, 8K / 32K prompt | ~4,470 / ~4,500 tok/s | ~4,500 / ~4,520 tok/s |
 | GSM8K-50 (thinking on, greedy) | 49/50 | 49/50 |
 | Window / cache pool | 1,048,576 / 6.6M tokens | same |
+
+The `CONFIG=gb300` preset now includes the host-gap settings (`TF_GLM_MULTI_LONE=1 TF_GLM_MULTI_ASYNC=1
+TF_GLM_MULTI_SAMPLER=packed`, round 4 in the results): C1 decode 172.7 -> 181.1 tok/s (+4.9%), replies byte-identical.
+GSM8K-50 (49/50) was measured before these settings; replies were identical afterwards. 173.1 is the figure without them.
 
 Details, method and logs: [results/RESULTS.md](results/RESULTS.md).
 
@@ -26,7 +30,7 @@ small patches, applied after Mia's 107:
 | `9002-glm-exl3-dec-tp1.patch` | `DEC_WIDTHS` += 2048 and a `dec_launch<32>`, so one rank's whole 2048-wide experts take the fused decode kernel | +2.1% decode; replies byte-identical (50/50 GSM8K, 34/34 bench replies) |
 | `9003-glm-split-target-env.patch` | `TF_GLM_SPLIT_TARGET` (default 192 = 4 waves of GB10's 48 SMs) and `TF_GLM_SHAPE_SK=0`, both env knobs; defaults unchanged | 576 with the table off: +3.2% decode on GB300 |
 
-`CONFIG=gb300` also sets `TF_GLM_L2PF=0` (Mia's L2 prefetch overlaps the cross-Spark all-gathers; at TP1 there are
+`CONFIG=gb300` also sets the three host-gap settings and `TF_GLM_L2PF=0` (Mia's L2 prefetch overlaps the cross-Spark all-gathers; at TP1 there are
 none: +2.4%) and `--parallel 8` (GLM's maximum).
 
 ## Run it

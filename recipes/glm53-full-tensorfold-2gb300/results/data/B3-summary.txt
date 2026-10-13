@@ -1,0 +1,4 @@
+C1 decode tok/s (mean of 3 runs): 73.2 [71.2, 74.1, 74.1]
+C1 decode after 8K prompt: 72.7356717144104
+prefill tok/s 8K / 32K: 2180.5411615824423 / 2095.8771891555684
+max cached fraction: 0.0 | contaminated: []

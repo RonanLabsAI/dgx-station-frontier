@@ -1,0 +1,38 @@
+{
+ "label": "c1-r3",
+ "slot": "/opt/b1/pool/c1-r3.jsonl",
+ "conc": 1,
+ "seed": 113,
+ "think": 0,
+ "max_tokens": 1024,
+ "requests": 5,
+ "wall_s": 12.894037844031118,
+ "sum_completion_tokens": 2501,
+ "aggregate_output_tps": 193.96561653165597,
+ "decode_tps": {
+  "mean": 194.18100460726447,
+  "median": 198.85073191099693,
+  "n": 5
+ },
+ "output_tps": {
+  "mean": 188.836515784159,
+  "median": 195.36746477510906,
+  "n": 5
+ },
+ "ttft_s": {
+  "mean": 0.07986037640366703,
+  "median": 0.05516203201841563,
+  "n": 5
+ },
+ "prefill_tps": {
+  "mean": 587.4344002528064,
+  "median": 453.210280427194,
+  "n": 5
+ },
+ "max_cached_frac": 0.0,
+ "finish_reasons": [
+  "length",
+  "stop"
+ ],
+ "contaminated": false
+}

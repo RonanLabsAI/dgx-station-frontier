@@ -1,0 +1,37 @@
+{
+ "label": "c1long-r1",
+ "slot": "/opt/b1/pool/c1long-r1.jsonl",
+ "conc": 1,
+ "seed": 183,
+ "think": 0,
+ "max_tokens": 1024,
+ "requests": 3,
+ "wall_s": 23.227534299949184,
+ "sum_completion_tokens": 3072,
+ "aggregate_output_tps": 132.25682762232412,
+ "decode_tps": {
+  "mean": 172.90151221455838,
+  "median": 172.56241458343038,
+  "n": 3
+ },
+ "output_tps": {
+  "mean": 132.29875382281216,
+  "median": 132.22381469050882,
+  "n": 3
+ },
+ "ttft_s": {
+  "mean": 1.8229041370019938,
+  "median": 1.8173053229693323,
+  "n": 3
+ },
+ "prefill_tps": {
+  "mean": 4497.322617920234,
+  "median": 4511.074664440602,
+  "n": 3
+ },
+ "max_cached_frac": 0.0,
+ "finish_reasons": [
+  "length"
+ ],
+ "contaminated": false
+}

@@ -77,3 +77,40 @@ Reading:
   - a cheaper EXL3 decode for many-SM GPUs;
   - FP8/NVFP4 expert weights on the GB300's tensor cores;
   - fewer host round trips per step.
+
+## Round 4: host gap (2026-10-11)
+
+The profile above left the GPU idle ~13% of each step waiting on the host. This round tries three host-side knobs that
+are already in Mia's recipe code, on the same image (`tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-dec-ngc`, i.e. the
+base plus 9001-9003) and the same hygiene (fresh slots and seeds, `cached_tokens` 0 on every request, one boot per arm).
+Every arm runs the GB300-tuned config above (`--parallel 8`, `TF_GLM_L2PF=0 TF_GLM_SPLIT_TARGET=576
+TF_GLM_SHAPE_SK=0`, DFlash2 drafts on) plus:
+
+- **H0:** nothing else except `TF_GLM_MULTI_PROFILE=64` (a per-round time breakdown every 64 rounds; the control);
+- **H1:** `TF_GLM_MULTI_LONE=1` (a lone stream runs on the one-stream graphs);
+- **H2:** `TF_GLM_MULTI_ASYNC=1` (async messages);
+- **H3:** both, plus `TF_GLM_MULTI_SAMPLER=packed`.
+
+| Arm | C1 decode, mean of 3 | C1 output | C4 aggregate | C8 aggregate (64 prompts) | C1 after 8K | vs H0 (C1) |
+|---|---|---|---|---|---|---|
+| H0 | 172.7 (168.6 / 164.3 / 185.3) | 167.9 | 313.1 | 402.9 | 172.9 | — |
+| H1 | 178.7 (174.4 / 170.0 / 191.7) | 173.5 | 313.9 | 404.0 | 176.7 | +3.5% |
+| H2 | 175.1 (171.0 / 166.5 / 187.9) | 170.2 | 315.9 | 404.6 | 175.2 | +1.4% |
+| H3 | **181.1** (177.0 / 172.3 / 194.2) | **175.8** | **316.2** | **405.8** | **178.5** | **+4.9%** |
+
+All in tok/s. H0 reproduces the earlier GB300-tuned figure (172.7 vs 173.1). Prefill was flat across arms (8K
+4,497-4,504; 32K 4,521-4,526 tok/s).
+
+- **Replies are identical.** Compared with the earlier GB300-tuned run, every reply matched in all four arms: C1 5/5 in
+  each of the three runs, C4 16/16, C8 64/64 (`data/host-gap-ab4.out`). These are speed knobs only. GSM8K was not rerun
+  for this round; the identical replies stand in for it.
+- **The gain is at C1.** H3 is +4.9% over H0; C4 and C8 move +1.0% and +0.7%. `CONFIG=gb300` now sets all three.
+- **Where the time goes (H0's `TF_GLM_MULTI_PROFILE` lines, `data/host-gap-H0/multi-profile.txt`).** At C1 a
+  round takes ~15.5 ms wall, of which ~14 ms is the `sample` bucket, and that bucket tracks the GPU's verify time almost
+  exactly, so it is where the host waits on the GPU (an inference from the matching numbers). The rest (message,
+  propose, verify launch, commit, taps, emit) is ~1.6 ms a round, about 10%. The one-stream graphs are 0.3-0.4 ms
+  faster per verify window than the batched graphs at the same row count, which is what H1 picks up. At C8 the host
+  share is ~4.6 of 49.6 ms (~9%), consistent with C4 and C8 barely moving.
+- **What is left.** The experts are still ALU-bound (see the profile above); the host gap is now ~10% at C1.
+
+Raw summaries for each arm: `data/host-gap-H0/` to `data/host-gap-H3/`.

@@ -1,0 +1,47 @@
+--- code: 'Write a Python function `merge_intervals(intervals)` that me'
+    finish=stop tool_calls=[]
+    Here's a Python function that merges overlapping closed intervals:
+    
+    ```python
+    def merge_intervals(intervals):
+        """
+        Merge overlapping closed intervals and return them sorted.
+    
+        Args:
+            intervals: A list of [start, end] pairs (lists or tuples).
+                       Intervals are closed, 
+--- code: 'In C, write a function `int is_balanced(const char *s)` that'
+    finish=stop tool_calls=[]
+    <answer>
+    #include <string.h>
+    
+    #define MAX_DEPTH 1024
+    
+    int is_balanced(const char *s)
+    {
+        char stack[MAX_DEPTH];
+        int top = -1;   /* -1 means empty */
+    
+        for (; *s; s++) {
+            switch (*s) {
+            case '(': case '[': case '{':
+                if (top == MAX_DEPTH - 1)
+                    return 0
+--- code: 'Here is a buggy JavaScript function. Find the bug and give t'
+    finish=stop tool_calls=[]
+    There are two bugs here:
+    
+    1. **`total` is never initialized** — it's `undefined`, so `total += arr[i]` produces `NaN`.
+    2. **Loop goes one step too far** — `i <= arr.length` accesses `arr[arr.length]`, which is `undefined` (also causing `NaN`).
+    
+    Fixed code:
+    
+    ```javascript
+    function sum(arr) {
+      let to
+--- tool: "What's the weather in Reykjavik right now, in Celsius?"
+    finish=tool_calls tool_calls=[('get_weather', '{"city":"Reykjavik","unit":"c"}')]
+    
+--- tool: 'How much is 250 US dollars in euros? Then tell me the weathe'
+    finish=tool_calls tool_calls=[('convert_currency', '{"amount":250,"from":"USD","to":"EUR"}'), ('get_weather', '{"city":"Lisbon"}')]
+    I'll convert the currency and check the weather in Lisbon for you.
