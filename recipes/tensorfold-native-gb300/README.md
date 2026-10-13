@@ -16,6 +16,11 @@ the same Station's RTX PRO 6000, with the same harness. Measured 2026-10-11 PT.
 One request = mean of three runs; queued = four requests against `--parallel 1`; long prompt = 8K tokens, longest = 32K tokens.
 MLX int4 is the `MLX-4bit` checkpoint.
 
+**Notes from Ash Hart (TensorFold's author), 2026-10-12:**
+- Greedy decoding with the MTP head's drafts on: the drafted output is identical, token for token, to plain decoding.
+- The GB300 numbers come from our from-source sm_103 build. GB300 is not an official or tuned TensorFold platform.
+- TensorFold 1.0.8 is out; single-user speed is unchanged from 1.0.7.
+
 - Same model, two GPUs: the GB300 decodes a little slower than the RTX PRO 6000 and prefills a little faster. NVFP4
   decodes slower than MLX 4-bit on the GB300.
 - Ash's own GPU test suite (`tf-cuda-test`) passes on the GB300 with our build: info, smoke, graph, launch-ex, ptx,

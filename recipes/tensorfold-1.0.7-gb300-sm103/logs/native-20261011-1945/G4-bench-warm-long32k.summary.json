@@ -1,0 +1,37 @@
+{
+ "label": "warm-long32k",
+ "slot": "/opt/b1/pool/warm-long32k.jsonl",
+ "conc": 1,
+ "seed": 321,
+ "think": 0,
+ "max_tokens": 16,
+ "requests": 1,
+ "wall_s": 1.887112452997826,
+ "sum_completion_tokens": 16,
+ "aggregate_output_tps": 8.478562035125542,
+ "decode_tps": {
+  "mean": 408.62181041371525,
+  "median": 408.62181041371525,
+  "n": 1
+ },
+ "output_tps": {
+  "mean": 8.48507507750004,
+  "median": 8.48507507750004,
+  "n": 1
+ },
+ "ttft_s": {
+  "mean": 1.8489551679231226,
+  "median": 1.8489551679231226,
+  "n": 1
+ },
+ "prefill_tps": {
+  "mean": 18316.83135835133,
+  "median": 18316.83135835133,
+  "n": 1
+ },
+ "max_cached_frac": 0.0,
+ "finish_reasons": [
+  "length"
+ ],
+ "contaminated": false
+}

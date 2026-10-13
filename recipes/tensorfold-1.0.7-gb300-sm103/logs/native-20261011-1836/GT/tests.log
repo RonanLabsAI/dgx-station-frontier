@@ -1,0 +1,53 @@
+--- info
+RESULT driver CUDA 13020, device NVIDIA GB300, sm_103, 152 SMs, 255809 MiB total, 255104 MiB free, kernels embedded true
+--- smoke
+PASS blocking copies: 1 MiB host -> device -> device -> host equal
+PASS async copies, memset8 and memset32
+PASS launches: fill, fill, axpy over 100000 elements exact
+PASS mapped host memory: a kernel's 1024 writes read on the host after the stream syncs
+PASS module global: cuModuleGetGlobal write, kernel read
+PASS argument packing: by-value struct, bool, int8, double, int64
+error: cuModuleGetFunction: CUDA_ERROR_NOT_FOUND (500) named symbol not found
+error: kernel symbol not in module: tf_probe_missing
+PASS refusals: oversized block, absent kernel symbol
+--- graph
+PASS stream capture: 8 launches captured, nothing run, 3 replays = 108
+PASS exec kernel-node update: new arguments in place, replay adds 80
+PASS explicit graph: fill->axpy edge exact; exec update from a same-topology graph; topology change refused (topology_changed) and the exec kept
+--- launch-ex
+PASS cuLaunchKernelEx clusters: ranks 0..1 and 0..3 in clusters of 2 and 4 (spread policy on the second)
+PASS cuLaunchKernelEx cooperative grid of 152 blocks
+PASS cuLaunchKernelEx PDL: 100 dependent steps exact on a stream and twice from a captured graph
+--- ptx
+error: cuModuleLoadDataEx: CUDA_ERROR_INVALID_PTX (218) a PTX JIT compilation failed
+PASS PTX: hand-written sm_80 PTX JIT-compiled and exact; broken PTX refused with log "ptxas application ptx input, line 3; fatal   : Parsing error near 'not': syntax "
+--- symbols
+RESULT gdn tree<0,8,4,true>: 125 registers, max 128 threads
+RESULT gdn tree<1,8,4,false>: 120 registers, max 128 threads
+RESULT gdn tree<2,8,2,false>: 120 registers, max 64 threads
+RESULT gdn tree<2,4,4,false>: 80 registers, max 128 threads
+RESULT gdn tree<4,2,4,false>: 64 registers, max 128 threads
+RESULT gdn tree<8,2,4,false>: 64 registers, max 128 threads
+RESULT gdn tree<16,2,2,false>: 64 registers, max 64 threads
+RESULT gdn tree<32,2,1,false>: 64 registers, max 32 threads
+PASS symbols: 2 replay and 8 tree instantiations resolve in the gdn fatbin
+--- overhead 1000 20
+RESULT overhead plain n=1000 reps=20: enqueue 1.328 us/launch, wall 1.338 us/launch, gpu 1.330 us/launch
+RESULT overhead graph n=1000 reps=20: cuGraphLaunch 3.0 us per graph, wall 0.693 us/kernel, gpu 0.686 us/kernel, instantiate 1.2 ms
+RESULT graph patch n=1000: node argument update 0.196 us/node, recapture 0.432 us/kernel, whole-exec update 0.088 us/node
+PASS launch cost: every one of 43200 dependent kernels ran exactly once
+--- overhead 10000 10
+RESULT overhead plain n=10000 reps=10: enqueue 1.336 us/launch, wall 1.337 us/launch, gpu 1.336 us/launch
+RESULT overhead graph n=10000 reps=10: cuGraphLaunch 24.0 us per graph, wall 0.683 us/kernel, gpu 0.682 us/kernel, instantiate 12.1 ms
+RESULT graph patch n=10000: node argument update 0.202 us/node, recapture 0.424 us/kernel, whole-exec update 0.091 us/node
+PASS launch cost: every one of 230200 dependent kernels ran exactly once
+--- overhead-pdl 1000 20
+RESULT overhead pdl plain n=1000 reps=20: enqueue 1.294 us/launch, wall 1.304 us/launch, gpu 1.297 us/launch
+RESULT overhead pdl graph n=1000 reps=20: cuGraphLaunch 2.9 us per graph, wall 0.535 us/kernel, gpu 0.527 us/kernel, instantiate 1.4 ms
+PASS launch cost: every one of 42200 dependent kernels ran exactly once
+--- overhead-pdl 10000 10
+RESULT overhead pdl plain n=10000 reps=10: enqueue 1.299 us/launch, wall 1.300 us/launch, gpu 1.300 us/launch
+RESULT overhead pdl graph n=10000 reps=10: cuGraphLaunch 23.3 us per graph, wall 0.525 us/kernel, gpu 0.525 us/kernel, instantiate 14.2 ms
+PASS launch cost: every one of 220200 dependent kernels ran exactly once
+--- cublaslt
+PASS cuBLASLt 130101: bf16 x bf16 -> fp32 (16x256x512), reruns bit-equal, max abs error 2.505723387002945e-6 vs fp64, workspace 0 B

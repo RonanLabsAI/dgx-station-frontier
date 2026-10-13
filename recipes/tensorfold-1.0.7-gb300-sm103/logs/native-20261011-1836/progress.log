@@ -1,0 +1,86 @@
+[2026-10-11 18:36:10 PDT] preflight: out $RUNS/native-20261011-1836
+[2026-10-11 18:36:11 PDT] stopping <rtx-daily> for N6 (RTX PRO 6000 only)
+[2026-10-11 18:36:26 PDT] [N6] tensorfold native on RTX PRO 6000 (GPU-<uuid>): TensorFold__NVIDIA-Nemotron-3.5-Lightning-30B-A3B-MLX-4bit-d9d758fb
+[2026-10-11 18:36:31 PDT] [N6] up after 5 s; RTX PRO 6000 used 19329 MiB
+{"n": 50, "correct": 37, "acc": 0.74, "runaways": 0, "errors": 0, "think": 0, "pass_95": false}
+[2026-10-11 18:36:41 PDT] [N6] warm-short: C1 max_tokens 256 seed 101
+[2026-10-11 18:36:43 PDT] [N6] c1-r1: C1 max_tokens 1024 seed 111
+[2026-10-11 18:36:48 PDT] [N6] c1-r2: C1 max_tokens 1024 seed 112
+[2026-10-11 18:36:56 PDT] [N6] c1-r3: C1 max_tokens 1024 seed 113
+[2026-10-11 18:37:03 PDT] [N6] c4-r1: C4 max_tokens 1024 seed 141
+[2026-10-11 18:37:22 PDT] [N6] warm-long8k: C1 max_tokens 64 seed 181
+[2026-10-11 18:37:22 PDT] [N6] prefill8k: C1 max_tokens 16 seed 182
+[2026-10-11 18:37:24 PDT] [N6] c1long-r1: C1 max_tokens 1024 seed 183
+[2026-10-11 18:37:31 PDT] [N6] warm-long32k: C1 max_tokens 16 seed 321
+[2026-10-11 18:37:33 PDT] [N6] prefill32k: C1 max_tokens 16 seed 322
+[N6] C1 decode mean of 3: 557.7 [608.7, 540.0, 524.5]
+[N6] C4 (queued, --parallel 1) aggregate: 508.0
+[N6] C1 decode after 8K: 539.3274975678893 | prefill 8K / 32K: 19511.30979983688 / 17472.04339349044
+[N6] max cached fraction: 0.0 | contaminated: []
+[2026-10-11 18:37:45 PDT] [N6] RTX PRO 6000 used after teardown: 47 MiB
+[2026-10-11 18:37:45 PDT] restore: docker start <rtx-daily>
+[2026-10-11 18:38:45 PDT] <rtx-daily> healthy on :8888
+[2026-10-11 18:38:45 PDT] [GT] Ash's tf-cuda-test GPU checks on GB300 (sm_103 build)
+[2026-10-11 18:38:58 PDT] [GT] FAIL/rc lines: $RUNS/native-20261011-1836/GT/tests.log:0 $RUNS/native-20261011-1836/GT/nccl.log:2 
+[2026-10-11 18:38:58 PDT] [G4] tensorfold native on GB300 (GPU-<uuid>): TensorFold__NVIDIA-Nemotron-3.5-Lightning-30B-A3B-MLX-4bit-d9d758fb
+[2026-10-11 18:38:59 PDT] [G4] FAIL: exited after 0 s
+unknown option --name
+usage: tensorfold run MODEL --tokens ID,ID,... [--max-tokens N] [--no-drafts] [--report PATH] [--kernels DIR|native] [--device N]
+         [--temperature T] [--top-k K] [--top-p P] [--min-p M] [--seed S]   (temperature 0: greedy)
+         [--context N] [--ignore-eos] [--eager] [--costs MS1,...,MS16,LEVEL]
+         [--carveout]   (KV caches in GB10's display memory first; also TF_CUDA_CARVEOUT=1,
+         sized by TF_CUDA_CARVEOUT_MIB (default 1792), card TF_DRM_CARD (default /dev/dri/card0))
+         [--tokens-file PATH] [--segments N]   (N whole 2048-row prompt chunks a call as staggered segments,
+         1-4; default TF_CUDA_SEGMENTS, else 1)
+       tensorfold segments MODEL IDS_FILE... [--counts 1,2,3,4] [--repeat N] [--max-tokens N] [--profile]
+                (each prompt prefilled at every segment count, interleaved: state hashes, prompt and decode speed)
+       tensorfold check-weights MODEL DIGESTS.json [--kernels DIR]
+       tensorfold teacher MODEL TEACHER.json [--dump DIR] [--kernels DIR]
+       tensorfold prefill MODEL PROMPTS.json NAME [--dump DIR] [--kernels DIR]
+       tensorfold rounds MODEL --tokens ID,... [--max-tokens N]   (GPU ms a serial and a window graph round)
+       tensorfold check-draws MODEL FIXTURES_DIR   (MTP draws against the lane fixtures)
+       tensorfold shared-widths MODEL PROMPTS.json --streams N [--max-tokens N] [sampling as run]
+                (N streams' continuations as shared windows of varying splits against serial, 2 <= N <= 8)
+       tensorfold check-kernels MODEL   (lane_gemv and the forked MoE against the kernels they replace, real weights)
+       tensorfold train-check MODEL   (Sliding Weights' gradients against the forward by finite differences)
+       tensorfold check-precision MODEL --tokens ID,... --dump DIR   (ModelOpt projections against fp64 and NVIDIA's math)
+       tensorfold widths MODEL --tokens ID,... [--max-tokens N] [--eager] [sampling as run]
+                (every verify width 1-16 against serial decoding, a wrong draft every third window)
+       tensorfold models
+       tensorfold info MODEL
+       tensorfold pull REPO[@REVISION]
+       tensorfold lanes MODEL PROMPTS.json [--solo] [--max-tokens N] [--no-drafts] [sampling as run] [--report PATH]
+                (every prompt through the lane core at once, or one at a time with --solo)
+[2026-10-11 18:38:59 PDT] [G4] failed
+[2026-10-11 18:38:59 PDT] [GF] tensorfold native on GB300 (GPU-<uuid>): nvidia__NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4-bee75962
+[2026-10-11 18:38:59 PDT] [GF] FAIL: exited after 0 s
+unknown option --name
+usage: tensorfold run MODEL --tokens ID,ID,... [--max-tokens N] [--no-drafts] [--report PATH] [--kernels DIR|native] [--device N]
+         [--temperature T] [--top-k K] [--top-p P] [--min-p M] [--seed S]   (temperature 0: greedy)
+         [--context N] [--ignore-eos] [--eager] [--costs MS1,...,MS16,LEVEL]
+         [--carveout]   (KV caches in GB10's display memory first; also TF_CUDA_CARVEOUT=1,
+         sized by TF_CUDA_CARVEOUT_MIB (default 1792), card TF_DRM_CARD (default /dev/dri/card0))
+         [--tokens-file PATH] [--segments N]   (N whole 2048-row prompt chunks a call as staggered segments,
+         1-4; default TF_CUDA_SEGMENTS, else 1)
+       tensorfold segments MODEL IDS_FILE... [--counts 1,2,3,4] [--repeat N] [--max-tokens N] [--profile]
+                (each prompt prefilled at every segment count, interleaved: state hashes, prompt and decode speed)
+       tensorfold check-weights MODEL DIGESTS.json [--kernels DIR]
+       tensorfold teacher MODEL TEACHER.json [--dump DIR] [--kernels DIR]
+       tensorfold prefill MODEL PROMPTS.json NAME [--dump DIR] [--kernels DIR]
+       tensorfold rounds MODEL --tokens ID,... [--max-tokens N]   (GPU ms a serial and a window graph round)
+       tensorfold check-draws MODEL FIXTURES_DIR   (MTP draws against the lane fixtures)
+       tensorfold shared-widths MODEL PROMPTS.json --streams N [--max-tokens N] [sampling as run]
+                (N streams' continuations as shared windows of varying splits against serial, 2 <= N <= 8)
+       tensorfold check-kernels MODEL   (lane_gemv and the forked MoE against the kernels they replace, real weights)
+       tensorfold train-check MODEL   (Sliding Weights' gradients against the forward by finite differences)
+       tensorfold check-precision MODEL --tokens ID,... --dump DIR   (ModelOpt projections against fp64 and NVIDIA's math)
+       tensorfold widths MODEL --tokens ID,... [--max-tokens N] [--eager] [sampling as run]
+                (every verify width 1-16 against serial decoding, a wrong draft every third window)
+       tensorfold models
+       tensorfold info MODEL
+       tensorfold pull REPO[@REVISION]
+       tensorfold lanes MODEL PROMPTS.json [--solo] [--max-tokens N] [--no-drafts] [sampling as run] [--report PATH]
+                (every prompt through the lane core at once, or one at a time with --solo)
+[2026-10-11 18:38:59 PDT] [GF] failed
+[2026-10-11 18:38:59 PDT] done: $RUNS/native-20261011-1836  (<rtx-daily> restored; the GB300 daily is the controller's to restore)
+[2026-10-11 18:38:59 PDT] <rtx-daily> healthy on :8888

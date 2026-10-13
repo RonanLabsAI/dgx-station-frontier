@@ -1,0 +1,3 @@
+index, name, uuid, driver_version, memory.used [MiB], memory.total [MiB], power.limit [W], clocks.max.sm [MHz]
+0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, GPU-<uuid>, 595.99.02, 89201 MiB, 97887 MiB, 300.00 W, 3090 MHz
+1, NVIDIA GB300, GPU-<uuid>, 595.99.02, 22 MiB, 256703 MiB, 1300.00 W, 2070 MHz

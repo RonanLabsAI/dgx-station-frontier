@@ -1,0 +1,4 @@
+[GF] C1 decode mean of 3: 411.4 [390.6, 422.5, 421.0]
+[GF] C4 (queued, --parallel 1) aggregate: 408.5
+[GF] C1 decode after 8K: 433.4076224442077 | prefill 8K / 32K: 19511.74232436647 / 17740.80347239978
+[GF] max cached fraction: 0.0 | contaminated: []

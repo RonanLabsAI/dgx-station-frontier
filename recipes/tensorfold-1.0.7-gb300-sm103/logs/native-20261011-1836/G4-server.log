@@ -1,0 +1,27 @@
+unknown option --name
+usage: tensorfold run MODEL --tokens ID,ID,... [--max-tokens N] [--no-drafts] [--report PATH] [--kernels DIR|native] [--device N]
+         [--temperature T] [--top-k K] [--top-p P] [--min-p M] [--seed S]   (temperature 0: greedy)
+         [--context N] [--ignore-eos] [--eager] [--costs MS1,...,MS16,LEVEL]
+         [--carveout]   (KV caches in GB10's display memory first; also TF_CUDA_CARVEOUT=1,
+         sized by TF_CUDA_CARVEOUT_MIB (default 1792), card TF_DRM_CARD (default /dev/dri/card0))
+         [--tokens-file PATH] [--segments N]   (N whole 2048-row prompt chunks a call as staggered segments,
+         1-4; default TF_CUDA_SEGMENTS, else 1)
+       tensorfold segments MODEL IDS_FILE... [--counts 1,2,3,4] [--repeat N] [--max-tokens N] [--profile]
+                (each prompt prefilled at every segment count, interleaved: state hashes, prompt and decode speed)
+       tensorfold check-weights MODEL DIGESTS.json [--kernels DIR]
+       tensorfold teacher MODEL TEACHER.json [--dump DIR] [--kernels DIR]
+       tensorfold prefill MODEL PROMPTS.json NAME [--dump DIR] [--kernels DIR]
+       tensorfold rounds MODEL --tokens ID,... [--max-tokens N]   (GPU ms a serial and a window graph round)
+       tensorfold check-draws MODEL FIXTURES_DIR   (MTP draws against the lane fixtures)
+       tensorfold shared-widths MODEL PROMPTS.json --streams N [--max-tokens N] [sampling as run]
+                (N streams' continuations as shared windows of varying splits against serial, 2 <= N <= 8)
+       tensorfold check-kernels MODEL   (lane_gemv and the forked MoE against the kernels they replace, real weights)
+       tensorfold train-check MODEL   (Sliding Weights' gradients against the forward by finite differences)
+       tensorfold check-precision MODEL --tokens ID,... --dump DIR   (ModelOpt projections against fp64 and NVIDIA's math)
+       tensorfold widths MODEL --tokens ID,... [--max-tokens N] [--eager] [sampling as run]
+                (every verify width 1-16 against serial decoding, a wrong draft every third window)
+       tensorfold models
+       tensorfold info MODEL
+       tensorfold pull REPO[@REVISION]
+       tensorfold lanes MODEL PROMPTS.json [--solo] [--max-tokens N] [--no-drafts] [sampling as run] [--report PATH]
+                (every prompt through the lane core at once, or one at a time with --solo)

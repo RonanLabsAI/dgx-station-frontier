@@ -1,0 +1,38 @@
+{
+ "label": "warm-short",
+ "slot": "/opt/b1/pool/warm-short.jsonl",
+ "conc": 1,
+ "seed": 101,
+ "think": 0,
+ "max_tokens": 256,
+ "requests": 4,
+ "wall_s": 1.8793126869713888,
+ "sum_completion_tokens": 966,
+ "aggregate_output_tps": 514.0177080147104,
+ "decode_tps": {
+  "mean": 533.3125055137348,
+  "median": 547.1262906851978,
+  "n": 4
+ },
+ "output_tps": {
+  "mean": 513.2761974102453,
+  "median": 533.8416552743286,
+  "n": 4
+ },
+ "ttft_s": {
+  "mean": 0.01979220047360286,
+  "median": 0.016543856996577233,
+  "n": 4
+ },
+ "prefill_tps": {
+  "mean": 3038.3347957672,
+  "median": 2565.7959532364875,
+  "n": 4
+ },
+ "max_cached_frac": 0.0,
+ "finish_reasons": [
+  "length",
+  "stop"
+ ],
+ "contaminated": false
+}

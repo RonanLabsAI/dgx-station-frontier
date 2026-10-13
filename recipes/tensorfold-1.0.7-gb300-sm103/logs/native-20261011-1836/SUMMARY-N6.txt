@@ -1,0 +1,4 @@
+[N6] C1 decode mean of 3: 557.7 [608.7, 540.0, 524.5]
+[N6] C4 (queued, --parallel 1) aggregate: 508.0
+[N6] C1 decode after 8K: 539.3274975678893 | prefill 8K / 32K: 19511.30979983688 / 17472.04339349044
+[N6] max cached fraction: 0.0 | contaminated: []

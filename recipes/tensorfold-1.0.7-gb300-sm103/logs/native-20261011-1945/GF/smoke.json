@@ -1,0 +1,292 @@
+[
+ {
+  "kind": "code",
+  "prompt": "Write a Python function `merge_intervals(intervals)` that merges overlapping closed intervals and returns them sorted. Include three asserts that test edge cases.",
+  "response": {
+   "id": "chatcmpl-a45016ef3e4be9848313f1d6788ab480",
+   "object": "chat.completion",
+   "created": 1791773239,
+   "model": "nemotron",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "Here is the Python function `merge_intervals` along with the requested assertions.\n\n```python\ndef merge_intervals(intervals):\n    \"\"\"\n    Merges overlapping closed intervals and returns them sorted.\n    \n    Args:\n        intervals (list of list): A list of intervals, where each interval is [start, end].\n        \n    Returns:\n        list of list: A list of merged, non-overlapping intervals sorted by start time.\n    \"\"\"\n    if not intervals:\n        return []\n\n    # Sort intervals based on the start time\n    intervals.sort(key=lambda x: x[0])\n\n    merged = []\n    for interval in intervals:\n        # If the list of merged intervals is empty or if the current\n        # interval does not overlap with the previous, simply append it.\n        if not merged or merged[-1][1] < interval[0]:\n            merged.append(interval)\n        else:\n            # Otherwise, there is overlap, so we merge the current and previous intervals.\n            merged[-1][1] = max(merged[-1][1], interval[1])\n\n    return merged\n\n\n# --- Assertions for Edge Cases ---\n\n# 1. Empty input list\nassert merge_intervals([]) == [], \"Test 1 Failed: Empty list should return empty list\"\n\n# 2. Non-overlapping intervals (already sorted)\n# Intervals: [1,3], [6,9] -> should remain separate\nassert merge_intervals([[1, 3], [6, 9]]) == [[1, 3], [6, 9]], \"Test 2 Failed: Non-overlapping intervals\"\n\n# 3. Complete overlap (one interval fully contains another)\n# Intervals: [1, 4], [2, 3] -> should merge to [1, 4]\nassert merge_intervals([[1, 4], [2, 3]]) == [[1, 4]], \"Test 3 Failed: Complete overlap\"\n```"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 47,
+    "completion_tokens": 414,
+    "total_tokens": 461,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   },
+   "exact_mode": "exact",
+   "tensorfold": {
+    "enable_thinking": false,
+    "reasoning_effort": "none",
+    "engine": "lanes",
+    "tokens_per_second": 615.3728612930394,
+    "seconds": 0.671137819,
+    "prefill_seconds": 0.016451192,
+    "prefill_widths": [],
+    "prefill_raised": [],
+    "time_to_first_token": 0.016706778,
+    "sampling": "greedy",
+    "drafts": true,
+    "token_sha": "f51e422015a5",
+    "min_rows": 0
+   },
+   "speculative": {
+    "rounds": 94,
+    "drafted": 502,
+    "accepted": 322,
+    "acceptance_rate": 0.6414342629482072,
+    "tokens_per_round": 4.404255319148936
+   }
+  }
+ },
+ {
+  "kind": "code",
+  "prompt": "In C, write a function `int is_balanced(const char *s)` that returns 1 if the brackets ()[]{} in s are balanced and 0 otherwise. Use a fixed-size stack and explain its limit in one sentence.",
+  "response": {
+   "id": "chatcmpl-30d10fd8c5b1a64b2c806e5068fab6e2",
+   "object": "chat.completion",
+   "created": 1791773240,
+   "model": "nemotron",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "```c\n#include <stddef.h>\n\n#define MAX_STACK 1024\n\nstatic char stack[MAX_STACK];\nstatic size_t top = 0;\n\nint is_balanced(const char *s)\n{\n    top = 0;                     /* reset stack for each call */\n    for (const char *p = s; *p; ++p) {\n        char c = *p;\n        if (c == '(' || c == '[' || c == '{') {\n            if (top >= MAX_STACK) return 0;   /* stack overflow \u2192 unbalanced */\n            stack[top++] = c;\n        } else if (c == ')' || c == ']' || c == '}') {\n            if (top == 0) return 0;           /* closing without opening */\n            char open = stack[--top];\n            if ((c == ')' && open != '(') ||\n                (c == ']' && open != '[') ||\n                (c == '}' && open != '{'))\n                return 0;                       /* mismatched pair */\n        }\n        /* ignore any other characters */\n    }\n    return top == 0;      /* balanced only if every opening was closed */\n}\n```\n\n**Limit explanation:**  \nThe function uses a fixed\u2011size stack of `MAX_STACK` elements; if the input string contains more opening brackets than this limit, the function immediately reports the brackets as unbalanced."
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 65,
+    "completion_tokens": 298,
+    "total_tokens": 363,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   },
+   "exact_mode": "exact",
+   "tensorfold": {
+    "enable_thinking": false,
+    "reasoning_effort": "none",
+    "engine": "lanes",
+    "tokens_per_second": 517.1287016314051,
+    "seconds": 0.574325113,
+    "prefill_seconds": 0.017822244,
+    "prefill_widths": [],
+    "prefill_raised": [],
+    "time_to_first_token": 0.018014982,
+    "sampling": "greedy",
+    "drafts": true,
+    "token_sha": "0ad108d63b75",
+    "min_rows": 0
+   },
+   "speculative": {
+    "rounds": 87,
+    "drafted": 371,
+    "accepted": 212,
+    "acceptance_rate": 0.5714285714285714,
+    "tokens_per_round": 3.425287356321839
+   }
+  }
+ },
+ {
+  "kind": "code",
+  "prompt": "Here is a buggy JavaScript function. Find the bug and give the fixed code only.\n\nfunction sum(arr) {\n  let total;\n  for (let i = 0; i <= arr.length; i++) total += arr[i];\n  return total;\n}",
+  "response": {
+   "id": "chatcmpl-d0b53014df7a1d1179ac8a0fcb7628ff",
+   "object": "chat.completion",
+   "created": 1791773240,
+   "model": "nemotron",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "The bug is an off-by-one error in the loop condition. The condition `i <= arr.length` causes the loop to attempt accessing an index that is out of bounds (`arr[arr.length]` is undefined), which results in `NaN`. The correct condition should be `i < arr.length`.\n\n```javascript\nfunction sum(arr) {\n  let total = 0;\n  for (let i = 0; i < arr.length; i++) total += arr[i];\n  return total;\n}\n```"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 70,
+    "completion_tokens": 104,
+    "total_tokens": 174,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   },
+   "exact_mode": "exact",
+   "tensorfold": {
+    "enable_thinking": false,
+    "reasoning_effort": "none",
+    "engine": "lanes",
+    "tokens_per_second": 634.292711528429,
+    "seconds": 0.162385596,
+    "prefill_seconds": 0.017982054,
+    "prefill_widths": [],
+    "prefill_raised": [],
+    "time_to_first_token": 0.01817172,
+    "sampling": "greedy",
+    "drafts": true,
+    "token_sha": "a50a3fbd4b08",
+    "min_rows": 0
+   },
+   "speculative": {
+    "rounds": 24,
+    "drafted": 125,
+    "accepted": 81,
+    "acceptance_rate": 0.648,
+    "tokens_per_round": 4.333333333333333
+   }
+  }
+ },
+ {
+  "kind": "tool",
+  "prompt": "What's the weather in Reykjavik right now, in Celsius?",
+  "response": {
+   "id": "chatcmpl-6f1a10f8b32570bbe7c47c75ae381213",
+   "object": "chat.completion",
+   "created": 1791773240,
+   "model": "nemotron",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+       {
+        "id": "call_2e5c65edf7dbf14da2110846",
+        "type": "function",
+        "function": {
+         "name": "get_weather",
+         "arguments": "{\"city\":\"Reykjavik\",\"unit\":\"c\"}"
+        }
+       }
+      ]
+     },
+     "finish_reason": "tool_calls"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 419,
+    "completion_tokens": 38,
+    "total_tokens": 457,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   },
+   "exact_mode": "exact",
+   "tensorfold": {
+    "enable_thinking": false,
+    "reasoning_effort": "none",
+    "engine": "lanes",
+    "tokens_per_second": 819.7046542099179,
+    "seconds": 0.045138209,
+    "prefill_seconds": 0.031438691,
+    "prefill_widths": [],
+    "prefill_raised": [],
+    "time_to_first_token": 0.032319275,
+    "sampling": "greedy",
+    "drafts": true,
+    "token_sha": "e9eb0dccc725",
+    "min_rows": 0
+   },
+   "speculative": {
+    "rounds": 5,
+    "drafted": 42,
+    "accepted": 34,
+    "acceptance_rate": 0.8095238095238095,
+    "tokens_per_round": 7.6
+   }
+  }
+ },
+ {
+  "kind": "tool",
+  "prompt": "How much is 250 US dollars in euros? Then tell me the weather in Lisbon.",
+  "response": {
+   "id": "chatcmpl-55d60236e9a8983d258bf0af0f4a9414",
+   "object": "chat.completion",
+   "created": 1791773241,
+   "model": "nemotron",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+       {
+        "id": "call_0d064faf0d07690437e518ec",
+        "type": "function",
+        "function": {
+         "name": "convert_currency",
+         "arguments": "{\"amount\":250,\"from\":\"USD\",\"to\":\"EUR\"}"
+        }
+       }
+      ]
+     },
+     "finish_reason": "tool_calls"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 426,
+    "completion_tokens": 48,
+    "total_tokens": 474,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   },
+   "exact_mode": "exact",
+   "tensorfold": {
+    "enable_thinking": false,
+    "reasoning_effort": "none",
+    "engine": "lanes",
+    "tokens_per_second": 711.6215998473921,
+    "seconds": 0.066046337,
+    "prefill_seconds": 0.031592483,
+    "prefill_widths": [],
+    "prefill_raised": [],
+    "time_to_first_token": 0.032347371,
+    "sampling": "greedy",
+    "drafts": true,
+    "token_sha": "54b5f05fa6e7",
+    "min_rows": 0
+   },
+   "speculative": {
+    "rounds": 7,
+    "drafted": 73,
+    "accepted": 42,
+    "acceptance_rate": 0.5753424657534246,
+    "tokens_per_round": 6.857142857142857
+   }
+  }
+ }
+]

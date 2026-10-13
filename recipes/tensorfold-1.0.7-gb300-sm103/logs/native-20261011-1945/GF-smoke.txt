@@ -1,0 +1,40 @@
+--- code: 'Write a Python function `merge_intervals(intervals)` that me'
+    finish=stop tool_calls=[]
+    Here is the Python function `merge_intervals` along with the requested assertions.
+    
+    ```python
+    def merge_intervals(intervals):
+        """
+        Merges overlapping closed intervals and returns them sorted.
+        
+        Args:
+            intervals (list of list): A list of intervals, where each interval is [start, 
+--- code: 'In C, write a function `int is_balanced(const char *s)` that'
+    finish=stop tool_calls=[]
+    ```c
+    #include <stddef.h>
+    
+    #define MAX_STACK 1024
+    
+    static char stack[MAX_STACK];
+    static size_t top = 0;
+    
+    int is_balanced(const char *s)
+    {
+        top = 0;                     /* reset stack for each call */
+        for (const char *p = s; *p; ++p) {
+            char c = *p;
+            if (c == '(' || c == '[' || c 
+--- code: 'Here is a buggy JavaScript function. Find the bug and give t'
+    finish=stop tool_calls=[]
+    The bug is an off-by-one error in the loop condition. The condition `i <= arr.length` causes the loop to attempt accessing an index that is out of bounds (`arr[arr.length]` is undefined), which results in `NaN`. The correct condition should be `i < arr.length`.
+    
+    ```javascript
+    function sum(arr) {
+      l
+--- tool: "What's the weather in Reykjavik right now, in Celsius?"
+    finish=tool_calls tool_calls=[('get_weather', '{"city":"Reykjavik","unit":"c"}')]
+    
+--- tool: 'How much is 250 US dollars in euros? Then tell me the weathe'
+    finish=tool_calls tool_calls=[('convert_currency', '{"amount":250,"from":"USD","to":"EUR"}')]
+    

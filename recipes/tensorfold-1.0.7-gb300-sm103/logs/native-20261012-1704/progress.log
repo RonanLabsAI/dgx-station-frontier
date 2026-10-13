@@ -1,0 +1,39 @@
+[2026-10-12 17:04:49 PDT] preflight: out $RUNS/native-20261012-1704
+[2026-10-12 17:04:49 PDT] [G4] tensorfold native on GB300 (GPU-<uuid>): TensorFold__NVIDIA-Nemotron-3.5-Lightning-30B-A3B-MLX-4bit-d9d758fb
+[2026-10-12 17:04:56 PDT] [G4] up after 6 s; GB300 used 19430 MiB
+{"n": 50, "correct": 37, "acc": 0.74, "runaways": 0, "errors": 0, "think": 0, "pass_95": false}
+[2026-10-12 17:05:05 PDT] [G4] warm-short: C1 max_tokens 256 seed 101
+[2026-10-12 17:05:07 PDT] [G4] c1-r1: C1 max_tokens 1024 seed 111
+[2026-10-12 17:05:13 PDT] [G4] c1-r2: C1 max_tokens 1024 seed 112
+[2026-10-12 17:05:21 PDT] [G4] c1-r3: C1 max_tokens 1024 seed 113
+[2026-10-12 17:05:29 PDT] [G4] c4-r1: C4 max_tokens 1024 seed 141
+[2026-10-12 17:05:48 PDT] [G4] warm-long8k: C1 max_tokens 64 seed 181
+[2026-10-12 17:05:49 PDT] [G4] prefill8k: C1 max_tokens 16 seed 182
+[2026-10-12 17:05:50 PDT] [G4] c1long-r1: C1 max_tokens 1024 seed 183
+[2026-10-12 17:05:57 PDT] [G4] warm-long32k: C1 max_tokens 16 seed 321
+[2026-10-12 17:05:59 PDT] [G4] prefill32k: C1 max_tokens 16 seed 322
+[G4] C1 decode mean of 3: 534.7 [588.6, 517.0, 498.3]
+[G4] C4 (queued, --parallel 1) aggregate: 488.2
+[G4] C1 decode after 8K: 509.42768907462 | prefill 8K / 32K: 20399.89702951818 / 18411.379560421352
+[G4] max cached fraction: 0.0 | contaminated: []
+[2026-10-12 17:06:11 PDT] [G4] GB300 used after teardown: 22 MiB
+[2026-10-12 17:06:11 PDT] [GF] tensorfold native on GB300 (GPU-<uuid>): nvidia__NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4-bee75962
+[2026-10-12 17:06:21 PDT] [GF] up after 10 s; GB300 used 20508 MiB
+{"n": 50, "correct": 41, "acc": 0.82, "runaways": 0, "errors": 0, "think": 0, "pass_95": false}
+[2026-10-12 17:06:34 PDT] [GF] warm-short: C1 max_tokens 256 seed 101
+[2026-10-12 17:06:37 PDT] [GF] c1-r1: C1 max_tokens 1024 seed 111
+[2026-10-12 17:06:44 PDT] [GF] c1-r2: C1 max_tokens 1024 seed 112
+[2026-10-12 17:06:54 PDT] [GF] c1-r3: C1 max_tokens 1024 seed 113
+[2026-10-12 17:07:03 PDT] [GF] c4-r1: C4 max_tokens 1024 seed 141
+[2026-10-12 17:07:25 PDT] [GF] warm-long8k: C1 max_tokens 64 seed 181
+[2026-10-12 17:07:26 PDT] [GF] prefill8k: C1 max_tokens 16 seed 182
+[2026-10-12 17:07:28 PDT] [GF] c1long-r1: C1 max_tokens 1024 seed 183
+[2026-10-12 17:07:36 PDT] [GF] warm-long32k: C1 max_tokens 16 seed 321
+[2026-10-12 17:07:38 PDT] [GF] prefill32k: C1 max_tokens 16 seed 322
+[GF] C1 decode mean of 3: 411.4 [390.6, 422.5, 421.0]
+[GF] C4 (queued, --parallel 1) aggregate: 408.5
+[GF] C1 decode after 8K: 433.4076224442077 | prefill 8K / 32K: 19511.74232436647 / 17740.80347239978
+[GF] max cached fraction: 0.0 | contaminated: []
+[2026-10-12 17:07:50 PDT] [GF] GB300 used after teardown: 22 MiB
+[2026-10-12 17:07:50 PDT] done: $RUNS/native-20261012-1704  (<rtx-daily> restored; the GB300 daily is the controller's to restore)
+[2026-10-12 17:07:50 PDT] <rtx-daily> healthy on :8888
