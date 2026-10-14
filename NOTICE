@@ -54,5 +54,5 @@ Referenced, nothing copied
   from it is included; the Data Direct helper in recipes/fabric-data-direct was written from our own notes.
 
 Model weights are not included. DeepSeek-V4.1-Flash, DeepSeek-V4-Pro-0813, GLM-5.3, Nemotron 3 Ultra and Kimi K3 (Kimi K3 License,
-including vellum-ai/Kimi-K3-W3A16-g64 and unsloth/Kimi-K3-GGUF) are used under their own licences;
+including vellum-ai/Kimi-K3-W3A16-g64, unsloth/Kimi-K3-GGUF and Inferact/Kimi-K3-DSpark) are used under their own licences;
 check each model card before redistributing anything derived from them.

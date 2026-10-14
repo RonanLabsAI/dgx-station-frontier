@@ -148,3 +148,12 @@ class _Finder(importlib.abc.MetaPathFinder):
 
 if os.environ.get("K3_REPACK3", "1") == "1":
     sys.meta_path.insert(0, _Finder())
+
+# DSpark guard (see ../launch-k3-dspark.sh and the README, section A2). Loaded only when K3DS_GUARD=1; without it this
+# file behaves exactly as before.
+if os.environ.get("K3DS_GUARD") == "1":
+    try:
+        import k3ds_guard
+        k3ds_guard.install()
+    except Exception as _e:  # noqa: BLE001
+        sys.stderr.write(f"K3DS guard FAILED to install: {_e!r}\n")

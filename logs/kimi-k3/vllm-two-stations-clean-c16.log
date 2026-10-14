@@ -1,0 +1,17 @@
+# Kimi K3 vLLM two-Station recipe: the clean random-id C16 rerun that replaces the first run's flagged C16 (logs/kimi-k3/vllm-two-stations.log).
+# Same image (vllm/vllm-openai nightly af7f9488), same weights and flags as that log, but with the later bench hygiene: a fresh seed per invocation,
+# a separate warm-up invocation, and a measured server prefix-cache hit rate per run (here 0.00% on every run).
+# The run includes the per-layer route counters (K3T_COUNT), as the control arms of logs/kimi-k3/vllm-two-stations-dspark.log do.
+# Run 2026-10-09 15:41-16:32 PT, the deployment of the published recipe plus the counters. The launch record is not part of this excerpt.
+# Excerpt: lines verbatim from the raw file named; nothing else edited.
+
+
+--- catid/summary.txt (raw file of the run, 2026-10-09)
+== 2026-10-09 15:41:15 PDT kr nonce=85675000 CS=[1 4 16 32] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+kr C1 rep1 seed 85675101: decode_agg 17.99 tok/s (TPOT 55.60 ms) out 16.02 tok/s TTFT_med 7047.03 ms failed 0 prefix_hit 0.00%
+kr C1 rep2 seed 85675102: decode_agg 18.04 tok/s (TPOT 55.44 ms) out 16.06 tok/s TTFT_med 7046.75 ms failed 0 prefix_hit 0.00%
+kr C1 rep3 seed 85675103: decode_agg 18.01 tok/s (TPOT 55.54 ms) out 16.03 tok/s TTFT_med 7048.37 ms failed 0 prefix_hit 0.00%
+kr C4 rep1 seed 85675401: decode_agg 32.35 tok/s (TPOT 123.66 ms) out 29.03 tok/s TTFT_med 11609.95 ms failed 0 prefix_hit 0.00%
+kr C16 rep1 seed 85676601: decode_agg 55.23 tok/s (TPOT 289.71 ms) out 50.19 tok/s TTFT_med 13414.47 ms failed 0 prefix_hit 0.00%
+kr C32 rep1 seed 85678201: decode_agg 105.05 tok/s (TPOT 304.61 ms) out 49.52 tok/s TTFT_med 329527.57 ms failed 0 prefix_hit 0.00%
+DONE 16:32:15 contaminated=0

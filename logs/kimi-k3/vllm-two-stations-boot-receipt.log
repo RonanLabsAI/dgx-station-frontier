@@ -1,0 +1,143 @@
+# Boot receipt for the PUBLISHED launcher recipes/kimi-k3/vllm/launch-k3-dspark.sh (and hook/k3ds_guard.py, bench/*.py of this repository,
+# exactly as in the tree; no kit-only files), Kimi K3 (vellum-ai/Kimi-K3-W3A16-g64 @09c06868) + Inferact/Kimi-K3-DSpark @ cf6b8244, two Stations,
+# vLLM nightly af7f9488, launcher defaults except the rail addresses, model/drafter paths and log dir. One boot, one attempt.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names, GPU UUIDs and private paths replaced with <placeholders>.
+# Times are Pacific (PT) unless the line says otherwise; vLLM server log lines are UTC.
+# Checks: bench/ksmoke.py (3 canaries, GSM8K first 20 rows, 5 tool calls); real-text C1 x3 (bench/kbench_chat_ds.py, CNN/DailyMail slices from
+# bench/build_pool_k3.py); random-id C1 x1 (recipes/nemotron-ultra/bench/bench-nemotron-ultra.sh, CONCS=1 REPS=1).
+
+
+# NOTE ON THE RANDOM-ID ROW (added by us): recipes/nemotron-ultra/bench/bench-nemotron-ultra.sh passes no --temperature, so vllm bench serve uses the
+# server's default sampling (the dump below shows temperature=None). Random-token prompts then produce random continuations that the drafter cannot predict
+# (mean accepted length 1.02), the acceptance-gated K turns drafting off (stats-r0.kctl.json: on=false, ema 1.0), and C1 equals the no-drafter speed.
+# The 27.6 tok/s random-id figure in logs/kimi-k3/vllm-two-stations-dspark.log was measured with --temperature 0 (greedy), which falls into repetitive output.
+
+--- run.log (boot, guard and restore lines)
+2026-10-13 18:23:55 [bootrx] start br-1013-182355; claim held by the controller; nonce 41035000; L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89201 MiB;NVIDIA GB300, 221188 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89990 MiB;NVIDIA GB300, 242352 MiB;
+2026-10-13 18:23:56 [bootrx] containers L: <other-container-1> <other-container-3>  R: <other-container-4> <other-container-2> 
+2026-10-13 18:24:06 [bootrx] preflight ok (kit + drafter sha on both hosts, header check, pool, harness)
+2026-10-13 18:24:30 [bootrx] dailies stopped: <other-container-1> <other-container-2>; L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89201 MiB;NVIDIA GB300, 22 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89990 MiB;NVIDIA GB300, 22 MiB;
+2026-10-13 18:24:31 [bootrx] boot: RANK0_IP=<rail-ip> RANK1_IP=<rail-ip> MODEL=/models/hf/vellum-ai__Kimi-K3-W3A16-g64 DRAFTER=/models/hf/Inferact__Kimi-K3-DSpark NAME=k3 SERVED=kimi-k3 PORT=8010 LOGDIR=boot bash launch-k3-dspark.sh (rank 1 on .95, then rank 0)
+2026-10-13 18:41:08 [bootrx] boot READY in 16 min; MemAvailable: 28897536 kB Shmem: 429141760 kB ; L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89201 MiB;NVIDIA GB300, 228058 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89990 MiB;NVIDIA GB300, 228058 MiB;
+2026-10-13 18:41:08 [bootrx] guard/boot checks: ok
+2026-10-13 18:46:20 [bootrx] real-text eval-c1-r1: {'decode_agg': 26.81, 'output_tok_s': 22.03, 'acceptance_len': 2.785, 'prefix_hit_pct': 0.0}
+2026-10-13 18:48:44 [bootrx] real-text eval-c1-r2: {'decode_agg': 26.67, 'output_tok_s': 22.75, 'acceptance_len': 2.773, 'prefix_hit_pct': 0.0}
+2026-10-13 18:51:12 [bootrx] real-text eval-c1-r3: {'decode_agg': 25.62, 'output_tok_s': 22.02, 'acceptance_len': 2.668, 'prefix_hit_pct': 0.0}
+2026-10-13 18:55:47 [bootrx] catid C1 x1 exit 0: catid-c1-r1 seed 42411: decode_agg 17.52 (TPOT 57.09 ms, TTFT 6356.51 ms, out_tput 15.81) failed 0 hit 0.00% (0/24576 tok) mtp_acc_len 1.02;
+2026-10-13 18:55:54 [bootrx] teardown rank 0 first (public stop-k3.sh)
+2026-10-13 18:59:03 [bootrx] <other-container-1>: 391? 391 | nvidia-smi -L: GPU 0: NVIDIA GB300 (UUID: <GB300-uuid>) 
+2026-10-13 19:08:37 [bootrx] <other-container-2>: 391? 391 | nvidia-smi -L: GPU 0: NVIDIA GB300 (UUID: <GB300-uuid>) 
+2026-10-13 19:08:37 [bootrx] host nvidia-smi -L: L: GPU 0: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition (UUID: <GB300-uuid>) GPU 1: NVIDIA GB300 (UUID: <GB300-uuid>)  R: GPU 0: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition (UUID: <GB300-uuid>) GPU 1: NVIDIA GB300 (UUID: <GB300-uuid>) 
+
+--- boot/launch-rank0.txt
+launched 2026-10-13 18:25:02 PDT host=<host> rank=0 image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+dspark: drafter=/models/hf/Inferact__Kimi-K3-DSpark replayssm=1 kvbytes=51539607552 exec_timeout=120
+spec={"method":"dspark","model":"/drafter","num_speculative_tokens":3,"attention_backend":"FLASHINFER_MLA","draft_sample_method":"greedy","num_speculative_tokens_per_batch_size":[[1,1,3],[2,3,2],[4,16,0]]}
+guard: K3DS_DRAFT_WARMUP=relax K3DS_GUARD=1 K3DS_STATS=/prof/k3ds-stats-rank0.json K3DS_ZERO_TIER=1 R31B_CHECK_EVERY=512 R31B_FAILFAST=1 R31B_KCTL=1 R31B_KCTL_KOFF=0 R31B_KCTL_OFF=1.6 R31B_KCTL_ON=2.0 R31B_KCTL_PROBE=16 R31C_PROBE_MAX=256 R31C_SKIPDRAFT=1 
+model=/models/hf/vellum-ai__Kimi-K3-W3A16-g64 moe=humming offgb=408 ctx=65536 seqs=16 mbt=8192 util=0.95 dd=1 tuner=tuner3.csv
+args: serve /model --served-model-name kimi-k3 --trust-remote-code --reasoning-parser kimi_k3 --tool-call-parser kimi_k3 --enable-auto-tool-choice --distributed-executor-backend mp --nnodes 2 --node-rank 0 --master-addr <rail-ip> --master-port 29614 --disable-custom-all-reduce --moe-backend humming --offload-backend uva --cpu-offload-gb 408 --cpu-offload-params routed_experts.w13_weight_packed routed_experts.w2_weight_packed --max-model-len 65536 --max-num-seqs 16 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.95 --no-enable-flashinfer-autotune --tensor-parallel-size 2 --pipeline-parallel-size 1 --enable-expert-parallel --language-model-only --host 0.0.0.0 --port 8010 --kv-cache-memory-bytes 51539607552 --speculative-config \{\"method\":\"dspark\"\,\"model\":\"/drafter\"\,\"num_speculative_tokens\":3\,\"attention_backend\":\"FLASHINFER_MLA\"\,\"draft_sample_method\":\"greedy\"\,\"num_speculative_tokens_per_batch_size\":\[\[1\,1\,3\]\,\[2\,3\,2\]\,\[4\,16\,0\]\]\} --use-replayssm --mamba-backend triton
+
+--- boot/image-digest-rank0.txt
+sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+
+--- boot/server-rank0.log (selected lines; UTC)
+K3DS installing: {"check_every": 512, "draft_warmup": "relax", "failfast": true, "kctl": true, "skipdraft": true, "stats": true, "zero_tier": true} pid=1
+K3DS patched WorkerProc._execute_worker_rpc (failfast=True, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens'])
+(APIServer pid=1) INFO 10-14 01:25:31 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.30.1rc1.dev245+gaf7f9488c
+(APIServer pid=1) INFO 10-14 01:25:37 [model.py:699] Resolved architecture: K3DSparkModel
+K3DS installing: {"check_every": 512, "draft_warmup": "relax", "failfast": true, "kctl": true, "skipdraft": true, "stats": true, "zero_tier": true} pid=335
+K3DS installing: {"check_every": 512, "draft_warmup": "relax", "failfast": true, "kctl": true, "skipdraft": true, "stats": true, "zero_tier": true} pid=336
+K3DS patched WorkerProc._execute_worker_rpc (failfast=True, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens'])
+(EngineCore pid=336) INFO 10-14 01:25:48 [core.py:129] Initializing a V1 LLM engine (v0.30.1rc1.dev245+gaf7f9488c) with config: model='/model', speculative_config=SpeculativeConfig(method='dspark', model='/drafter', num_spec_tokens=3), tokenizer='/model', skip_tokenizer_init=False, tokenizer_mode=kimi_k3, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq
+K3DS installing: {"check_every": 512, "draft_warmup": "relax", "failfast": true, "kctl": true, "skipdraft": true, "stats": true, "zero_tier": true} pid=555
+K3DS patched WorkerProc._execute_worker_rpc (failfast=True, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens'])
+K3DS patched cudagraph_utils.build_dynamic_sd_schedule_lookup (zero_tier=True, k_off=0, target only)
+K3DS patched GPUModelRunner.execute_model (records the broadcast num_spec_tokens_to_schedule)
+K3DS patched gpu_worker.kernel_warmup (drafter eager warm-up=relax, stats=True)
+K3DS patched DFlashSpeculator.propose (skip-draft light steps at K=0, rank check every 512)
+(Worker_TP0_EP0 pid=555) INFO 10-14 01:26:03 [int_wna16.py:282] Using 'HUMMING' WNA16 MoE backend.
+(Worker_TP0_EP0 pid=555) INFO 10-14 01:26:40 [uva.py:68] Total CPU offloaded parameters: 408.27
+(Worker_TP0_EP0 pid=555) INFO 10-14 01:38:59 [default_loader.py:484] Loading weights took 737.63 seconds
+(Worker_TP0_EP0 pid=555) INFO 10-14 01:39:25 [default_loader.py:484] Loading weights took 0.64 seconds
+(Worker_TP0_EP0 pid=555) INFO 10-14 01:39:25 [model_runner.py:407] Model loading took 168.49 GiB memory and 802.561968 seconds
+(EngineCore pid=336) INFO 10-14 01:40:05 [kv_cache_utils.py:2408] GPU KV cache size: 1,052,945 tokens, Maximum concurrency for 65,536 tokens per request: 16.07x
+K3DS drafter eager warm-up (relax): 152 M values 1..8192, width 35840, 304 calls, 0.3 s; free after 21768 MiB of 249.8 GiB
+(Worker_TP0_EP0 pid=555) INFO 10-14 01:40:56 [model_runner.py:1069] Graph capturing finished in 23 secs, took 0.55 GiB
+K3DS patched Scheduler (acceptance-gated K)
+K3DS KCTL installed: base=[3, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] k_off=0 off<1.6 on>2.0 probe/16..256 skipdraft=True
+INFO:     Application startup complete.
+
+--- boot/server-rank1.log (selected lines; UTC)
+K3DS installing: {"check_every": 512, "draft_warmup": "relax", "failfast": true, "kctl": true, "skipdraft": true, "stats": true, "zero_tier": true} pid=1
+K3DS patched WorkerProc._execute_worker_rpc (failfast=True, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens'])
+(MainProcess pid=1) INFO 10-14 01:25:11 [model.py:699] Resolved architecture: K3DSparkModel
+K3DS installing: {"check_every": 512, "draft_warmup": "relax", "failfast": true, "kctl": true, "skipdraft": true, "stats": true, "zero_tier": true} pid=399
+K3DS installing: {"check_every": 512, "draft_warmup": "relax", "failfast": true, "kctl": true, "skipdraft": true, "stats": true, "zero_tier": true} pid=400
+K3DS patched WorkerProc._execute_worker_rpc (failfast=True, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens'])
+K3DS patched cudagraph_utils.build_dynamic_sd_schedule_lookup (zero_tier=True, k_off=0, target only)
+K3DS patched GPUModelRunner.execute_model (records the broadcast num_spec_tokens_to_schedule)
+K3DS patched gpu_worker.kernel_warmup (drafter eager warm-up=relax, stats=True)
+K3DS patched DFlashSpeculator.propose (skip-draft light steps at K=0, rank check every 512)
+(Worker_TP1_EP1 pid=400) INFO 10-14 01:26:03 [int_wna16.py:282] Using 'HUMMING' WNA16 MoE backend.
+(Worker_TP1_EP1 pid=400) INFO 10-14 01:26:42 [uva.py:68] Total CPU offloaded parameters: 408.27
+(Worker_TP1_EP1 pid=400) INFO 10-14 01:39:19 [default_loader.py:484] Loading weights took 755.64 seconds
+(Worker_TP1_EP1 pid=400) INFO 10-14 01:39:45 [default_loader.py:484] Loading weights took 0.40 seconds
+(Worker_TP1_EP1 pid=400) INFO 10-14 01:39:45 [model_runner.py:407] Model loading took 168.49 GiB memory and 822.525580 seconds
+K3DS drafter eager warm-up (relax): 152 M values 1..8192, width 35840, 304 calls, 0.3 s; free after 21768 MiB of 249.8 GiB
+(Worker_TP1_EP1 pid=400) INFO 10-14 01:40:56 [model_runner.py:1069] Graph capturing finished in 23 secs, took 0.55 GiB
+
+--- ksmoke.log (python3 bench/ksmoke.py 8010 20 8 gsm8k_test.jsonl)
+CANARY ok=True q='What is 4738 * 2917? Reply with just the' got='13820746' reasoning_len=0
+CANARY ok=True q='What is the capital of Australia? Reply ' got='Canberra' reasoning_len=0
+CANARY ok=True q='Write a Python function is_prime(n) in u' got='```python\ndef is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return' reasoning_len=0
+GSM 1 ok=True gold=3 got=3
+GSM 3 ok=True gold=540 got=540
+GSM 4 ok=True gold=20 got=20
+GSM 6 ok=True gold=260 got=260
+GSM 0 ok=True gold=18 got=18
+GSM 5 ok=True gold=64 got=64
+GSM 2 ok=True gold=70000 got=70000
+GSM 7 ok=True gold=160 got=160
+GSM 10 ok=True gold=366 got=366
+GSM 9 ok=True gold=460 got=460
+GSM 11 ok=True gold=694 got=694
+GSM 8 ok=True gold=45 got=45
+GSM 14 ok=True gold=60 got=60
+GSM 15 ok=True gold=125 got=125
+GSM 18 ok=True gold=7 got=7
+GSM 16 ok=True gold=230 got=230
+GSM 17 ok=True gold=57500 got=57500
+GSM 13 ok=True gold=18 got=18
+GSM 19 ok=True gold=6 got=6
+GSM 12 ok=False gold=13 got=12
+RESULT gsm8k_20 19/20 = 95.0%
+TOOL ok=True "What's the weather at KSFO right now?" -> [{'id': 'chatcmpl-tool-90f90f6c3078b189', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao": "KSFO"}'}}]
+TOOL ok=True 'Fetch the METAR for KOAK.' -> [{'id': 'chatcmpl-tool-bcfa4a2f9204cb79', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao": "KOAK"}'}}]
+TOOL ok=True 'Is it VFR at KLAX?' -> [{'id': 'chatcmpl-tool-b205965295aebd5b', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao": "KLAX"}'}}]
+TOOL ok=True 'Get the current observation for KJFK please.' -> [{'id': 'chatcmpl-tool-ad898cd3805d9f79', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao": "KJFK"}'}}]
+TOOL ok=True 'Check the METAR at KSEA.' -> [{'id': 'chatcmpl-tool-b632a9aaff626550', 'type': 'function', 'function': {'name': 'get_metar', 'arguments': '{"icao": "KSEA"}'}}]
+RESULT toolcall 5/5
+
+--- rt-*.json ("summary" of each measured real-text C1 run; 3 prompts each)
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 37.3, "decode_agg": 26.81, "output_tok_s": 22.03, "wall_s": 139.4, "median_ttft_s": 7.07, "mean_ptoks": 8196, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24588, "think": "off", "spec_drafts": 1104, "spec_draft_tokens": 3312, "spec_accepted": 1971, "acceptance_len": 2.785, "forced": true, "pool": pool/long/eval-c1-r1-try1.jsonl", "nonce": "br-41035000-eval-c1-r1-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 37.49, "decode_agg": 26.67, "output_tok_s": 22.75, "wall_s": 135.0, "median_ttft_s": 6.44, "mean_ptoks": 8210, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24630, "think": "off", "spec_drafts": 1107, "spec_draft_tokens": 3321, "spec_accepted": 1963, "acceptance_len": 2.773, "forced": true, "pool": pool/long/eval-c1-r2-try1.jsonl", "nonce": "br-41035000-eval-c1-r2-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 39.03, "decode_agg": 25.62, "output_tok_s": 22.02, "wall_s": 139.5, "median_ttft_s": 6.34, "mean_ptoks": 8194.3, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24583, "think": "off", "spec_drafts": 1152, "spec_draft_tokens": 3456, "spec_accepted": 1922, "acceptance_len": 2.668, "forced": true, "pool": pool/long/eval-c1-r3-try1.jsonl", "nonce": "br-41035000-eval-c1-r3-t1"}
+
+--- catid/summary.txt (bench-nemotron-ultra.sh CONCS=1 REPS=1)
+== 2026-10-13 18:51:50 PDT seedbase 42300 container k3 image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+catid-c1-r1 seed 42411: decode_agg 17.52 (TPOT 57.09 ms, TTFT 6356.51 ms, out_tput 15.81) failed 0 hit 0.00% (0/24576 tok) mtp_acc_len 1.02
+prefill-8k-c1 seed 42501: prefill 1290.4 tok/s (mean TTFT 6348.40 ms) failed 0 hit 0.00% (0/32768 tok)
+C1 mean over 1 reps: 17.52 (min 17.52 max 17.52)
+DONE 18:55:47
+
+--- spec-after.txt (vllm:spec_decode_num_{drafts,draft_tokens,accepted_tokens}_total after the checks)
+3959 11776 6993
+
+--- stats-r0.json (guard telemetry, rank 0)
+{"time": 1791942948.9799993, "failfast": 0, "proposals": 7524, "draft_warm_calls": 304, "draft_warm_s": 0.26, "draft_warm_m": [1, 8192, 152], "mem_free_min": 22714187776, "mem_free_last": 26304512000, "mem_total": 268235309056, "kctl": null, "skip": {"next_k": 3, "calls": 7524, "light": 3582, "full": 3942, "checks": 14, "async": true}}
+
+--- stats-r0.kctl.json (acceptance-gated K, EngineCore)
+{"time": 1791942948.937672, "on": false, "ema": 1.0, "flips": 1, "steps_off": 3056, "probes": 14, "probe_gap": 256, "k_hist": {"3": 3904, "0": 3576, "2": 38}}
+
+--- catid/catid-c1-r1.log (vllm bench serve argument dump, cut)
+Namespace(... seed=42411, num_prompts=3, dataset_name='random', random_input_len=8192, random_output_len=1024, random_range_ratio='0', endpoint='/v1/completions', max_concurrency=1, ignore_eos=True, temperature=None ...)   [fields that define the run; the rest of the dump cut]

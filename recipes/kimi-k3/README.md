@@ -7,7 +7,8 @@ host floor are set aside, so no unpruned 4-bit K3 fits. This folder has two ways
 - **A. vLLM, two Stations, 3-bit (recommended).** `vellum-ai/Kimi-K3-W3A16-g64` (GPTQ int3 routed experts, every other
   weight BF16) with TP2 + EP2 across one 400G link, vLLM's Humming 3-bit MoE kernels, and `408` GiB per rank of routed
   experts in Grace memory, read by the GB300 over NVLink-C2C (UVA offload). Needs a small load hook (included) and four
-  fixes to load at all.
+  fixes to load at all. **A2** adds Inferact's DSpark speculative-decoding drafter: one user decodes about 1.46 times
+  faster on real text, and nothing changes at four or more concurrent users.
 - **B. llama.cpp, 1.6-bit.** unsloth's `UD-IQ1_M` GGUF on one Station, on two Stations over RPC, and on all four GPUs.
   Includes our one-line C2C zero-copy patch, and a warning: llama.cpp built with CUDA 13.2.0/13.2.1 produces garbage
   for this model.
@@ -22,6 +23,7 @@ with routed experts served from Grace memory. The only other desktop-class K3 we
 |---|---|---|---|
 | [`moonshotai/Kimi-K3`](https://huggingface.co/moonshotai/Kimi-K3) (the original; only `preprocessor_config.json` is used here) | `f831ab66` | `1,560.9 GB` | Kimi K3 License |
 | [`vellum-ai/Kimi-K3-W3A16-g64`](https://huggingface.co/vellum-ai/Kimi-K3-W3A16-g64) (recipe A) | `09c06868` | `1,290.9 GB`, `275` shards | Kimi K3 License (the same LICENSE file, byte for byte) |
+| [`Inferact/Kimi-K3-DSpark`](https://huggingface.co/Inferact/Kimi-K3-DSpark) (the speculative-decoding drafter, recipe A2) | `cf6b8244` | `7.12 GB` (one BF16 safetensors file, `3.56` B parameters, `2.39` B loaded by vLLM because the target's embedding is shared) | Kimi K3 License (its `LICENSE` file is byte-identical to the vellum copy, md5 `7746aa28`, checked 2026-10-12) |
 | [`unsloth/Kimi-K3-GGUF`](https://huggingface.co/unsloth/Kimi-K3-GGUF), `UD-IQ1_M` (recipe B) | main; `a0836360` on 2026-10-09 (our download predates it; revision not recorded) | `604.3` GiB, `15` shards | Kimi K3 License (HF metadata `kimi-k3`) |
 
 **The Kimi K3 License** (read in full from the moonshotai repository, 2026-10-09) is the MIT licence text with three
@@ -36,8 +38,9 @@ conditions added:
 
 Conditions 2 and 3 do not apply to internal use (nothing made available to third parties) or to use through Moonshot
 AI's official products and certified partners. vellum's 3-bit checkpoint is a derivative redistributed under the same
-licence with attribution. **No weights are included in this repository**; the hook, patch and scripts here contain no
-model content. Read the licence yourself before serving the model to anyone else; this summary is not legal advice.
+licence with attribution, and the DSpark drafter carries the same licence file. **No weights are included in this
+repository**; the hook, patch and scripts here contain no model content. Read the licence yourself before serving the
+model to anyone else; this summary is not legal advice.
 
 ## A. vLLM: Kimi K3 at 3 bits across two Stations
 
@@ -49,7 +52,8 @@ mean TPOT, aggregate across streams. C1 is the mean of three repetitions with th
 |---|---|---|
 | Decode C1 per user, tok/s (mean of three) | 18.1 | [log](../../logs/kimi-k3/vllm-two-stations.log) |
 | Decode C4 aggregate, tok/s | 32.7 | [log](../../logs/kimi-k3/vllm-two-stations.log) |
-| Decode C16 aggregate, tok/s (**upper bound**: some prompt tokens hit the prefix cache, see below) | 52.17 | [log](../../logs/kimi-k3/vllm-two-stations.log) |
+| Decode C16 aggregate, tok/s, **clean rerun** (fresh seed, no prefix-cache hits; supersedes the first run's figure) | 55.23 | [log](../../logs/kimi-k3/vllm-two-stations-clean-c16.log) |
+| Decode C16 aggregate, tok/s, first run (**superseded**: some prompt tokens hit the prefix cache, see below) | 52.17 | [log](../../logs/kimi-k3/vllm-two-stations.log) |
 | GSM8K, first `200` test rows, greedy, thinking requested (**not verified on**, see below), % | 98.0 | [log](../../logs/kimi-k3/vllm-two-stations.log) |
 | Tool calls (`get_metar`, OpenAI format), correct of five | 5 | [log](../../logs/kimi-k3/vllm-two-stations.log) |
 | Coherence, `16` greedy prompts: auto-checked answers correct, of twelve | 11 | [log](../../logs/kimi-k3/vllm-two-stations.log) |
@@ -65,12 +69,17 @@ mean TPOT, aggregate across streams. C1 is the mean of three repetitions with th
 - **Load:** weights load in `735` / `782` s per rank (this includes the hook's GPU repack, about three seconds per
   shard), then about two minutes of graph capture and warm-up. Each GB300 shows `242,372` MiB in use while serving.
 
-**The C16 figure is an upper bound.** This run used an older bench script that gave every concurrency the same seeds,
-so the C4 and C16 prompt sets reused C1 repetition 1's seed, and vLLM's prefix cache was on (its default). The server
-log shows a `0.0%` hit rate through C1 and C4, but during the first wave of C16 prefills its rolling hit rate rose to
-17.6% (our estimate: about `35K` of the `262K` C16 prompt tokens came from cache; the second wave had none). That breaks
-this repository's `2%` rule. Cache hits shorten prefill, and at C16 new prefills interleave with decode, so the effect
-on decode TPOT should be small, but we did not measure it. C1 and C4 are clean. A clean C16 rerun is owed.
+**The first C16 figure was flagged as an upper bound; that caveat is withdrawn.** The first run used an older bench
+script that gave every concurrency the same seeds, so the C4 and C16 prompt sets reused C1 repetition 1's seed, and
+vLLM's prefix cache was on (its default). The server log shows a `0.0%` hit rate through C1 and C4, but during the
+first wave of C16 prefills its rolling hit rate rose to 17.6% (our estimate: about `35K` of the `262K` C16 prompt
+tokens came from cache; the second wave had none). That breaks this repository's `2%` rule, so we called it an upper
+bound and owed a clean rerun. The clean rerun (fresh seed, separate warm-up, `0.00%` hit rate, the same stack plus
+per-layer route counters) came out 5.9% higher (55.23 vs 52.17), so the prefix-cache hits did not inflate the figure;
+the upper-bound caveat is withdrawn ([receipt](../../logs/kimi-k3/vllm-two-stations-clean-c16.log)). Why the first run
+was lower is not isolated: the hits, the shared seed, the counters and plain run-to-run noise all differ between the
+two runs. The first run's 52.17 stays in `results.jsonl` as measured, with a note. C1 and C4 were clean and are
+unchanged. The rerun is a single run and includes the route counters (A0 in section A2 does too).
 
 **Thinking was requested but not verified.** The GSM8K run passed `chat_template_kwargs: {thinking: true,
 reasoning_effort: high}`, but the responses came back with an empty reasoning field (the canaries on the same boot show
@@ -170,6 +179,190 @@ that way). Quality: [`coherence16.py`](../dsv4-pro-two-stations/tools/coherence1
 [`gsm8k200_v4.py`](../dsv4-pro-two-stations/tools/gsm8k200_v4.py) from the DS-V4-Pro recipe
 (`gsm8k200_v4.py http://127.0.0.1:8010/v1/chat/completions kimi-k3 out.jsonl 16 200`), and
 `bench/ksmoke.py 8010 20 8` for the canaries and tool calls.
+
+### A2. Speculative decoding with Inferact's DSpark drafter
+
+`Inferact/Kimi-K3-DSpark` is a five-layer, BF16, `3.56` B-parameter drafter for Kimi K3 that reads the target's hidden
+states from layers `2, 23, 47, 71` and `89`, and shares the target's embedding. vLLM `af7f9488` runs it as `method:
+dspark`. This section is a same-session A/B on the two-Station recipe above: first the control arm (A0, the recipe as
+in section A, no drafter), then the same boot with the drafter, on the same two GB300s, in one sitting
+([receipt](../../logs/kimi-k3/vllm-two-stations-dspark.log)). The schedule, the bars and our predictions were written
+before the run.
+
+**Setup of the DSpark arm.** The drafter proposes `K = 3` tokens when one request is running, `K = 2` at two or three,
+and nothing (`K = 0`) at four or more: we expected verification to cost more than drafting saves at larger batches and
+did not measure other thresholds. That is the `num_speculative_tokens_per_batch_size` schedule
+`[[1,1,3],[2,3,2],[4,16,0]]` in [`vllm/launch-k3-dspark.sh`](vllm/launch-k3-dspark.sh). Three more pieces, none of
+them in stock vLLM:
+
+- `--use-replayssm --mamba-backend triton` (RecoverSSM): Kimi Delta Attention keeps a recurrent state per request, and
+  verifying `K` drafts needs `1 + K` state slots each; RecoverSSM recovers the state instead of storing the slots. It
+  had never run on this stack (Humming experts, UVA offload, TP2 + EP2) before this boot. It came up on the first
+  attempt.
+- [`vllm/hook/k3ds_guard.py`](vllm/hook/k3ds_guard.py), a guard we first wrote for the DS-V4-Pro DSpark drafter
+  (receipts: [R3.1b](../../logs/dsv4-pro-two-stations/dspark-guard-r31b.log) and
+  [R3.1c](../../logs/dsv4-pro-two-stations/dspark-skipdraft-r31c.log)), ported to K3: any rank's exception in the
+  model step ends the worker instead of hanging its peer; an acceptance-gated `K` decided in the scheduler (so every
+  rank sees the same `K`) that turns drafting off while the mean accepted length is below `1.6` and back on above
+  `2.0`; a light step at `K = 0` that stages the drafter's context without running a draft forward; an eager warm-up
+  of the drafter's eager path; and drafter graphs that never see query length zero. Every part is off unless its
+  environment variable is set, and the file is loaded only with `K3DS_GUARD=1`.
+- `--kv-cache-memory-bytes` (48 GiB per rank) instead of the utilisation-derived KV budget, because the drafter's
+  weights and graphs are outside that accounting.
+
+**Measurement.** Real text is the primary measure. Real text: CNN/DailyMail 3.0.0 test articles
+([`abisee/cnn_dailymail`](https://huggingface.co/datasets/abisee/cnn_dailymail) at `96df5e68`) concatenated to about
+8,200 K3 prompt tokens, thinking off, `1,024` forced output tokens, temperature 0, streaming. C1 is the mean of three
+repetitions of three prompts; C2, C4 and C16 are one run each on the first four, eight and sixteen prompts of one
+disjoint slice. Slices are disjoint, each arm has its own nonce, and the server's prefix-cache hit rate was measured
+around every run (`0.0%` throughout). The pool is rebuilt from public sources with
+[`bench/build_pool_k3.py`](bench/build_pool_k3.py) (it takes the output of
+[`build_realtext_pool.py`](../dsv41-flash-sidecar/bench/realtext/) and keeps only the prompt text) and driven by
+[`bench/kbench_chat_ds.py`](bench/kbench_chat_ds.py), which also reads vLLM's speculative-decoding counters. Random
+ids are a control, and **they depend on the sampling setting**: the table's random-id row was measured with
+`--temperature 0` (greedy) and one prompt per repetition by our kit script; the repository's own random-id bench
+([`bench-nemotron-ultra.sh`](../nemotron-ultra/bench/bench-nemotron-ultra.sh)) passes no temperature, and gives a
+different answer (see the boot receipt below).
+
+<!-- results -->
+| Same session, two Stations | No drafter (A0) | DSpark | Ratio | Receipt |
+|---|---|---|---|---|
+| Real text, C1 decode per user, tok/s (mean of three) | 18.01 | 26.23 | 1.456 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Real text, C1 mean accepted length (verify step, `K = 3`) | | 2.74 | | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Real text, C2 decode aggregate, tok/s | 24.61 | 32.7 | 1.329 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Real text, C4 decode aggregate, tok/s (drafter off) | 30.78 | 30.29 | 0.984 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Real text, C16 decode aggregate, tok/s (drafter off) | 45.17 | 45.36 | 1.004 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Random ids with `--temperature 0` (greedy), C1 decode per user, tok/s (mean of three; kit script, not reproduced by the repo bench path, see below) | 18.05 | 27.6 | 1.529 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Random ids with `--temperature 0`, C1 mean accepted length | | 2.98 | | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+<!-- /results -->
+
+<!-- results -->
+| Quality, hygiene and cost, same session | No drafter (A0) | DSpark | Receipt |
+|---|---|---|---|
+| GSM8K, first `200` test rows, thinking requested (not verified, as in section A), % | 97.5 | 98.5 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Coherence, `16` greedy prompts: auto-checked answers correct, of twelve | 11 | 11 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Teacher-forced top-1 flips against the A0 reference, % (A0 column: A0 run twice, the floor) | 0.0 | 0.042 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Free-running greedy continuations identical to the A0 reference, of `32` (A0 column: A0 against itself) | 8 | 7 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Streaming soak, requests completed without error, of the same number submitted | | 135 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Weights in GPU memory per rank (vLLM's `Model loading took`), GiB | 165.6 | 168.49 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| KV cache per rank, tokens (A0: utilisation `0.95`; DSpark: fixed budget) | 1,796,096 | 1,052,945 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Lowest free GPU memory the guard saw on either rank over the whole DSpark arm, GiB | | 21.15 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Launch to ready, minutes | 15 | 16 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+| Highest server prefix-cache hit rate over every measured run of both arms, % | 0.0 | 0.0 | [log](../../logs/kimi-k3/vllm-two-stations-dspark.log) |
+<!-- /results -->
+
+**Reproduced with the published launcher and the repository's own benches.** After the A/B we booted
+`vllm/launch-k3-dspark.sh` exactly as it is in this tree (one boot, launcher defaults except the rail addresses and
+paths), on both Stations, and ran `bench/ksmoke.py`, the real-text C1 bench and the repository's random-id bench
+([receipt](../../logs/kimi-k3/vllm-two-stations-boot-receipt.log)). The A0 control in the first column is the earlier
+session's (the receipt session had no control arm).
+
+<!-- results -->
+| Published launcher, boot receipt | Result | Ratio | Receipt |
+|---|---|---|---|
+| Real text, C1 decode per user, tok/s (mean of three) | 26.37 | 1.464 over A0 | [log](../../logs/kimi-k3/vllm-two-stations-boot-receipt.log) |
+| Real text, C1 mean accepted length | 2.74 | | [log](../../logs/kimi-k3/vllm-two-stations-boot-receipt.log) |
+| `ksmoke.py` GSM8K, first `20` rows, % (a smoke test) | 95.0 | | [log](../../logs/kimi-k3/vllm-two-stations-boot-receipt.log) |
+| `ksmoke.py` tool calls correct, of five | 5 | | [log](../../logs/kimi-k3/vllm-two-stations-boot-receipt.log) |
+| Random ids with default sampling (the repo bench), C1 decode per user, tok/s (one repetition) | 17.52 | 0.968 over the first run | [log](../../logs/kimi-k3/vllm-two-stations-boot-receipt.log) |
+| Random ids with default sampling, C1 mean accepted length | 1.02 | | [log](../../logs/kimi-k3/vllm-two-stations-boot-receipt.log) |
+| Launch to ready, minutes | 16 | | [log](../../logs/kimi-k3/vllm-two-stations-boot-receipt.log) |
+<!-- /results -->
+
+- **Real text reproduces.** 26.37 against 26.23, within a percent, with acceptance 2.74 in both.
+- **Random ids do not, and now we know why.** The kit script passed `--temperature 0`. `bench-nemotron-ultra.sh`
+  passes none, so `vllm bench serve` uses the server's default sampling (the argument dumps in the two logs show
+  `temperature=0.0` and `temperature=None`). A sampled continuation of a random-token prompt is random, the drafter
+  cannot predict it (mean accepted length 1.02), the acceptance-gated `K` turns drafting off (its state at the end of
+  the run: off, EMA 1.0) and C1 is the no-drafter speed minus 3%: 17.52 against the first run's 18.1, which also used
+  default sampling. Under greedy decoding the same prompts fall into repetitive output, the drafter predicts it
+  (accepted length 2.98) and C1 rises to 27.6. **The greedy figure is a property of greedy decoding on random tokens,
+  not of the recipe, and it does not transfer to the repository's bench path or to real text.** We keep it in the
+  table, labelled, because it is a measured number, and do not use it as a headline.
+- **A note on the shape.** The random-id rows of this repository that came from `bench-nemotron-ultra.sh` and
+  `tools/bench_e3.sh` use the server's default sampling (no `--temperature` passed); the top-level README now says so.
+  For decode without a drafter this changes little (18.1 against 18.05 greedy); with a drafter it changes everything.
+  Only the A/B kit's random-id rows above are explicitly greedy.
+
+**What it means.**
+
+- **One user gets a real speed-up, a batch gets none.** Real-text C1 rises from 18.01 to 26.23 tok/s (1.456 times), C2
+  by a third, and from C4 up the drafter is off and the numbers are the control's within one run's noise (0.984 at C4,
+  1.004 at C16). The guard's light step at `K = 0` costs nothing we can see. This is a single-user feature: it does
+  not raise aggregate throughput.
+- **The spread across repetitions is real.** The three real-text C1 repetitions are 26.96, 27.2 and 24.53 tok/s, with
+  mean accepted lengths 2.811, 2.841 and 2.559: the gain follows how predictable the prompts' continuations are.
+  Random-id repetitions: 32.93, 25.5 and 24.37 tok/s.
+- **Quality gates held, and the evidence is thin.** GSM8K is two problems of `200` above the control (the earlier
+  recipe run measured 98.0, so the three runs span one point). The top-1 flip rate against the control is 2 of `4,708`
+  positions. Free-running greedy continuations were identical for 7 of `32` prompts against the control, but the
+  control was identical to *itself* for only 8 of `32`: on this stack greedy free-running output is not run-to-run
+  deterministic with or without a drafter, so a low identical-count is not evidence of damage. The soak ran 20 minutes
+  at a concurrency schedule `1, 3, 8, 2, 4, 1, 6, 2` (every `K` tier and the transitions between them) and all `135`
+  requests it submitted completed: it covers GSM8K with and without thinking, random ids, and long and short synthetic
+  text, but thinking is capped at `2,048` / `1,024` tokens and only `135` requests fit in the window, so it is a hang
+  and error check, not a statistical one.
+- **The cost is memory, not speed.** The drafter adds about 2.9 GiB of weights per rank, and we gave the KV cache 48
+  GiB instead of 66.5 GiB: `1,052,945` tokens instead of `1,796,096`, still room for 16 requests of `65,536` tokens.
+  The guard's free-memory floor was 21.15 GiB per rank, so the KV budget can probably go higher; we did not look for
+  the limit.
+
+**Where our predictions missed.** Written before the boot, applied mechanically afterwards ([the predictions are in
+the log's `summary.md`](../../logs/kimi-k3/vllm-two-stations-dspark.log)):
+
+| Measure | Predicted | Measured | Verdict |
+|---|---|---|---|
+| Real-text C1 decode (tok/s) | 24 to 30 | 26.23 | in range |
+| Real-text C1 ratio | 1.35 to 1.65 | 1.456 | in range |
+| Mean accepted length, real-text C1 | 2.8 to 3.0 | 2.74 | **missed low** (two of three repetitions were above 2.8) |
+| Real-text C2 ratio | 1.2 to 1.4 | 1.329 | in range |
+| Real-text C4 ratio | 0.95 to 1.02 | 0.984 | in range |
+| Real-text C16 ratio | 0.97 to 1.00 | 1.004 | 0.4% above the range; noise on a single run |
+| **Random-id C1 ratio** | **0.95 to 1.02** | **1.529** greedy; **0.968** default sampling | **missed high under greedy only; the repo bench path matches the prediction** |
+
+The random-id miss turned out to depend on the sampling setting, not on the recipe. We expected the acceptance-gated
+`K` to turn the drafter off on random ids (the prediction of 0.95 to 1.02 says "mostly off"). Under `--temperature 0`
+it did not: the drafter accepted 2.98 tokens per step and C1 rose by a half, because greedy decoding of a random-token
+prompt falls into repetitive output (our reading; we did not inspect the outputs). Under the default sampling of the
+repository's own bench the prediction held (0.968, accepted length 1.02, drafting off). So the random-id speed-up
+should not be read as a speed-up of anything but greedy random-id decoding: the real-text row is the one that
+transfers.
+
+**Not run, or open.**
+
+- The launcher and hook files in this folder were booted once as published (the boot receipt above): real text
+  reproduces, random ids depend on the sampling setting. The A/B arms themselves loaded the same hook plus our
+  per-layer route counters (`K3T_COUNT`, in both arms and not published), and the kit's own scripts for the random-id
+  runs. The receipt session had no control arm, so its ratio is against the A/B's control.
+- Each arm booted once and each configuration was measured once (C1 three times). The pre-registration allowed a
+  fallback second attempt; it was not needed.
+- Power was not recorded. Driver 595.99.02, kernel 7.0.0-1019-nvidia-64k and Ubuntu 24.04.4 were queried on both
+  Stations after the run (unchanged by policy), not logged during it.
+- A nsys profile of the DSpark arm was taken but is not part of this release.
+- Thinking-on quality with the drafter is as unverified as without it (see above).
+
+**Run it.**
+
+```bash
+hf download Inferact/Kimi-K3-DSpark --revision cf6b8244620e7ea4b0651d214f28e89eac75bed6 \
+  --local-dir $MODEL_ROOT/Inferact__Kimi-K3-DSpark          # on both Stations; sha256 of model.safetensors f9972a63...2053
+python3 bench/check_drafter.py $MODEL_ROOT/Inferact__Kimi-K3-DSpark \
+  --target-config $MODEL_ROOT/vellum-ai__Kimi-K3-W3A16-g64/config.json   # CPU only: reads the header, not the weights
+# same ranks, same order as section A; DRAFTER defaults to /models/hf/Inferact__Kimi-K3-DSpark
+RANK0_IP=<rail ip of station A> RANK1_IP=<rail ip of station B> vllm/launch-k3-dspark.sh 1   # on B
+RANK0_IP=<rail ip of station A> RANK1_IP=<rail ip of station B> vllm/launch-k3-dspark.sh 0   # on A
+# control arm of the same kit: DSPARK=0 vllm/launch-k3-dspark.sh <rank>   (equivalent to launch-k3.sh)
+grep -E "K3DS (installing|KCTL)|Resolved architecture: K3DSpark" ~/bench/k3-*/server-rank0.log
+# real text (build the pool once; see bench/build_pool_k3.py)
+python3 bench/kbench_chat_ds.py http://127.0.0.1:8010 kimi-k3 pool/long/eval-c1-r1-try1.jsonl out.json 1 \
+  --warm pool/long/eval-c1-r1-try1-warm.jsonl --nonce mine-1
+```
+
+Random-id runs: `bench-nemotron-ultra.sh` uses the server's default sampling (drafting ends up off, C1 is the
+no-drafter speed); to reproduce the greedy figure run `vllm bench serve` with `--temperature 0` and `--ignore-eos`, a
+fresh seed per invocation and one prompt per repetition. The acceptance length is `1 + accepted / drafts` from the
+deltas of `vllm:spec_decode_num_accepted_tokens_total` and `vllm:spec_decode_num_drafts_total` around the run
+(`bench-nemotron-ultra.sh` prints it as `mtp_acc_len`, `kbench_chat_ds.py` as `acceptance_len`).
 
 ## B. llama.cpp: Kimi K3 UD-IQ1_M on one Station, two Stations and four GPUs
 
@@ -271,7 +464,7 @@ uses one RPC server per GPU, including one on loopback for the local RTX PRO 600
 
 ## C. Caveats
 
-- **C16 is far below `100` tok/s** in every configuration, and the vLLM C16 figure is an upper bound (section A).
+- **C16 is far below `100` tok/s** in every configuration (section A; the vLLM figure is the clean rerun).
   Our reading (modelled, not profiled): decode at C16 is bound by Grace. 16 tokens with 16 routed experts each touch
   roughly a quarter of each rank's `448` local experts in every layer, and most expert bytes (`408` of about `608` GiB
   of weights per rank) are in Grace, read at C2C speed. Hot-expert pinning (as in our DS-V4-Pro recipe) and RTX PRO
@@ -284,13 +477,14 @@ uses one RPC server per GPU, including one on loopback for the local RTX PRO 600
 - **A GB300 and an RTX PRO 6000 cannot share one CUDA process** on these Stations (above). Any plan that needs both
   in one engine process, such as tensor parallelism across them or an in-process expert sidecar, does not work; the
   sidecars in our other recipes run as separate processes.
-- **Different driver.** The vLLM run used NVIDIA driver 595.99.02 (an unattended upgrade had landed that morning); the
-  llama.cpp runs and the rest of this repository used 595.91.07.
+- **Different driver.** The first vLLM run used NVIDIA driver 595.99.02 (an unattended upgrade had landed that morning); the
+  llama.cpp runs and the rest of this repository used 595.91.07. The 2026-10-13 session (section A2) used the same driver 595.99.02, kernel 7.0.0-1019-nvidia-64k and Ubuntu 24.04.4, queried after the run and unchanged by policy rather than logged during it.
 - **The 3-bit checkpoint's quality is otherwise unpublished** (vellum's card says its evaluation is being finalised).
   Our GSM8K-200 and the coherence and tool checks are the only quality evidence we have; no long-context, coding or
   multilingual checks were run, and nothing was compared against the full-precision model.
-- **Not measured:** prefill throughput, long contexts, speculative decoding, power for the llama.cpp runs at C16, and
-  a run of the vLLM recipe with prefix caching off.
+- **Not measured:** prefill throughput, long contexts, power for the llama.cpp runs at C16 and for the DSpark runs, a
+  run of the vLLM recipe with prefix caching off, speculative decoding on the llama.cpp builds, and DSpark with thinking
+  verified on (section A2).
 
 ## Credits
 
@@ -298,6 +492,9 @@ uses one RPC server per GPU, including one on loopback for the local RTX PRO 600
 - **Vellum** ([vellum-ai/Kimi-K3-W3A16-g64](https://huggingface.co/vellum-ai/Kimi-K3-W3A16-g64)) for the 3-bit
   quantisation that makes the two-Station fit possible.
 - **unsloth** for the `UD-IQ1_M` GGUF.
+- **Inferact** ([Kimi-K3-DSpark](https://huggingface.co/Inferact/Kimi-K3-DSpark), Kimi K3 License) for the drafter
+  checkpoint; no weights are included. The `dspark` method, its config class and the DFlash proposer it inherits from
+  are vLLM's; `hook/k3ds_guard.py` patches around them and copies none of that code.
 - **vLLM** (Apache-2.0) for the Kimi K3 model code, the WNA16 path, UVA offload and the Humming kernels;
   **compressed-tensors** (Apache-2.0) for the packing format the hook converts from. The hook copies no code from
   either.

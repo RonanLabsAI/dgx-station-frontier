@@ -1,0 +1,266 @@
+# Kimi K3 (vellum-ai/Kimi-K3-W3A16-g64 @09c06868) across TWO Stations, vLLM nightly af7f9488, TP2 + EP2, Humming int3 experts with 408 GiB/rank in Grace
+# (the recipes/kimi-k3 section A configuration): the same-session control arm "A0" and the arm with the Inferact DSpark drafter "DS".
+# Drafter: Inferact/Kimi-K3-DSpark @ cf6b8244620e7ea4b0651d214f28e89eac75bed6, BF16, K = 3, with --use-replayssm and the guard hook
+# recipes/kimi-k3/vllm/hook/k3ds_guard.py. Run 2026-10-13 07:51-11:13 PT, one session, both GB300s, A0 first, then DS (boot 1 each; 0 retries).
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names, GPU UUIDs and private paths replaced with
+# <placeholders>. Times are Pacific (PT) unless the line says otherwise; vLLM server log lines are UTC ("10-13 16:28:36" = 09:28:36 PDT).
+# Definitions: decode_agg = C x 1000 / mean TPOT (tok/s, the repo's decode metric); out = output tokens / wall incl. TTFT.
+# Real text = CNN/DailyMail 3.0.0 test articles (abisee/cnn_dailymail @ 96df5e68) concatenated to about 8,200 K3 prompt tokens, thinking off,
+# 1,024 forced output tokens, temperature 0 (bench/kbench_chat_ds.py, pool from bench/build_pool_k3.py). Every real-text slice is disjoint from
+# the other slices and replayed with a fresh per-arm nonce; "prefix_hit_pct" is the server's /metrics delta around the measured run (bar: 2).
+# catid = 8,192 random-token ids in / 1,024 forced out, vllm bench serve with --temperature 0 (greedy) and 1 prompt per repetition, a fresh seed per invocation
+# (kit script, NOT the repo's bench-nemotron-ultra.sh, which passes no temperature: see logs/kimi-k3/vllm-two-stations-boot-receipt.log).
+# A0 is NOT bit-identical to recipes/kimi-k3 as published: it adds per-layer expert route counters (K3T_COUNT, shown in the boot line below);
+# they are in both arms and cost nothing visible at C1 (A0 C1 below, 18.01, against 18.1 in the first run). The tier/pinning code of that hook was not enabled.
+
+
+--- run.log (boot lines; the K3T_COUNT counters are in BOTH arms)
+2026-10-13 07:52:19 [ds] boot a0 attempt 1: HOOKDIR=<kr-hook> MODEL=/models/hf/vellum-ai__Kimi-K3-W3A16-g64 SHARDS=275 OFFGB=408 MOE=humming CTX=65536 SEQS=16 MINAVAIL=420 NAME=k3 SERVED=kimi-k3 K3T_COUNT=/prof/k3-counts.json LOGDIR=boot-a0-1 bash launch-k3t.sh
+2026-10-13 08:08:42 [ds] boot a0 attempt 1 READY in 15 min; MemAvailable: 31982720 kB Shmem: 429139200 kB ; L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89221 MiB;NVIDIA GB300, 242380 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89990 MiB;NVIDIA GB300, 242380 MiB;
+2026-10-13 09:11:27 [ds] boot ds attempt 1: HOOKDIR=<kit>/hook MODEL=/models/hf/vellum-ai__Kimi-K3-W3A16-g64 SHARDS=275 OFFGB=408 MOE=humming CTX=65536 SEQS=16 MINAVAIL=420 NAME=k3 SERVED=kimi-k3 K3T_COUNT=/prof/k3-counts.json SPEC=\{\"method\":\"dspark\"\,\"model\":\"/drafter\"\,\"num_speculative_tokens\":3\,\"attention_backend\":\"FLASHINFER_MLA\"\,\"draft_sample_method\":\"greedy\"\,\"num_speculative_tokens_per_batch_size\":\[\[1\,1\,3\]\,\[2\,3\,2\]\,\[4\,16\,0\]\]\} DRAFTER=/models/hf/Inferact__Kimi-K3-DSpark K3DS_GUARD=1 K3DS_DRAFT_WARMUP=relax K3DS_ZERO_TIER=1 R31B_FAILFAST=1 R31B_KCTL=1 R31B_KCTL_KOFF=0 R31B_KCTL_OFF=1.6 R31B_KCTL_ON=2.0 R31B_KCTL_PROBE=16 R31C_SKIPDRAFT=1 R31C_PROBE_MAX=256 R31B_CHECK_EVERY=512 EXEC_TIMEOUT=120 REPLAYSSM=1 KVBYTES=51539607552 LOGDIR=boot-ds-1 bash <kit>/launch/launch-k3t-ds.sh
+2026-10-13 09:28:20 [ds] boot ds attempt 1 READY in 16 min; MemAvailable: 30364992 kB Shmem: 429140672 kB ; L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89221 MiB;NVIDIA GB300, 228064 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89990 MiB;NVIDIA GB300, 228064 MiB;
+
+--- boot-a0-1/launch-rank0.txt
+launched 2026-10-13 07:52:50 PDT host=<host> rank=0 gpu=<GB300-uuid> image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+model=/models/hf/vellum-ai__Kimi-K3-W3A16-g64 mode=tp moe=humming pin=alloc offgb=408 ctx=65536 seqs=16 mbt=8192 util=0.95 dd=1 tuner=tuner3.csv
+args: serve /model --served-model-name kimi-k3 --trust-remote-code --reasoning-parser kimi_k3 --tool-call-parser kimi_k3 --enable-auto-tool-choice --distributed-executor-backend mp --nnodes 2 --node-rank 0 --master-addr <rail-ip-left> --master-port 29614 --disable-custom-all-reduce --moe-backend humming --offload-backend uva --cpu-offload-gb 408 --cpu-offload-params routed_experts.w13_weight_packed routed_experts.w2_weight_packed --max-model-len 65536 --max-num-seqs 16 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.95 --no-enable-flashinfer-autotune --tensor-parallel-size 2 --pipeline-parallel-size 1 --enable-expert-parallel --language-model-only --host 0.0.0.0 --port 8010
+
+--- boot-ds-1/launch-rank0.txt
+launched 2026-10-13 09:11:58 PDT host=<host> rank=0 gpu=<GB300-uuid> image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+hookdir=<kit>/hook drafter=/models/hf/Inferact__Kimi-K3-DSpark replayssm=1 kvbytes=51539607552 nsys_out=off exec_timeout=120
+spec={"method":"dspark","model":"/drafter","num_speculative_tokens":3,"attention_backend":"FLASHINFER_MLA","draft_sample_method":"greedy","num_speculative_tokens_per_batch_size":[[1,1,3],[2,3,2],[4,16,0]]}
+guard: K3DS_DRAFT_WARMUP=relax K3DS_GUARD=1 K3DS_STATS=/prof/k3ds-stats-rank0.json K3DS_ZERO_TIER=1 R31B_CHECK_EVERY=512 R31B_FAILFAST=1 R31B_KCTL=1 R31B_KCTL_KOFF=0 R31B_KCTL_OFF=1.6 R31B_KCTL_ON=2.0 R31B_KCTL_PROBE=16 R31C_PROBE_MAX=256 R31C_SKIPDRAFT=1 
+model=/models/hf/vellum-ai__Kimi-K3-W3A16-g64 mode=tp moe=humming pin=alloc offgb=408 ctx=65536 seqs=16 mbt=8192 util=0.95 dd=1 tuner=tuner3.csv
+args: serve /model --served-model-name kimi-k3 --trust-remote-code --reasoning-parser kimi_k3 --tool-call-parser kimi_k3 --enable-auto-tool-choice --distributed-executor-backend mp --nnodes 2 --node-rank 0 --master-addr <rail-ip-left> --master-port 29614 --disable-custom-all-reduce --moe-backend humming --offload-backend uva --cpu-offload-gb 408 --cpu-offload-params routed_experts.w13_weight_packed routed_experts.w2_weight_packed --max-model-len 65536 --max-num-seqs 16 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.95 --no-enable-flashinfer-autotune --tensor-parallel-size 2 --pipeline-parallel-size 1 --enable-expert-parallel --language-model-only --host 0.0.0.0 --port 8010 --kv-cache-memory-bytes 51539607552 --speculative-config \{\"method\":\"dspark\"\,\"model\":\"/drafter\"\,\"num_speculative_tokens\":3\,\"attention_backend\":\"FLASHINFER_MLA\"\,\"draft_sample_method\":\"greedy\"\,\"num_speculative_tokens_per_batch_size\":\[\[1\,1\,3\]\,\[2\,3\,2\]\,\[4\,16\,0\]\]\} --use-replayssm --mamba-backend triton
+
+--- boot-a0-1/image-digest-rank0.txt
+sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+
+--- boot-ds-1/image-digest-rank0.txt
+sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+
+--- drafter (kit SOURCES.txt line; header-check-lsh.json = CPU-only check of config.json + safetensors header on the left Station)
+Drafter: Inferact/Kimi-K3-DSpark @ cf6b8244620e7ea4b0651d214f28e89eac75bed6, at /models/hf/Inferact__Kimi-K3-DSpark on both Stations; safetensors LFS sha256 f9972a636d92a11994cdcfc88fd4c5b5d50d6eb2a89af016031593b8c65c2053 (7,124,633,450 B), identical on both hosts and equal to the HF API value (SHA256SUMS in that dir); LICENSE md5 7746aa2854821f5cd38fe47d368f7f72 = the Kimi K3 License file served with the vellum checkpoint.
+{
+ "architectures": [
+  "K3DSparkModel"
+ ],
+ "checks": {
+  "all_dtypes_match_config": true,
+  "all_shapes_match_config": true,
+  "all_tensors_present": true,
+  "config_accepted_by_K3DSparkConfig": true,
+  "data_span_equals_tensor_bytes": true,
+  "file_size_equals_8_plus_header_plus_data": true,
+  "mla_latent_matches_target": true,
+  "no_unexpected_tensors": true,
+  "target_hidden_matches": true,
+  "target_layer_ids_in_range": true,
+  "target_layers_match": true,
+  "target_vocab_matches": true
+ },
+ "config_refusals": [],
+ "data_bytes": 7124625922,
+ "data_span": 7124625922,
+ "drafter": "/models/hf/Inferact__Kimi-K3-DSpark",
+ "dtypes": [
+  "BF16"
+ ],
+ "file_size": 7124633450,
+ "header_bytes": 7520,
+ "layers": 5,
+ "metadata": {
+  "torchspec_version": "0.1.0"
+ },
+ "missing": [],
+ "model_type": "k3_dspark",
+ "ok": true,
+ "params_embed_shared_with_target": 1174405120,
+ "params_loaded_by_vllm": 2387907841,
+ "params_total": 3562312961,
+ "target": {
+  "hidden_size": 7168,
+  "kv_lora_rank": 512,
+  "num_hidden_layers": 93,
+  "num_nextn_predict_layers": 0,
+  "qk_rope_head_dim": 64,
+  "vocab_size": 163840
+ },
+ "target_layer_ids": [
+  2,
+  23,
+  47,
+  71,
+  89
+ ],
+ "tensors": 68,
+ "unexpected": [],
+ "want_dtype": "BF16",
+ "wrong_shape": {}
+}
+
+--- boot-a0-1/server-rank0.log (selected lines; UTC)
+(APIServer pid=1) INFO 10-13 14:53:19 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.30.1rc1.dev245+gaf7f9488c
+(EngineCore pid=335) INFO 10-13 14:53:36 [core.py:129] Initializing a V1 LLM engine (v0.30.1rc1.dev245+gaf7f9488c) with config: model='/model', speculative_config=None, tokenizer='/model', skip_tokenizer_init=False, tokenizer_mode=kimi_k3, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=65536, download_dir=None, load_format=auto, tensor_parallel_si
+(Worker_TP0_EP0 pid=618) INFO 10-13 14:53:56 [int_wna16.py:282] Using 'HUMMING' WNA16 MoE backend.
+(Worker_TP0_EP0 pid=618) INFO 10-13 14:54:34 [uva.py:68] Total CPU offloaded parameters: 408.27
+(Worker_TP0_EP0 pid=618) INFO 10-13 15:06:43 [default_loader.py:484] Loading weights took 727.77 seconds
+(Worker_TP0_EP0 pid=618) INFO 10-13 15:07:06 [model_runner.py:407] Model loading took 165.6 GiB memory and 790.055004 seconds
+(Worker_TP0_EP0 pid=618) INFO 10-13 15:08:10 [model_runner.py:1069] Graph capturing finished in 15 secs, took 0.63 GiB
+(Worker_TP0_EP0 pid=618) INFO 10-13 15:08:11 [gpu_worker.py:692] Available KV cache memory: 66.5 GiB
+(EngineCore pid=335) INFO 10-13 15:08:11 [kv_cache_utils.py:2408] GPU KV cache size: 1,796,096 tokens, Maximum concurrency for 65,536 tokens per request: 27.41x
+(Worker_TP0_EP0 pid=618) INFO 10-13 15:08:24 [model_runner.py:1069] Graph capturing finished in 7 secs, took 0.11 GiB
+INFO:     Application startup complete.
+
+--- boot-ds-1/server-rank0.log (selected lines; UTC)
+K3DS installing: {"check_every": 512, "draft_warmup": "relax", "failfast": true, "kctl": true, "skipdraft": true, "stats": true, "zero_tier": true} pid=1
+K3DS patched WorkerProc._execute_worker_rpc (failfast=True, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens'])
+(APIServer pid=1) INFO 10-13 16:12:27 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.30.1rc1.dev245+gaf7f9488c
+(APIServer pid=1) INFO 10-13 16:12:45 [model.py:699] Resolved architecture: K3DSparkModel
+K3DS installing: {"check_every": 512, "draft_warmup": "relax", "failfast": true, "kctl": true, "skipdraft": true, "stats": true, "zero_tier": true} pid=611
+K3DS installing: {"check_every": 512, "draft_warmup": "relax", "failfast": true, "kctl": true, "skipdraft": true, "stats": true, "zero_tier": true} pid=612
+K3DS patched WorkerProc._execute_worker_rpc (failfast=True, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens'])
+(EngineCore pid=612) INFO 10-13 16:12:53 [core.py:129] Initializing a V1 LLM engine (v0.30.1rc1.dev245+gaf7f9488c) with config: model='/model', speculative_config=SpeculativeConfig(method='dspark', model='/drafter', num_spec_tokens=3), tokenizer='/model', skip_tokenizer_init=False, tokenizer_mode=kimi_k3, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq
+K3DS installing: {"check_every": 512, "draft_warmup": "relax", "failfast": true, "kctl": true, "skipdraft": true, "stats": true, "zero_tier": true} pid=895
+K3DS patched WorkerProc._execute_worker_rpc (failfast=True, methods=['execute_dummy_batch', 'execute_model', 'sample_tokens'])
+K3DS patched cudagraph_utils.build_dynamic_sd_schedule_lookup (zero_tier=True, k_off=0, target only)
+K3DS patched GPUModelRunner.execute_model (records the broadcast num_spec_tokens_to_schedule)
+K3DS patched gpu_worker.kernel_warmup (drafter eager warm-up=relax, stats=True)
+K3DS patched DFlashSpeculator.propose (skip-draft light steps at K=0, rank check every 512)
+(Worker_TP0_EP0 pid=895) INFO 10-13 16:13:06 [int_wna16.py:282] Using 'HUMMING' WNA16 MoE backend.
+(Worker_TP0_EP0 pid=895) INFO 10-13 16:13:44 [uva.py:68] Total CPU offloaded parameters: 408.27
+(Worker_TP0_EP0 pid=895) INFO 10-13 16:26:11 [default_loader.py:484] Loading weights took 745.37 seconds
+(Worker_TP0_EP0 pid=895) INFO 10-13 16:26:39 [default_loader.py:484] Loading weights took 0.63 seconds
+(Worker_TP0_EP0 pid=895) INFO 10-13 16:26:39 [model_runner.py:407] Model loading took 168.49 GiB memory and 813.171430 seconds
+(EngineCore pid=612) INFO 10-13 16:27:09 [kv_cache_utils.py:2408] GPU KV cache size: 1,052,945 tokens, Maximum concurrency for 65,536 tokens per request: 16.07x
+K3DS drafter eager warm-up (relax): 152 M values 1..8192, width 35840, 304 calls, 0.3 s; free after 21768 MiB of 249.8 GiB
+(Worker_TP0_EP0 pid=895) INFO 10-13 16:28:01 [model_runner.py:1069] Graph capturing finished in 24 secs, took 0.56 GiB
+K3DS patched Scheduler (acceptance-gated K)
+K3DS KCTL installed: base=[3, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] k_off=0 off<1.6 on>2.0 probe/16..256 skipdraft=True
+INFO:     Application startup complete.
+
+--- rt-a0-eval-*-t1.json ("summary" of each measured real-text run, A0; C2/C4/C16 use the first 4 / 8 / 16 prompts of the eval-c16 slice)
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 55.51, "decode_agg": 18.02, "output_tok_s": 16.09, "wall_s": 190.9, "median_ttft_s": 6.97, "mean_ptoks": 8198, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24594, "think": "off", "spec_drafts": 0, "spec_draft_tokens": 0, "spec_accepted": 0, "acceptance_len": null, "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "ds-3106000-a0-eval-c1-r1-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 55.52, "decode_agg": 18.01, "output_tok_s": 16.12, "wall_s": 190.5, "median_ttft_s": 6.6, "mean_ptoks": 8212, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24636, "think": "off", "spec_drafts": 0, "spec_draft_tokens": 0, "spec_accepted": 0, "acceptance_len": null, "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "ds-3106000-a0-eval-c1-r2-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 55.51, "decode_agg": 18.01, "output_tok_s": 16.13, "wall_s": 190.5, "median_ttft_s": 6.56, "mean_ptoks": 8196.3, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24589, "think": "off", "spec_drafts": 0, "spec_draft_tokens": 0, "spec_accepted": 0, "acceptance_len": null, "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "ds-3106000-a0-eval-c1-r3-t1"}
+{"C": 2, "np": 4, "ok": 4, "mean_tpot_ms": 81.26, "decode_agg": 24.61, "output_tok_s": 21.98, "wall_s": 186.3, "median_ttft_s": 9.97, "mean_ptoks": 8230.5, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 32922, "think": "off", "spec_drafts": 0, "spec_draft_tokens": 0, "spec_accepted": 0, "acceptance_len": null, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "ds-3106000-a0-eval-c2-t1"}
+{"C": 4, "np": 8, "ok": 8, "mean_tpot_ms": 129.96, "decode_agg": 30.78, "output_tok_s": 27.86, "wall_s": 294.0, "median_ttft_s": 13.77, "mean_ptoks": 8199.8, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 65598, "think": "off", "spec_drafts": 0, "spec_draft_tokens": 0, "spec_accepted": 0, "acceptance_len": null, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "ds-3106000-a0-eval-c4-t1"}
+{"C": 16, "np": 16, "ok": 16, "mean_tpot_ms": 354.2, "decode_agg": 45.17, "output_tok_s": 39.4, "wall_s": 415.8, "median_ttft_s": 52.88, "mean_ptoks": 8202.4, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 131239, "think": "off", "spec_drafts": 0, "spec_draft_tokens": 0, "spec_accepted": 0, "acceptance_len": null, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "ds-3106000-a0-eval-c16-t1"}
+
+--- rt-ds-eval-*-t1.json ("summary" of each measured real-text run, DS; C2/C4/C16 use the first 4 / 8 / 16 prompts of the eval-c16 slice)
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 37.09, "decode_agg": 26.96, "output_tok_s": 22.88, "wall_s": 134.3, "median_ttft_s": 6.97, "mean_ptoks": 8198, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24594, "think": "off", "spec_drafts": 1094, "spec_draft_tokens": 3282, "spec_accepted": 1981, "acceptance_len": 2.811, "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "ds-3106000-ds-eval-c1-r1-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 36.77, "decode_agg": 27.2, "output_tok_s": 23.27, "wall_s": 132.0, "median_ttft_s": 6.41, "mean_ptoks": 8212, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24636, "think": "off", "spec_drafts": 1081, "spec_draft_tokens": 3243, "spec_accepted": 1990, "acceptance_len": 2.841, "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "ds-3106000-ds-eval-c1-r2-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 40.76, "decode_agg": 24.53, "output_tok_s": 21.21, "wall_s": 144.8, "median_ttft_s": 6.42, "mean_ptoks": 8196.3, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24589, "think": "off", "spec_drafts": 1201, "spec_draft_tokens": 3603, "spec_accepted": 1872, "acceptance_len": 2.559, "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "ds-3106000-ds-eval-c1-r3-t1"}
+{"C": 2, "np": 4, "ok": 4, "mean_tpot_ms": 61.16, "decode_agg": 32.7, "output_tok_s": 28.5, "wall_s": 143.7, "median_ttft_s": 7.06, "mean_ptoks": 8230.5, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 32922, "think": "off", "spec_drafts": 1675, "spec_draft_tokens": 3413, "spec_accepted": 2421, "acceptance_len": 2.445, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "ds-3106000-ds-eval-c2-t1"}
+{"C": 4, "np": 8, "ok": 8, "mean_tpot_ms": 132.07, "decode_agg": 30.29, "output_tok_s": 27.66, "wall_s": 296.1, "median_ttft_s": 13.32, "mean_ptoks": 8199.8, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 65598, "think": "off", "spec_drafts": 40, "spec_draft_tokens": 83, "spec_accepted": 53, "acceptance_len": 2.325, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "ds-3106000-ds-eval-c4-t1"}
+{"C": 16, "np": 16, "ok": 16, "mean_tpot_ms": 352.72, "decode_agg": 45.36, "output_tok_s": 39.85, "wall_s": 411.1, "median_ttft_s": 49.37, "mean_ptoks": 8202.4, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 131239, "think": "off", "spec_drafts": 9, "spec_draft_tokens": 19, "spec_accepted": 11, "acceptance_len": 2.222, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "ds-3106000-ds-eval-c16-t1"}
+
+--- catid-a0-c1/summary.txt
+== 2026-10-13 08:32:29 PDT a0 nonce=3116000 CS=[1] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+a0 C1 rep1 seed 3116101: decode_agg 18.09 tok/s (TPOT 55.29 ms) out 16.10 tok/s TTFT_med 7036.24 ms failed 0 prefix_hit 0.00% acc_len - drafts 0 draft_tokens 0 accepted 0
+a0 C1 rep2 seed 3116102: decode_agg 18.03 tok/s (TPOT 55.46 ms) out 16.06 tok/s TTFT_med 7034.78 ms failed 0 prefix_hit 0.00% acc_len - drafts 0 draft_tokens 0 accepted 0
+a0 C1 rep3 seed 3116103: decode_agg 18.03 tok/s (TPOT 55.45 ms) out 16.06 tok/s TTFT_med 7033.09 ms failed 0 prefix_hit 0.00% acc_len - drafts 0 draft_tokens 0 accepted 0
+DONE 08:36:49 contaminated=0
+
+--- catid-ds-c1/summary.txt
+== 2026-10-13 10:04:54 PDT ds nonce=3126000 CS=[1] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+ds C1 rep1 seed 3126101: decode_agg 32.93 tok/s (TPOT 30.37 ms) out 27.37 tok/s TTFT_med 6342.77 ms failed 0 prefix_hit 0.00% acc_len 3.543 drafts 289 draft_tokens 867 accepted 735
+ds C1 rep2 seed 3126102: decode_agg 25.5 tok/s (TPOT 39.21 ms) out 22.04 tok/s TTFT_med 6352.26 ms failed 0 prefix_hit 0.00% acc_len 2.738 drafts 374 draft_tokens 1122 accepted 650
+ds C1 rep3 seed 3126103: decode_agg 24.37 tok/s (TPOT 41.04 ms) out 21.19 tok/s TTFT_med 6344.91 ms failed 0 prefix_hit 0.00% acc_len 2.653 drafts 386 draft_tokens 1158 accepted 638
+DONE 10:08:12 contaminated=0
+
+--- catid-ds-c1/ds-c1-r1-t1.log (vllm bench serve argument dump, cut): the kit script ran random ids GREEDY (temperature=0.0), one prompt per repetition
+Namespace(... seed=3126101, num_prompts=1, dataset_name='random', random_input_len=8192, random_output_len=1024, random_range_ratio='0', endpoint='/v1/completions', max_concurrency=1, ignore_eos=True, temperature=0.0 ...)   [fields that define the run; the rest of the dump cut]
+
+--- gsm8k200-a0.log (GSM8K first 200 test rows, thinking requested, effort high, greedy, 16 parallel, max_tokens 16000)
+{"n": 200, "correct": 195, "acc": 97.5, "runaways": 0, "errors": 0, "wall_s": 1024, "median_ctoks": 194, "effort": "high"}
+
+--- gsm8k200-ds.log (same)
+{"n": 200, "correct": 197, "acc": 98.5, "runaways": 0, "errors": 0, "wall_s": 1105, "median_ctoks": 188, "effort": "high"}
+
+--- coherence16-a0.log
+0 True 'Paris'
+1 True '391'
+2 False 'The word "airplane" spelled backwards is **enalpira**.'
+3 True 'Carbon dioxide.'
+4 True 'Jupiter'
+5 True '"Thank you" in Spanish is **"gracias"**.\n\nIf you\'d like to be more formal or emphatic, you can also say:\n- **"Muchas gracias"** – Thank you '
+6 True '100'
+7 True 'Here\'s a Python function that returns the square of a number:\n\n```python\ndef square(number):\n    """\n    Returns the square of a number.\n   '
+8 None 'The sky appears blue because sunlight is scattered by air molecules, and shorter blue wavelengths scatter much more strongly than longer red'
+9 None 'The three primary colors are:\n\n1. **Red**\n2. **Blue**\n3. **Yellow**\n\nThese are the traditional primary colors used in art and pigment mixing'
+10 True '300'
+11 True 'In aviation, **VFR** stands for **Visual Flight Rules**.\n\nThese are a set of regulations under which a pilot operates an aircraft in weather'
+12 True '*Pride and Prejudice* was written by **Jane Austen**. \n\nPublished in 1813, it is one of the most beloved novels in English literature. Inter'
+13 None 'Silent peaks touch sky  \nAncient stone whispers to clouds  \nSnow guards the summit'
+14 True 'The chemical symbol for gold is **Au** (from the Latin word *aurum*, meaning "shining dawn" or "glow of sunrise").'
+15 None 'Two young lovers from feuding families secretly marry, but a series of tragic misunderstandings and circumstances leads to their untimely de'
+auto-checked 11/12 correct
+
+--- coherence16-ds.log
+0 True 'Paris'
+1 True '391'
+2 False 'The word "airplane" spelled backwards is **enalpira**.'
+3 True 'Carbon dioxide.'
+4 True 'Jupiter'
+5 True '"Thank you" in Spanish is **"gracias"**.\n\nIf you\'d like to be more emphatic, you can say **"muchas gracias"** (thank you very much).'
+6 True '100'
+7 True 'Here\'s a Python function that returns the square of a number:\n\n```python\ndef square(number):\n    """\n    Returns the square of a number.\n   '
+8 None 'The sky appears blue because sunlight is scattered by molecules in Earth’s atmosphere, and shorter blue wavelengths scatter much more strong'
+9 None 'The three primary colors are **red, blue, and yellow**.'
+10 True '300'
+11 True 'In aviation, **VFR** stands for **Visual Flight Rules**.\n\nThese are a set of regulations under which a pilot operates an aircraft in weather'
+12 True '*Pride and Prejudice* was written by **Jane Austen**. \n\nPublished in 1813, it is one of the most beloved novels in English literature. Inter'
+13 None 'Silent peaks touch sky  \nAncient stone whispers to clouds  \nSnow guards the summit'
+14 True 'The chemical symbol for gold is **Au**, derived from the Latin word *aurum*, meaning "shining dawn" or "glow of sunrise."'
+15 None 'Two young lovers from feuding families secretly marry, but a series of tragic misunderstandings and circumstances leads to their untimely de'
+auto-checked 11/12 correct
+
+--- parity-ref.log / parity-a0.log / parity-ds.log (32 fixed chat prompts, C1, greedy, 160 tokens; teacher-forced top-1 flips vs the A0 reference; a0 = floor)
+ref saved 32 seqs 4740 positions
+{"positions": 4708, "flips": 0, "flip_pct": 0.0, "cont_positions": 3623, "cont_flips": 0, "cont_flip_pct": 0.0, "free_identical": 8, "n_prompts": 32}
+{"positions": 4708, "flips": 2, "flip_pct": 0.042, "cont_positions": 3623, "cont_flips": 0, "cont_flip_pct": 0.0, "free_identical": 7, "n_prompts": 32}
+
+--- soak-ds.log (last line) + soak-ds.jsonl (first line = summary): 20-minute streaming soak, concurrency schedule 1,3,8,2,4,1,6,2 at 150 s per phase
+{"mode": "soak-stream-k3", "duration_s": 1200.0, "submitted": 135, "ok": 135, "timeout": 0, "http_error": 0, "other": 0, "hang": false, "hang_why": "", "healthy_after": true, "kinds": {"gsm": {"n": 53, "ok": 53, "max_wall": 82.82, "max_gap": 6.97}, "chat": {"n": 18, "ok": 18, "max_wall": 69.34, "max_gap": 6.61}, "gsmnt": {"n": 16, "ok": 16, "max_wall": 43.75, "max_gap": 6.29}, "long": {"n": 15, "ok": 15, "max_wall": 74.82, "max_gap": 6.85}, "gsmT": {"n": 12, "ok": 12, "max_wall": 64.51, "max_gap": 6.61}, "ids": {"n": 21, "ok": 21, "max_wall": 192.14, "max_gap": 6.97}}, "conc_schedule": [1, 3, 8, 2, 4, 1, 6, 2], "phase_s": 150.0, "phases": {"0": {"conc": 1, "n": 20, "ok": 20}, "1": {"conc": 3, "n": 15, "ok": 15}, "2": {"conc": 8, "n": 24, "ok": 24}, "3": {"conc": 2, "n": 16, "ok": 16}, "4": {"conc": 4, "n": 19, "ok": 19}, "5": {"conc": 1, "n": 13, "ok": 13}, "6": {"conc": 6, "n": 19, "ok": 19}, "7": {"conc": 2, "n": 9, "ok": 9}}}
+{"tag": "soak0-gsm", "t0": 1791909436.983, "max_tokens": 2048, "think": true, "T": 0.0, "phase": 0, "conc": 1, "status": "ok", "ctoks": 201, "ptoks": 140, "finish": "stop", "id": "chatcmpl-bdfc09cc8a6676a7", "wall": 6.39, "ttft": 0.95, "max_gap": 0.11, "chunks": 53}
+
+--- div-ds-soak.log / div-ds-final.log (guard divergence check, both ranks)
+DIV PASS [soak] light [2963, 2963] calls [9070, 9070] checks [17, 17] free_min_gib [21.15, 21.15]
+DIV PASS [final] light [9325, 9325] calls [21352, 21352] checks [41, 41] free_min_gib [21.15, 21.15]
+
+--- stats-r0-final.json (guard telemetry, rank 0) and stats-r0-final.kctl.json (acceptance-gated K, EngineCore)
+{"time": 1791913383.8412604, "failfast": 0, "proposals": 21352, "draft_warm_calls": 304, "draft_warm_s": 0.26, "draft_warm_m": [1, 8192, 152], "mem_free_min": 22714253312, "mem_free_last": 26069630976, "mem_total": 268235309056, "kctl": null, "skip": {"next_k": 3, "calls": 21352, "light": 9325, "full": 12027, "checks": 41, "async": true}}
+{"time": 1791913383.7962298, "on": true, "ema": 2.111, "flips": 2, "steps_off": 19, "probes": 1, "probe_gap": 16, "k_hist": {"3": 8795, "2": 3232, "0": 9319}}
+
+--- boot-ds-1/server-rank0.log: engine "SpecDecoding metrics" windows (211 windows over the whole DS arm; every 100th shown) + logwin-ds.json (the sums, computed by us)
+(APIServer pid=1) INFO 10-13 16:28:36 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 1.00, Accepted throughput: 0.00 tokens/s, Drafted throughput: 0.09 tokens/s, Accepted: 0 tokens, Drafted: 3 tokens, Per-position acceptance rate: 0.000, 0.000, 0.000, Avg Draft acceptance rate: 0.0%
+(APIServer pid=1) INFO 10-13 16:56:16 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.59, Accepted throughput: 19.50 tokens/s, Drafted throughput: 24.70 tokens/s, Accepted: 195 tokens, Drafted: 247 tokens, Per-position acceptance rate: 0.854, 0.724, 0.008, Avg Draft acceptance rate: 78.9%
+(APIServer pid=1) INFO 10-13 17:17:16 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 2.33, Accepted throughput: 1.20 tokens/s, Drafted throughput: 1.80 tokens/s, Accepted: 12 tokens, Drafted: 18 tokens, Per-position acceptance rate: 0.778, 0.556, 0.000, Avg Draft acceptance rate: 66.7%
+{"windows": 211, "accepted": 26857, "drafted": 39926, "k": 3, "acceptance_len": 3.018, "first": [{"mean_acc_len": 1.0, "accepted": 0, "drafted": 3, "per_position": [0.0, 0.0, 0.0]}], "last": [{"mean_acc_len": 2.42, "accepted": 156, "drafted": 220, "per_position": [0.8, 0.618, 0.0]}]}
+
+--- summary.md (written by the run's mechanical summary tool; the predictions were written before the run and are in recipes/kimi-k3 README A2)
+# E-C DSpark on Kimi K3 -- verdict: **PASS**
+
+decode tok/s = C x 1000 / mean TPOT (the bar metric); output tok/s = completion tokens / wall incl. TTFT.
+Real text is primary; catid (random ids) is the control next to it.
+
+| Measure | A0 | DS | DS / A0 | Acceptance len (DS) |
+|---|---|---|---|---|
+| real-text C1 decode (mean of 3) | 18.01 | 26.23 | 1.4561 | 2.74 |
+| real-text C1 reps | [18.02, 18.01, 18.01] | [26.96, 27.2, 24.53] | | |
+| real-text C1 output tok/s | 16.11 | 22.45 | | |
+| catid 8K/1K C1 decode (mean of 3) | 18.05 | 27.6 | 1.5291 | 2.98 |
+| real-text C2 decode_agg | 24.61 | 32.7 | 1.3287 | 2.44 |
+| real-text C4 decode_agg | 30.78 | 30.29 | 0.9841 | 2.33 |
+| real-text C16 decode_agg | 45.17 | 45.36 | 1.0042 | 2.22 |
+| GSM8K-200 (thinking, high) % | 97.5 | 98.5 | | |
+| coherence16 auto-checked | (11, 12) | (11, 12) | | |
+
+Gates: gsm8k_within_1pt=True, coherence_ge_11_of_12=True, parity_explained=True, soak_pass=True, div_final=True; C16 bar ok=True
+Parity (tf_flips vs the A0 reference): A0 floor 0.0% flips, free-run {'identical': 8, 'matched_tokens': 1258, 'tokens': 3623}; DS 0.042% flips, free-run {'identical': 7, 'matched_tokens': 1397, 'tokens': 3623}
+Soak: {"submitted": 135, "ok": 135, "timeout": 0, "http_error": 0, "other": 0, "hang": false, "healthy_after": true}
+Predictions (written before the run): {"rt_c1_tok_s": [24.0, 30.0], "rt_c1_ratio": [1.35, 1.65], "acc_len_k3": [2.8, 3.0], "rt_c2_ratio": [1.2, 1.4], "rt_c4_ratio": [0.95, 1.02], "rt_c16_ratio": [0.97, 1.0], "catid_c1_ratio": [0.95, 1.02]}
+
+--- ALLDONE
+done; VERDICT PASS rt_c1 1.4561 c16 1.0042 gates {'gsm8k_within_1pt': True, 'coherence_ge_11_of_12': True, 'parity_explained': True, 'soak_pass': True, 'div_final': True}
