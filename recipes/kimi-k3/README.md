@@ -182,6 +182,8 @@ that way). Quality: [`coherence16.py`](../dsv4-pro-two-stations/tools/coherence1
 
 ### A2. Speculative decoding with Inferact's DSpark drafter
 
+*Posted on X by Stephen J. Ronan, MD ([@SJRonanMD](https://x.com/SJRonanMD)), 2026-10-13: [thread](https://x.com/SJRonanMD/status/2110222694558183774).*
+
 `Inferact/Kimi-K3-DSpark` is a five-layer, BF16, `3.56` B-parameter drafter for Kimi K3 that reads the target's hidden
 states from layers `2, 23, 47, 71` and `89`, and shares the target's embedding. vLLM `af7f9488` runs it as `method:
 dspark`. This section is a same-session A/B on the two-Station recipe above: first the control arm (A0, the recipe as
