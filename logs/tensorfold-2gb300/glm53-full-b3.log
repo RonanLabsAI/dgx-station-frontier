@@ -1,0 +1,56 @@
+# Full GLM-5.3 (EXL3 2.75 bpw, DSpark drafts) across TWO DGX Station GB300s, TP2 over one 400G RoCE link, TensorFold v0.6.0 + Mia's full recipe + our 9101, 2026-10-11 PT (attempt 3).
+# Excerpt: results/data/progress.log (the run's own progress log, hosts and addresses already placeholders) followed by results/data/B3-summary.txt, verbatim.
+# decode = (completion_tokens-1)/(last-first delta); C1 = mean of 3; prefill = prompt tokens / TTFT at C1, 16-token reply. Nothing else edited.
+
+--- progress.log
+[2026-10-11 12:06:01 PDT] <left-host> GB300 used: 22 MiB
+sha256:c114eb8a5fc9bd7464c47c66ca6eeafbcc3f6b52e60877414ecc1369387dc88d
+[2026-10-11 12:06:02 PDT] <right-host> GB300 used: 22 MiB
+sha256:ebe3f958ca00803f491cfb3f6af83402abc4dbc3c958dc61879064ee9e7f0341
+23
+[2026-10-11 12:06:06 PDT] context 163840, drafts dspark
+[2026-10-11 12:06:07 PDT] B3 rank-0 port 8898 (free)
+started rank 1 on <right-node>
+started rank 0 on <left-node>
+[2026-10-11 12:11:30 PDT] healthy after 316 s; GB300 used left 141480 / right 141480 MiB
+<left-node>:1:1 [0] NCCL INFO NET/IB : No device found.
+<left-node>:1:1 [0] NCCL INFO NET/IB : Using [RO]; OOB enP1p3s0f1np1:<RAIL_IP_A><0>
+<left-node>:1:1 [0] NCCL INFO NET/IB: Data Direct DMA Interface is detected for device mlx5_1
+<left-node>:1:1 [0] NCCL INFO NET/IB: [0] mlx5_1:uverbs1:1/RoCE provider=Mlx5 speed=256000 context=0x2398ce80 pciPath=/sys/devices/pci0009:00/0009:00:00.0/0009:01:00.0/0009:02:00.0/0009:03:00.0 ar=0 oooRqSize=0
+<left-node>:1:1 [0] NCCL INFO NET/IB : Made virtual device [0] name=mlx5_1_dma speed=256000 ndevs=1 rail=-1 plane=-1
+<left-node>:1:1 [0] NCCL INFO NET/IB : Using [0]mlx5_1_dma:1/RoCE [RO]; OOB enP1p3s0f1np1:<RAIL_IP_A><0>
+<left-node>:1:1 [0] NCCL INFO Using network IB
+<left-node>:1:1 [0] NCCL INFO NET/IB : GPU Direct RDMA Enabled for HCA 0 'mlx5_1_dma'
+<left-node>:1:1 [0] NCCL INFO Channel 00/04 : 0 1
+<left-node>:1:1 [0] NCCL INFO Channel 01/04 : 0 1
+<left-node>:1:1 [0] NCCL INFO Channel 02/04 : 0 1
+<left-node>:1:1 [0] NCCL INFO Channel 03/04 : 0 1
+{"n": 50, "correct": 49, "acc": 0.98, "runaways": 0, "errors": 0, "think": 1, "pass_95": true}
+[2026-10-11 12:13:46 PDT] bench warm-short: slot warm-short C1 max_tokens 256 seed 101
+  decode 78.49944767418975 | output 74.39959125841219 | agg 73.9 | ttft 0.19352277828147635 | prefill 222.30779045791724 | cached max 0.0 | finish ['length']
+[2026-10-11 12:14:00 PDT] bench c1-r1: slot c1-r1 C1 max_tokens 1024 seed 111
+  decode 71.24546957978755 | output 68.7441798037268 | agg 73.0 | ttft 0.17510069862473757 | prefill 431.6766855900654 | cached max 0.0 | finish ['length', 'stop']
+[2026-10-11 12:14:44 PDT] bench c1-r2: slot c1-r2 C1 max_tokens 1024 seed 112
+  decode 74.11292050995749 | output 72.72952143696288 | agg 72.6 | ttft 0.14807162599172444 | prefill 255.34280411399715 | cached max 0.0 | finish ['length', 'stop']
+[2026-10-11 12:15:28 PDT] bench c1-r3: slot c1-r3 C1 max_tokens 1024 seed 113
+  decode 74.12447016466588 | output 72.44638591425723 | agg 71.3 | ttft 0.1489593181759119 | prefill 320.1686563068114 | cached max 0.0 | finish ['stop']
+[2026-10-11 12:15:58 PDT] bench warm-long8k: slot warm-long8k C1 max_tokens 64 seed 181
+  decode 81.39317340012727 | output 9.10154984591982 | agg 9.1 | ttft 6.257748745963909 | prefill 1310.055793673005 | cached max 0.0 | finish ['length']
+[2026-10-11 12:16:05 PDT] bench prefill8k: slot prefill8k C1 max_tokens 16 seed 182
+  decode 81.61671547604463 | output 4.052148176117462 | agg 4.0 | ttft 3.7605932163617886 | prefill 2180.5411615824423 | cached max 0.0 | finish ['length']
+[2026-10-11 12:16:16 PDT] bench c1long-r1: slot c1long-r1 C1 max_tokens 1024 seed 183
+  decode 72.7356717144104 | output 57.60379279397515 | agg 57.6 | ttft 3.7102811753672236 | prefill 2209.5481037162485 | cached max 0.0 | finish ['length']
+[2026-10-11 12:17:11 PDT] bench warm-long32k: slot warm-long32k C1 max_tokens 16 seed 321
+  decode 78.77931805421414 | output 1.0093947134199155 | agg 1.0 | ttft 15.66067830810789 | prefill 2092.7573732890073 | cached max 0.0 | finish ['length']
+[2026-10-11 12:17:26 PDT] bench prefill32k: slot prefill32k C1 max_tokens 16 seed 322
+  decode 79.58679861902165 | output 1.0110027862724267 | agg 1.0 | ttft 15.637379046684751 | prefill 2095.8771891555684 | cached max 0.0 | finish ['length']
+[2026-10-11 12:18:15 PDT] done
+[2026-10-11 12:18:21 PDT] <left-host> GB300 used after teardown: 22 MiB
+[2026-10-11 12:18:27 PDT] <right-host> GB300 used after teardown: 22 MiB
+[2026-10-11 12:18:27 PDT] logs in $LOGS/b3-20261011-1206-dspark (dailies are the controller's to restore)
+
+--- B3-summary.txt
+C1 decode tok/s (mean of 3 runs): 73.2 [71.2, 74.1, 74.1]
+C1 decode after 8K prompt: 72.7356717144104
+prefill tok/s 8K / 32K: 2180.5411615824423 / 2095.8771891555684
+max cached fraction: 0.0 | contaminated: []

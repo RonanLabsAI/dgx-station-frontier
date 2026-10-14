@@ -1,0 +1,118 @@
+# GLM-5.3-Flash EXL3 4bpw on ONE DGX Station GB300, host-gap round (TensorFold v0.6.0 + Mia's 107 patches + ours 9001-9003), 2026-10-11 PT.
+# Excerpt: the H0 (no host-gap settings) and H3 (TF_GLM_MULTI_LONE=1 TF_GLM_MULTI_ASYNC=1 TF_GLM_MULTI_SAMPLER=packed) sections of
+# recipes/glm53flash-tensorfold-gb300/results/data/host-gap-ab4.out, verbatim, plus the end-of-run identity check for both. The same file holds H1 and H2.
+# decode = (completion_tokens-1)/(last-first delta); C1 = mean of 3; aggregate = completion tokens / wall time; prefill = prompt tokens / TTFT at C1.
+# Nothing else edited.
+
+=== H0 00:46:38
+[2026-10-11 00:46:38 PDT] preflight: image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-dec-ngc, out $RUNS/b1-ab4-H0
+image sha256:cd07e84a7d60e24f38e6855499bf8939ca84646811c1714583dd8ff21a66310e
+[2026-10-11 00:46:38 PDT] GB300 memory used: 22 MiB
+[2026-10-11 00:46:38 PDT] preflight ok
+[2026-10-11 00:46:38 PDT] extra env: TF_GLM_L2PF=0
+[2026-10-11 00:46:38 PDT] extra env: TF_GLM_SPLIT_TARGET=576
+[2026-10-11 00:46:38 PDT] extra env: TF_GLM_SHAPE_SK=0
+[2026-10-11 00:46:38 PDT] extra env: TF_GLM_MULTI_PROFILE=64
+TF_GLM_CACHE_GIB=40
+TF_GLM_COMM=nccl
+TF_GLM_DENSE=q4
+TF_GLM_DISPLAY_KV_MIB=0
+TF_GLM_HC_SPLIT=0
+TF_GLM_KV=fp8
+TF_GLM_STREAM_SMOOTH=0
+[2026-10-11 00:46:38 PDT] serve: GB300 <GPU_UUID>, context 1048576, parallel 8, dense q4, drafts dflash2, image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-dec-ngc, profile 0
+[2026-10-11 00:55:05 PDT] healthy after 506 s; GB300 used 202570 MiB
+[2026-10-11 00:55:05 PDT] bench warm-short: slot warm-short, C4, max_tokens 256, seed 101
+  decode 93.73927669722035 tok/s/req | output 49.971652074776856 | agg 183.5 | ttft 2.3646779045229778 s | prefill 17.61168812528187 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 00:55:11 PDT] bench c1-r1: slot c1-r1, C1, max_tokens 1024, seed 111
+  decode 168.64017960414984 tok/s/req | output 162.13131939731468 | agg 175.8 | ttft 0.09707254657987505 s | prefill 755.8426622104362 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 00:55:29 PDT] bench c1-r2: slot c1-r2, C1, max_tokens 1024, seed 112
+  decode 164.2554679057893 tok/s/req | output 161.1940896532247 | agg 160.3 | ttft 0.0745391797972843 s | prefill 513.1400753904264 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 00:55:49 PDT] bench c1-r3: slot c1-r3, C1, max_tokens 1024, seed 113
+  decode 185.32681857267067 tok/s/req | output 180.45175318803314 | agg 185.5 | ttft 0.08008302496746182 s | prefill 585.9066569574795 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 00:56:03 PDT] bench c4-r1: slot c4-r1, C4, max_tokens 1024, seed 141
+  decode 84.30522304891772 tok/s/req | output 80.94891589661066 | agg 313.1 | ttft 0.1762695914876531 s | prefill 282.8209209651434 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 00:56:29 PDT] bench warm-long8k: slot warm-long8k, C1, max_tokens 64, seed 181
+  decode 150.86680092164374 tok/s/req | output 12.161503488841431 | agg 12.2 | ttft 4.844920324976556 s | prefill 1692.081489501 | cached max 0.000 | finish ['length']
+[2026-10-11 00:56:34 PDT] bench prefill8k: slot prefill8k, C1, max_tokens 16, seed 182
+  decode 170.69053212613028 tok/s/req | output 8.369993182605636 | agg 8.4 | ttft 1.8230769160436466 s | prefill 4496.901016716394 | cached max 0.000 | finish ['length']
+[2026-10-11 00:56:40 PDT] bench c1long-r1: slot c1long-r1, C1, max_tokens 1024, seed 183
+  decode 172.90151221455838 tok/s/req | output 132.29875382281216 | agg 132.3 | ttft 1.8229041370019938 s | prefill 4497.322617920234 | cached max 0.000 | finish ['length']
+[2026-10-11 00:57:03 PDT] bench warm-long32k: slot warm-long32k, C1, max_tokens 16, seed 321
+  decode 112.24460537625787 tok/s/req | output 2.161723765447719 | agg 2.2 | ttft 7.2678640050580725 s | prefill 4509.440459699153 | cached max 0.000 | finish ['length']
+[2026-10-11 00:57:11 PDT] bench prefill32k: slot prefill32k, C1, max_tokens 16, seed 322
+  decode 260.93126700540034 tok/s/req | output 2.189414395470021 | agg 2.2 | ttft 7.2499213159705205 s | prefill 4520.61141251126 | cached max 0.000 | finish ['length']
+C1 decode tok/s (mean of 3 runs): 172.7 [168.6, 164.3, 185.3]
+C1 output tok/s (mean of 3 runs): 167.9
+C4 aggregate output tok/s: 313.1 | per-request decode 84.30522304891772
+C1 decode after 8K prompt: 172.90151221455838
+prefill tok/s 8K / 32K: 4496.901016716394 / 4520.61141251126
+max cached fraction over all runs: 0.0 | contaminated: []
+[2026-10-11 00:57:33 PDT] bench warm-c16: slot warm-c16, C8, max_tokens 256, seed 1601
+  decode 58.17103195271308 tok/s/req | output 54.131996567163625 | agg 385.0 | ttft 0.30498140506097116 s | prefill 262.62859721479555 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 00:57:43 PDT] bench c8-r1: slot c16-r1, C8, max_tokens 1024, seed 1611
+  decode 55.91407491376113 tok/s/req | output 53.67863113818248 | agg 402.9 | ttft 0.22290415431416477 s | prefill 255.97466449158853 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 00:59:27 PDT] teardown
+[2026-10-11 00:59:36 PDT] GB300 used after teardown: 22 MiB
+[2026-10-11 00:59:36 PDT] other containers untouched (same set before/after)
+[2026-10-11 00:59:36 PDT] done: $RUNS/b1-ab4-H0
+=== H3 01:24:54
+[2026-10-11 01:24:54 PDT] preflight: image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-dec-ngc, out $RUNS/b1-ab4-H3
+image sha256:cd07e84a7d60e24f38e6855499bf8939ca84646811c1714583dd8ff21a66310e
+[2026-10-11 01:24:55 PDT] GB300 memory used: 22 MiB
+[2026-10-11 01:24:55 PDT] preflight ok
+[2026-10-11 01:24:55 PDT] extra env: TF_GLM_L2PF=0
+[2026-10-11 01:24:55 PDT] extra env: TF_GLM_SPLIT_TARGET=576
+[2026-10-11 01:24:55 PDT] extra env: TF_GLM_SHAPE_SK=0
+[2026-10-11 01:24:55 PDT] extra env: TF_GLM_MULTI_LONE=1
+[2026-10-11 01:24:55 PDT] extra env: TF_GLM_MULTI_ASYNC=1
+[2026-10-11 01:24:55 PDT] extra env: TF_GLM_MULTI_SAMPLER=packed
+TF_GLM_CACHE_GIB=40
+TF_GLM_COMM=nccl
+TF_GLM_DENSE=q4
+TF_GLM_DISPLAY_KV_MIB=0
+TF_GLM_HC_SPLIT=0
+TF_GLM_KV=fp8
+TF_GLM_STREAM_SMOOTH=0
+[2026-10-11 01:24:55 PDT] serve: GB300 <GPU_UUID>, context 1048576, parallel 8, dense q4, drafts dflash2, image tensorfold-b1:v0.6.0-c4646171-mia-b5808ac-tp1-dec-ngc, profile 0
+[2026-10-11 01:33:00 PDT] healthy after 485 s; GB300 used 202570 MiB
+[2026-10-11 01:33:00 PDT] bench warm-short: slot warm-short, C4, max_tokens 256, seed 101
+  decode 94.36523511554358 tok/s/req | output 50.38442144908537 | agg 184.0 | ttft 2.339831424964359 s | prefill 17.79837148622455 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 01:33:06 PDT] bench c1-r1: slot c1-r1, C1, max_tokens 1024, seed 111
+  decode 176.95493400927126 tok/s/req | output 169.76862598112845 | agg 184.0 | ttft 0.09668594100512565 s | prefill 758.7217213381027 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 01:33:24 PDT] bench c1-r2: slot c1-r2, C1, max_tokens 1024, seed 112
+  decode 172.3020709317326 tok/s/req | output 168.93897038064503 | agg 168.1 | ttft 0.0742312551708892 s | prefill 514.9661063415108 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 01:33:43 PDT] bench c1-r3: slot c1-r3, C1, max_tokens 1024, seed 113
+  decode 194.18100460726447 tok/s/req | output 188.836515784159 | agg 194.0 | ttft 0.07986037640366703 s | prefill 587.4344002528064 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 01:33:56 PDT] bench c4-r1: slot c4-r1, C4, max_tokens 1024, seed 141
+  decode 85.1297225385752 tok/s/req | output 81.68730988169631 | agg 316.2 | ttft 0.17749170454771956 s | prefill 282.1549964597517 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 01:34:22 PDT] bench warm-long8k: slot warm-long8k, C1, max_tokens 64, seed 181
+  decode 153.9448518745719 tok/s/req | output 12.23064796583639 | agg 12.2 | ttft 4.823518824996427 s | prefill 1699.5890961420832 | cached max 0.000 | finish ['length']
+[2026-10-11 01:34:27 PDT] bench prefill8k: slot prefill8k, C1, max_tokens 16, seed 182
+  decode 172.67063115264918 tok/s/req | output 8.383527973680538 | agg 8.4 | ttft 1.8209624566758673 s | prefill 4502.099178018504 | cached max 0.000 | finish ['length']
+[2026-10-11 01:34:33 PDT] bench c1long-r1: slot c1long-r1, C1, max_tokens 1024, seed 183
+  decode 178.48499007717547 tok/s/req | output 135.59949213521577 | agg 135.6 | ttft 1.8196291219210252 s | prefill 4505.418347103401 | cached max 0.000 | finish ['length']
+[2026-10-11 01:34:55 PDT] bench warm-long32k: slot warm-long32k, C1, max_tokens 16, seed 321
+  decode 113.8148451724107 tok/s/req | output 2.1641262772607672 | agg 2.2 | ttft 7.261490916018374 s | prefill 4513.398195913555 | cached max 0.000 | finish ['length']
+[2026-10-11 01:35:03 PDT] bench prefill32k: slot prefill32k, C1, max_tokens 16, seed 322
+  decode 264.41573275073375 tok/s/req | output 2.1911595866842153 | agg 2.2 | ttft 7.244860294313791 s | prefill 4523.76947680909 | cached max 0.000 | finish ['length']
+C1 decode tok/s (mean of 3 runs): 181.1 [177.0, 172.3, 194.2]
+C1 output tok/s (mean of 3 runs): 175.8
+C4 aggregate output tok/s: 316.2 | per-request decode 85.1297225385752
+C1 decode after 8K prompt: 178.48499007717547
+prefill tok/s 8K / 32K: 4502.099178018504 / 4523.76947680909
+max cached fraction over all runs: 0.0 | contaminated: []
+[2026-10-11 01:35:25 PDT] bench warm-c16: slot warm-c16, C8, max_tokens 256, seed 1601
+  decode 58.414907459974906 tok/s/req | output 54.42524577728692 | agg 387.1 | ttft 0.29756275324325543 s | prefill 265.1941429883014 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 01:35:35 PDT] bench c8-r1: slot c16-r1, C8, max_tokens 1024, seed 1611
+  decode 56.35201838311967 tok/s/req | output 54.06536008957163 | agg 405.8 | ttft 0.21532162384573894 s | prefill 258.1882792247637 | cached max 0.000 | finish ['length', 'stop']
+[2026-10-11 01:37:19 PDT] teardown
+[2026-10-11 01:37:27 PDT] GB300 used after teardown: 22 MiB
+[2026-10-11 01:37:27 PDT] other containers untouched (same set before/after)
+[2026-10-11 01:37:27 PDT] done: $RUNS/b1-ab4-H3
+[H0] identical to best run: c1-r1 5/5, c1-r2 5/5, c1-r3 5/5, c4-r1 16/16, c8-r1 64/64
+[H1] identical to best run: c1-r1 5/5, c1-r2 5/5, c1-r3 5/5, c4-r1 16/16, c8-r1 64/64
+[H2] identical to best run: c1-r1 5/5, c1-r2 5/5, c1-r3 5/5, c4-r1 16/16, c8-r1 64/64
+[H3] identical to best run: c1-r1 5/5, c1-r2 5/5, c1-r3 5/5, c4-r1 16/16, c8-r1 64/64
+[H0] identical to best run: c1-r1 5/5, c1-r2 5/5, c1-r3 5/5, c4-r1 16/16, c8-r1 64/64
+[H3] identical to best run: c1-r1 5/5, c1-r2 5/5, c1-r3 5/5, c4-r1 16/16, c8-r1 64/64

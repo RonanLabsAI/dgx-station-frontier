@@ -9,7 +9,7 @@ Mia's GLM-5.3-Flash EXL3 recipe (built for 2-4 DGX Sparks) on Ash Hart's TensorF
 | Decode, one request, no drafts | 91.7 tok/s | — |
 | 4 requests at once, aggregate | 306 tok/s | 316 tok/s |
 | 8 requests at once, aggregate | — | **406 tok/s** |
-| Prefill, 8K / 32K prompt | ~4,470 / ~4,500 tok/s | ~4,500 / ~4,520 tok/s |
+| Prefill, 8K / 32K prompt | ~4,470 / ~4,500 tok/s | ~4,502 / ~4,524 tok/s |
 | GSM8K-50 (thinking on, greedy) | 49/50 | 49/50 |
 | Window / cache pool | 1,048,576 / 6.6M tokens | same |
 
