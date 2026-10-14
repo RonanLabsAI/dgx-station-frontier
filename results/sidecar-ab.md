@@ -26,8 +26,8 @@ Both arms: same container image (vLLM nightly `af7f9488`, pinned by digest), sam
 same hot-expert map, same benchmark script (`tools/bench_e3.sh`), three repetitions per cell, each on its own seed.
 Decode tok/s = C x 1000 / mean TPOT.
 
-- **Random ids** (reproducible): 8,192 random-token prompt, 1,024 forced output tokens, greedy. This is catid's
-  published Station-pair shape.
+- **Random ids** (reproducible): 8,192 random-token prompt, 1,024 forced output tokens, the server's default
+  sampling (`tools/bench_e3.sh` passes no `--temperature`). This is catid's published Station-pair shape.
 - **Real text** (numbers only): 36 short prompts from a private workload, thinking off, 1,024 forced output tokens. The
   prompts are not published, and the expert maps were fitted to the same workload (on held-out topics), so these rows
   cannot be reproduced from this repo. They show what a usage-aware map buys on real traffic; random ids route almost
@@ -101,7 +101,7 @@ So at C1 the levers are kernel fusion and rank-balanced placement, not more expe
 
 Both arms: the same container image (vLLM nightly `af7f9488`, pinned by digest), weights revision, expert map and
 server flags (`32` sequences, context `131072`, DSpark speculative decoding `5/3/3`, prefix caching on). The bench is
-`vllm bench serve` with random ids, 8,192 in / 1,024 forced out, temperature 0, `5 x C` requests, a fresh seed for
+`vllm bench serve` with random ids, 8,192 in / 1,024 forced out, the server's default sampling (no `--temperature`), `5 x C` requests, a fresh seed for
 every invocation, the warm-up on its own seed, and `--num-warmups 0`.
 
 Two throughput metrics, labelled on every line because they differ:

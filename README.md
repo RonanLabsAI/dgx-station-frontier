@@ -36,8 +36,9 @@ Engines run in containers pinned by digest; each row of `results.jsonl` names it
 
 ## Headline results
 
-Shape unless noted: 8,192 random-token prompt, 1,024 forced output tokens, temperature 0 (the shape catid published
-for Station-pair results, so the numbers compare). "C" is concurrency; aggregate = output tokens per second across all
+Shape unless noted: 8,192 random-token prompt, 1,024 forced output tokens, the server's default sampling (no `--temperature`
+passed by `tools/bench_e3.sh` or `bench-nemotron-ultra.sh`, which produced the DS-V4-Pro, Nemotron and Kimi K3 rows; the DS-V4.1
+rows pass `--temperature 0`), as in the shape catid published for Station-pair results, so the numbers compare. "C" is concurrency; aggregate = output tokens per second across all
 streams.
 
 <!-- results -->
@@ -74,7 +75,8 @@ Result pages:
 ## Methodology
 
 **Benchmark shape.** Decode: `vllm bench serve` (or SGLang's `bench_serving`) with random token ids, 8,192 in,
-1,024 forced out (`--ignore-eos`), temperature 0. DS-V4.1 rows report vLLM's output token throughput; DS-V4-Pro rows
+1,024 forced out (`--ignore-eos`), temperature 0 for the DS-V4.1 rows and the server's default sampling (no `--temperature` passed)
+for the DS-V4-Pro, Nemotron and Kimi K3 random-id rows. DS-V4.1 rows report vLLM's output token throughput; DS-V4-Pro rows
 report decode throughput = C x 1000 / mean TPOT. Each recipe README says which.
 
 **Bench hygiene.** In October 2026 we audited our own receipts and found prefix-cache reuse inflating some of them.

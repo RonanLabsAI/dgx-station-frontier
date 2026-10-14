@@ -19,7 +19,8 @@ than four GB300s (search of 2026-10-06).
 
 Two benchmarks, three repetitions each, decode tok/s = C x 1000 / mean TPOT:
 
-- **random ids:** 8,192 random-token prompt, 1,024 forced output tokens, greedy (`vllm bench serve`). Reproducible.
+- **random ids:** 8,192 random-token prompt, 1,024 forced output tokens, the server's default sampling (`vllm bench serve` via `tools/bench_e3.sh`, which passes no
+  `--temperature`; the public-text `bench/public/pbench.sh` passes `--temperature 0`). Reproducible.
 - **real text:** 36 short prompts (12 held-out topics x 3 phrasings) from a private workload, thinking off, 1,024
   forced output tokens, streaming TPOT. **Not reproducible from this repo**: the prompts are private, and E2/E3 use expert
   maps fitted to the same private workload (held-out topics were not used to fit them). Random token ids route almost

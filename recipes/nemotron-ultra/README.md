@@ -28,7 +28,8 @@ the same checkpoint on both topologies.
 
 ## Results
 
-Shape: 8,192 random-token prompt, 1,024 forced output tokens (`--ignore-eos`), `vllm bench serve`. Decode tok/s =
+Shape: 8,192 random-token prompt, 1,024 forced output tokens (`--ignore-eos`), `vllm bench serve` with the server's default
+sampling (`bench-nemotron-ultra.sh` passes no `--temperature`). Decode tok/s =
 C x 1000 / mean TPOT, aggregate across streams. C1 is the mean of three repetitions with fresh prompts; C4, C16 and
 C32 are one run of 8, 32 and 64 prompts. Prefill = input length / mean TTFT at C1. Prefix caching is off on the
 server, so every run has zero cache hits by construction (the `/metrics` delta is still checked per run). MTP
