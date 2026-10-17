@@ -1,0 +1,72 @@
+# DeepSeek-V4.1-Flash-1017 on the GB300 + RTX PRO 6000 sidecar recipe (NEWSC), 2026-10-17 13:35-14:34 PT, one Station.
+# Scrubbed excerpt of the runner's master log plus the per-run summaries it wrote (same run directory).
+# Removed: host paths (kbench pool paths shortened to pool/long/<file>), GPU UUIDs, the services stopped/restored around
+# the run, the preflight's internal checks, and the lines of a separate quality comparison that is not published.
+# Weights deepseek-ai/DeepSeek-V4.1-Flash-1017 rev 1bae0e1088993b9b82de08f59de5be5a34e42170 (83 files checked before boot).
+# Image vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b (sha256:3af6a45b...), vLLM 0.30.1rc1.dev245+gaf7f9488c.
+# Map rowmap-mix-v1.json (original-el8, public): 285 hot experts per layer in GB300 HBM, 99 cold on the RTX PRO 6000.
+# Real text = kbench_chat_ds.py on the public CNN/DM pool (recipes/kimi-k3/bench/build_pool_k3.py; ~8,210 DS tokens in,
+#   1,024 forced out, thinking off, temperature 0, a per-run nonce so no prompt prefix repeats); decode_agg = C x 1000 / mean TPOT;
+#   output_tok_s = completion tokens / wall time (includes TTFT). C1 = 3 prompts per rep, C4 = 8, C16 and C32 = 32.
+# catid / ttft lines = vllm bench serve, RANDOM TOKEN IDS (8,192 in / 1,024 out for catid, 8,192 or 65,536 in / 16 out for TTFT),
+#   3 prompts per rep, own seed per rep, prefix-cache hit measured per rep and > 2% retried on a new seed.
+
+--- check boot (MEGA_PEER_CHECK on, MEGA_COLD_TRT=1): cosine gate v2, sidecar vs TRT-LLM cold path, real-text prompts
+2026-10-17 13:36:39 [d1017] NEWSC sidecar serving: prepared 40 layers in 47s; 75.9 GB allocated captured 560 graphs; 75.9 GB allocated ; RTX 73361 MiB
+2026-10-17 13:50:54 [d1017] NEWSC cosine gate v2 (12 real-text prompts, anchor T=2607): {"verdict": "PASS", "anchor_line": 1765, "checks": 426, "layers_covered": 40, "uncovered": [], "below": {}, "cos_min": 0.99958, "small_row_checks": 54, "small_row_cos_min": 0.99905, "rows0_dropped": 0, "small_row_uncovered_layers": {}}
+--- production boot (MEGA_PEER_CHECK=0, MEGA_COLD_TRT=0, route counting on)
+2026-10-17 13:59:30 [d1017] boot NEWSC (NEWSC) up in 496 s; GB300 242164 MiB RTX 73361 MiB; hook proven
+MEGA_PEER patched vllm.models.deepseek_v4.nvidia.model.DeepseekV4MegaMoEExperts (peer mode 2, check 0)
+MEGA_PEER patched vllm.models.deepseek_v4.nvidia.model.DeepseekV4MegaMoEExperts (peer mode 2, check 0)
+MEGA_PEER rowmap /w/rowmap-mix-v1.json: 40 layers
+MEGA_PEER layer 0 (language_model.model.layers.0.ffn.experts): 285 hot experts in MegaMoE, 99 cold on the host; peer mode 2
+--- real text (kbench): per-run master-log line, then the full summary of each run
+2026-10-17 13:59:45 [d1017] NEWSC real-text c1-r1: {'decode_agg': 273.49, 'acceptance_len': 2.896, 'median_ttft_s': 0.22, 'prefix_hit_pct': 0.0}
+2026-10-17 13:59:57 [d1017] NEWSC real-text c1-r2: {'decode_agg': 280.99, 'acceptance_len': 2.984, 'median_ttft_s': 0.23, 'prefix_hit_pct': 0.0}
+2026-10-17 14:00:10 [d1017] NEWSC real-text c1-r3: {'decode_agg': 266.36, 'acceptance_len': 2.825, 'median_ttft_s': 0.22, 'prefix_hit_pct': 0.0}
+2026-10-17 14:00:35 [d1017] NEWSC real-text c16: {'decode_agg': 1545.5, 'acceptance_len': 2.658, 'median_ttft_s': 0.77, 'prefix_hit_pct': 0.0}
+2026-10-17 14:04:21 [d1017] NEWSC real-text c4: {'decode_agg': 689.1, 'acceptance_len': 2.858, 'median_ttft_s': 0.55, 'prefix_hit_pct': 0.0}
+2026-10-17 14:04:41 [d1017] NEWSC real-text c32: {'decode_agg': 2276.61, 'acceptance_len': 2.646, 'median_ttft_s': 3.45, 'prefix_hit_pct': 0.0}
+rt-NEWSC-c1-r1: {"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 3.66, "decode_agg": 273.49, "output_tok_s": 258.34, "wall_s": 11.9, "median_ttft_s": 0.22, "mean_ptoks": 8212, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24636, "think": "off", "spec_drafts": 1060, "spec_draft_tokens": 5300, "spec_accepted": 2010, "acceptance_len": 2.896, "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "d1017-69306000-NEWSC-c1-r1-t1"}
+rt-NEWSC-c1-r2: {"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 3.56, "decode_agg": 280.99, "output_tok_s": 264.9, "wall_s": 11.6, "median_ttft_s": 0.23, "mean_ptoks": 8212, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24636, "think": "off", "spec_drafts": 1029, "spec_draft_tokens": 5145, "spec_accepted": 2042, "acceptance_len": 2.984, "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "d1017-69306000-NEWSC-c1-r2-t1"}
+rt-NEWSC-c1-r3: {"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 3.75, "decode_agg": 266.36, "output_tok_s": 251.94, "wall_s": 12.2, "median_ttft_s": 0.22, "mean_ptoks": 8211, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24633, "think": "off", "spec_drafts": 1087, "spec_draft_tokens": 5435, "spec_accepted": 1984, "acceptance_len": 2.825, "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "d1017-69306000-NEWSC-c1-r3-t1"}
+rt-NEWSC-c4: {"C": 4, "np": 8, "ok": 8, "mean_tpot_ms": 5.8, "decode_agg": 689.1, "output_tok_s": 619.33, "wall_s": 13.2, "median_ttft_s": 0.55, "mean_ptoks": 8210, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 65680, "think": "off", "spec_drafts": 2869, "spec_draft_tokens": 14345, "spec_accepted": 5332, "acceptance_len": 2.858, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "d1017-69306000-NEWSC-c4-t1"}
+rt-NEWSC-c16: {"C": 16, "np": 32, "ok": 32, "mean_tpot_ms": 10.35, "decode_agg": 1545.5, "output_tok_s": 1340.67, "wall_s": 24.4, "median_ttft_s": 0.77, "mean_ptoks": 8209.9, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 262718, "think": "off", "spec_drafts": 12331, "spec_draft_tokens": 37089, "spec_accepted": 20449, "acceptance_len": 2.658, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "d1017-69306000-NEWSC-c16-t1"}
+rt-NEWSC-c32: {"C": 32, "np": 32, "ok": 32, "mean_tpot_ms": 14.06, "decode_agg": 2276.61, "output_tok_s": 1778.55, "wall_s": 18.4, "median_ttft_s": 3.45, "mean_ptoks": 8209.9, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 262718, "think": "off", "spec_drafts": 12384, "spec_draft_tokens": 37200, "spec_accepted": 20385, "acceptance_len": 2.646, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "d1017-69306000-NEWSC-c32-t1"}
+--- GSM8K-200 (first 200 test rows; thinking on, reasoning_effort 50, temperature 0.3, max_tokens 24,000, C16)
+2026-10-17 14:01:16 [d1017] arm NEWSC GSM8K-200: {"n": 200, "correct": 194, "acc": 97.0, "runaways": 0, "errors": 0, "wall_s": 41, "median_ctoks": 152}
+--- random token ids (vllm bench serve): catid C1 decode, TTFT 8K and 64K
+== 2026-10-17 14:04:41 PDT catid nonce=69306100 CS=[1] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+catid C1 rep1 seed 69306201: decode_agg 520.83 tok/s (TPOT 1.92 ms) out 467.98 tok/s TTFT_med 224.70 ms failed 0 prefix_hit 0.00% acc_len 5.405 drafts 568 draft_tokens 2840 accepted 2502
+catid C1 rep2 seed 69306202: prefix_hit 32.81% > 2% -> retry, new seed
+catid C1 rep2 seed 69306252: decode_agg 471.7 tok/s (TPOT 2.12 ms) out 428.36 tok/s TTFT_med 226.87 ms failed 0 prefix_hit 0.00% acc_len 5.036 drafts 611 draft_tokens 3055 accepted 2466
+catid C1 rep3 seed 69306203: decode_agg 423.73 tok/s (TPOT 2.36 ms) out 387.39 tok/s TTFT_med 222.99 ms failed 0 prefix_hit 0.00% acc_len 4.661 drafts 660 draft_tokens 3300 accepted 2416
+DONE 14:06:38 contaminated=0
+== 2026-10-17 14:06:38 PDT ttft8k nonce=69306300 CS=[1] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+ttft8k C1 rep1 seed 69306401: decode_agg 106.61 tok/s (TPOT 9.38 ms) out 44.62 tok/s TTFT_med 217.56 ms failed 0 prefix_hit 0.00% acc_len 1.667 drafts 9 draft_tokens 45 accepted 6
+ttft8k C1 rep2 seed 69306402: decode_agg 117.51 tok/s (TPOT 8.51 ms) out 45.08 tok/s TTFT_med 226.99 ms failed 0 prefix_hit 0.00% acc_len 2.250 drafts 8 draft_tokens 40 accepted 10
+ttft8k C1 rep3 seed 69306403: decode_agg 146.2 tok/s (TPOT 6.84 ms) out 48.64 tok/s TTFT_med 226.10 ms failed 0 prefix_hit 0.00% acc_len 1.600 drafts 10 draft_tokens 50 accepted 6
+DONE 14:07:35 contaminated=0
+== 2026-10-17 14:07:35 PDT ttft64k nonce=69306500 CS=[1] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+ttft64k C1 rep1 seed 69306601: decode_agg 268.1 tok/s (TPOT 3.73 ms) out 9.30 tok/s TTFT_med 1663.50 ms failed 0 prefix_hit 0.00% acc_len 2.000 drafts 10 draft_tokens 50 accepted 10
+ttft64k C1 rep2 seed 69306602: decode_agg 386.1 tok/s (TPOT 2.59 ms) out 9.42 tok/s TTFT_med 1659.78 ms failed 0 prefix_hit 0.00% acc_len 2.000 drafts 8 draft_tokens 40 accepted 8
+ttft64k C1 rep3 seed 69306603: decode_agg 301.2 tok/s (TPOT 3.32 ms) out 9.60 tok/s TTFT_med 1615.89 ms failed 0 prefix_hit 0.00% acc_len 1.778 drafts 9 draft_tokens 45 accepted 7
+DONE 14:08:37 contaminated=0
+--- coherence / tool calls
+2026-10-17 14:08:41 [d1017] arm NEWSC quality: auto-checked 11/12 correct (empty answers 0) | toolcall 3/3 ok | toolext 12/12 ok
+--- long context (needle items at 63,000 and 125,000 target tokens; 4 single-needle + 2 two-hop per length; thinking off)
+{"len": 63000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 64112, "finish": "stop", "wall": 1.6, "answer_has_digits": true}
+{"len": 63000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 64112, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 63000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 64112, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 63000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 64112, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 63000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 64115, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 63000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": true, "ptoks": 64116, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 125000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 127199, "finish": "stop", "wall": 3.1, "answer_has_digits": true}
+{"len": 125000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 127199, "finish": "stop", "wall": 0.4, "answer_has_digits": true}
+{"len": 125000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 127199, "finish": "stop", "wall": 0.4, "answer_has_digits": true}
+{"len": 125000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 127199, "finish": "stop", "wall": 0.4, "answer_has_digits": true}
+{"len": 125000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 127203, "finish": "stop", "wall": 0.4, "answer_has_digits": true}
+{"len": 125000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": false, "ptoks": 127203, "finish": "stop", "wall": 0.4, "answer_has_digits": false}
+2026-10-17 14:13:16 [d1017] NEWSC long context (rc 1): {"chars_per_token": 4.695, "lengths": {"63000": {"correct": 5, "n": 6, "errors": 0, "valid": true, "ptoks_min": 64112, "ptoks_max": 64116}, "125000": {"correct": 4, "n": 6, "errors": 0, "valid": true, "ptoks_min": 127199, "ptoks_max": 127203}}, "bar": "[KIT] every length valid (prompt_tokens in [0.9
+--- sidecar shm timeout word over the boot
+timeouts_delta 0 words_before 3480 3480 0 362362 738800 303951168 3116 words_after 1747600 1747600 0 150291240 251493726 91747867904 1617900

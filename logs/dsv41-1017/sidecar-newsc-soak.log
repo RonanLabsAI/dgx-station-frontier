@@ -1,0 +1,20 @@
+# DeepSeek-V4.1-Flash-1017 on the sidecar recipe (NEWSC): 20-minute C16 soak, 2026-10-17 15:37-16:09 PT, its own boot of the same
+# production recipe as sidecar-newsc.log (rowmap-mix-v1, MEGA_PEER_CHECK=0, MEGA_COLD_TRT=0). The cosine check boot was not
+# repeated; the gate result it relies on is the check-boot line in sidecar-newsc.log.
+# Soak: 1,200 s at C16, seed 7, non-streaming client, 600 s request timeout. Job mix (by_kind below): gsm = GSM8K thinking on, T 0 (30%);
+# gsmnt = GSM8K thinking off (15%); ids = random token ids (15%); long = 4K-12K-token synthetic prompts (10%); chat = short chat,
+# T 0.6 (10%); gsmT = GSM8K thinking on, T 0.6 (10%); pfx = one shared ~3,000-word prefix + short suffix, prefix-cache hits on purpose (10%).
+# Scrubbed excerpt: host paths, GPU UUIDs and the services stopped around the run removed.
+
+2026-10-17 15:39:32 [d1017-scsoak] sidecar serving: prepared 40 layers in 46s; 75.9 GB allocated captured 560 graphs; 75.9 GB allocated ; RTX 73361 MiB
+2026-10-17 15:47:51 [d1017-scsoak] NEWSC up in 497 s; hook proven; 391 probe 391; GB300 242164 RTX 73361 MiB
+healthy before soak
+soak t=380s submitted 500: {'ok': 500, 'timeout': 0, 'http_error': 0, 'other': 0}
+soak t=604s submitted 800: {'ok': 800, 'timeout': 0, 'http_error': 0, 'other': 0}
+soak t=758s submitted 1000: {'ok': 1000, 'timeout': 0, 'http_error': 0, 'other': 0}
+{"mode": "soak", "ok": 1539, "timeout": 0, "http_error": 0, "other": 0, "submitted": 1539, "healthy_after": true, "by_kind": {"gsmnt": {"ok": 243, "bad": 0}, "gsm": {"ok": 450, "bad": 0}, "chat": {"ok": 164, "bad": 0}, "long": {"ok": 165, "bad": 0}, "gsmT": {"ok": 144, "bad": 0}, "ids": {"ok": 225, "bad": 0}, "pfx": {"ok": 148, "bad": 0}}, "duration_s": 1200.0, "conc": 16, "req_timeout_s": 600.0, "seed": 7}
+healthy after soak
+--- sidecar shm timeout word over the soak
+timeouts_delta 0 words_before 4640 4640 0 882794 1445954 630595040 4251 words_after 2814040 2814040 0 33032822 65617165 38030968128 2281563
+2026-10-17 16:09:03 [d1017-scsoak] peer shm after teardown: absent
+2026-10-17 16:09:04 [d1017-scsoak] scsoak: PASS (G4 PASS, SC2 PASS)

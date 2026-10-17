@@ -83,6 +83,86 @@ Reading the numbers:
   output tok/s (this README's metric) and decode tok/s (C x 1000 / mean TPOT, higher because it excludes TTFT); compare
   the C1 means above with its output row, not its decode row.
 
+## 1017 checkpoint (2026-10-17)
+
+DeepSeek published an updated checkpoint, `deepseek-ai/DeepSeek-V4.1-Flash-1017` (revision `1bae0e10`). Its
+`config.json`, tokenizer and shard layout are identical to the base repository's, so this recipe serves it unchanged:
+same image, hook, sidecar, b12x commit and `rowmap-mix-v1` map (checked equal to the 2026-10-09 inputs before boot).
+Licence: MIT (model card, checked 2026-10-17 at revision `1bae0e10`).
+
+**Arms, one Station, one day:**
+
+- **Sidecar (NEWSC):** the 1017 weights on this recipe: GB300 hot experts + RTX PRO 6000 cold experts, el8's public
+  `rowmap-mix-v1`, `max-num-seqs 32`, default thinking off, route counting on. Session 13:35-14:34 PT.
+- **Grace (NEW):** the 1017 weights on one GB300 with the cold experts served from Grace memory (no RTX PRO 6000). Its
+  hot/cold map was fitted to a private workload (not published), so this arm cannot be reproduced from this repo.
+  Session 07:18-08:34 PT.
+- **Older checkpoint (OLD):** revision `dba1be0a` on the same Grace recipe and map, booted in the same session as NEW
+  as its control.
+
+**Real text** is the public CNN/DailyMail pool of the Kimi K3 recipe
+([`build_pool_k3.py`](../kimi-k3/bench/build_pool_k3.py), driven by
+[`kbench_chat_ds.py`](../kimi-k3/bench/kbench_chat_ds.py)): about `8,210` prompt tokens, `1,024` forced output tokens,
+thinking off, temperature `0`, a nonce per run, the prefix-cache hit rate measured around every run (0.0% in all of
+them). The metric is **decode_agg = C x 1000 / mean TPOT** (it excludes TTFT and includes DSpark acceptance). C1 is the
+mean of three repetitions of three prompts; C4 sends `8` prompts, C16 and C32 send `32`.
+
+<!-- results -->
+| Real text, decode_agg, tok/s | C1 per user (mean of `3`) | C4 | C16 | C32 | Receipt |
+|---|---|---|---|---|---|
+| Sidecar (NEWSC), `1017` | **273.61** | **689.1** | **1,545.5** | **2,276.61** | [log](../../logs/dsv41-1017/sidecar-newsc.log) |
+| Grace (NEW), `1017`, private-fitted map | 166.75 | 304.4 | 562.9 | 801.19 | [log](../../logs/dsv41-1017/grace-new-old.log) |
+| Sidecar / Grace | 1.64x | 2.26x | 2.75x | 2.84x | [sidecar](../../logs/dsv41-1017/sidecar-newsc.log), [Grace](../../logs/dsv41-1017/grace-new-old.log) |
+| Older checkpoint (OLD), Grace, same session as NEW | 164.53 | | 566.89 | | [log](../../logs/dsv41-1017/grace-new-old.log) |
+<!-- /results -->
+
+<!-- results -->
+| Quality, gates and random-id controls | Sidecar (NEWSC) | Grace (NEW) | Receipt |
+|---|---|---|---|
+| GSM8K-200 (first `200` test rows, thinking on, effort `50`, T `0.3`), % | 97.0 | 97.5 | [sidecar](../../logs/dsv41-1017/sidecar-newsc.log), [Grace](../../logs/dsv41-1017/grace-new-old.log) |
+| Cosine gate v2: sidecar vs TRT-LLM cold path, minimum over `426` real-text checks, `40`/`40` layers covered | 0.99958 | | [log](../../logs/dsv41-1017/sidecar-newsc.log) |
+| Sidecar timeouts (production boot) | 0 | | [log](../../logs/dsv41-1017/sidecar-newsc.log) |
+| Soak (`20` min, C16, mixed jobs): requests ok / request timeouts / sidecar timeouts | 1,539 / 0 / 0 | | [soak](../../logs/dsv41-1017/sidecar-newsc-soak.log) |
+| Random token ids (catid shape), C1 decode_agg per user (mean of `3`), tok/s | 472.09 | | [log](../../logs/dsv41-1017/sidecar-newsc.log) |
+| Random token ids, same runs, vLLM output tok/s per user | 427.91 | | [log](../../logs/dsv41-1017/sidecar-newsc.log) |
+| TTFT, random ids, `8,192` in, median of `3`, ms | 226.1 | | [log](../../logs/dsv41-1017/sidecar-newsc.log) |
+| TTFT, random ids, `65,536` in, median of `3`, ms | 1,659.78 | | [log](../../logs/dsv41-1017/sidecar-newsc.log) |
+<!-- /results -->
+
+<!-- results -->
+| Long-context needle check, correct of `6` (gate: `6` of `6` at both lengths) | `63,000` tokens | `125,000` tokens | Receipt |
+|---|---|---|---|
+| Sidecar (NEWSC) | 5 | 4 | [log](../../logs/dsv41-1017/sidecar-newsc.log) |
+| Grace (NEW) | 5 | 4 | [log](../../logs/dsv41-1017/grace-new-old.log) |
+| Older checkpoint (OLD), Grace | 5 | 4 | [log](../../logs/dsv41-1017/grace-new-old.log) |
+<!-- /results -->
+
+Reading the numbers:
+
+- **The long-context check failed for every arm**, including the older checkpoint. All single-needle items were
+  correct; every miss was a two-hop item (one at `63,000` tokens, two at `125,000`), the same items on all three boots,
+  with no request errors. It is not a sidecar effect and not a 1017 regression, but neither checkpoint passes it.
+- **Sidecar / Grace is not a single-variable A/B.** Both arms serve the 1017 weights on the same Station and image, but
+  they ran in different sessions of the same day and use different hot/cold maps (el8's public map on the sidecar, a
+  map fitted to a private workload on Grace). The gain grows with concurrency, from 1.64x at C1 to 2.84x at C32. For a
+  clean same-session sidecar-vs-Grace A/B (older checkpoint, same map on both arms) see
+  [`results/sidecar-ab.md`](../../results/sidecar-ab.md) section 2.
+- **1017 vs the older checkpoint on Grace:** within run-to-run noise at C1 and C16 (166.75 vs 164.53 tok/s, 562.9 vs
+  566.89 tok/s).
+- **Not comparable with the older rows of this README.** The Results table at the top and the DP2 rows report vLLM output
+  tok/s on random token ids; this section reports decode_agg on real text. Real text draws far fewer DSpark acceptances
+  than random ids (mean accepted length about `2.9` vs `4.7-5.4` at C1, both in the log), which is why the random-id C1
+  above (472.09 tok/s decode_agg, 427.91 tok/s output) reads higher than the real-text C1 (273.61 tok/s).
+- **One random-id repetition was retried.** Rep 2's first seed measured a `32.81%` prefix-cache hit, above the `2%`
+  limit; it was discarded and rerun on a new seed (both lines are in the log). Every reported run measured `0.00%`.
+- **The cosine gate was re-registered.** The first sidecar attempt that morning read FAIL because the kit counted
+  vLLM's warm-up and graph-capture checks as real text (a line-numbering bug). Re-read on real text only, that attempt
+  had no check below `0.999` but left one decoder layer without a check of at least `32` cold rows. The fixed gate (same
+  bar, more real-text prompts until every layer is covered) was frozen before the boot reported here. The soak ran on its
+  own boot of the same production recipe (15:47-16:09 PT).
+- To run it: point `MODEL=` in [`launch/launch-dsv41-sidecar.sh`](launch/launch-dsv41-sidecar.sh) at the 1017
+  download; nothing else changes. The rows above used `SEQS=32` (the default) and sent thinking off per request.
+
 ## Prefill-biased expert slots (Stage 0)
 
 **Result:** giving the early MoE layers more HBM expert slots, paid for out of KV cache, speeds up `16K` single-request

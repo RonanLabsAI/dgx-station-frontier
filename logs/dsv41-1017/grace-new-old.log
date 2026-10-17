@@ -1,0 +1,74 @@
+# DeepSeek-V4.1-Flash: 1017 checkpoint (NEW) and the older checkpoint (OLD) on the one-GB300 Grace recipe, 2026-10-17 07:18-08:34 PT,
+# same Station as the sidecar log, earlier the same day. OLD = weights rev dba1be0a, NEW = DeepSeek-V4.1-Flash-1017 rev 1bae0e10;
+# nothing else differs between the two boots. Cold experts (99 of 384 per layer) are served from Grace memory (MEGA_PEER=0,
+# MEGA_COLD_TRT=1); the RTX PRO 6000 is not used by this recipe. The hot/cold map was fitted to a private workload and is not
+# published: its file name is replaced below.
+# Scrubbed excerpt of the runner's master log plus the per-run summaries it wrote. Removed: host paths, GPU UUIDs, the services
+# stopped/restored around the run, and the lines of a separate quality comparison that is not published.
+# Image vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b (sha256:3af6a45b...). Real text and decode_agg as in
+# sidecar-newsc.log (same pool files, same harness).
+
+=== OLD
+2026-10-17 07:31:17 [d1017] boot OLD (OLD) up in 722 s; GB300 242352 MiB RTX 47 MiB; hook proven
+MEGA_PEER patched vllm.models.deepseek_v4.nvidia.model.DeepseekV4MegaMoEExperts (peer mode 0, check 0)
+MEGA_PEER patched vllm.models.deepseek_v4.nvidia.model.DeepseekV4MegaMoEExperts (peer mode 0, check 0)
+MEGA_PEER rowmap <hot/cold map fitted to a private workload, not published>: 40 layers
+MEGA_PEER layer 0 (language_model.model.layers.0.ffn.experts): 285 hot experts in MegaMoE, 99 cold on the host; peer mode 0
+2026-10-17 07:31:40 [d1017] OLD real-text c1-r1: {'decode_agg': 166.88, 'acceptance_len': 2.954, 'median_ttft_s': 0.33, 'prefix_hit_pct': 0.0}
+2026-10-17 07:32:00 [d1017] OLD real-text c1-r2: {'decode_agg': 165.02, 'acceptance_len': 2.999, 'median_ttft_s': 0.34, 'prefix_hit_pct': 0.0}
+2026-10-17 07:32:21 [d1017] OLD real-text c1-r3: {'decode_agg': 161.7, 'acceptance_len': 2.943, 'median_ttft_s': 0.34, 'prefix_hit_pct': 0.0}
+2026-10-17 07:33:26 [d1017] OLD real-text c16: {'decode_agg': 566.89, 'acceptance_len': 2.694, 'median_ttft_s': 1.12, 'prefix_hit_pct': 0.0}
+2026-10-17 07:40:10 [d1017] OLD real-text c4: {'decode_agg': 311.33, 'acceptance_len': 3.039, 'median_ttft_s': 0.64, 'prefix_hit_pct': 0.0}
+2026-10-17 07:41:00 [d1017] OLD real-text c32: {'decode_agg': 805.39, 'acceptance_len': 2.705, 'median_ttft_s': 5.37, 'prefix_hit_pct': 0.0}
+rt-OLD-c1-r1: {"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 5.99, "decode_agg": 166.88, "output_tok_s": 158.47, "wall_s": 19.4, "median_ttft_s": 0.33, "mean_ptoks": 8211, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24633, "think": "off", "spec_drafts": 1041, "spec_draft_tokens": 5205, "spec_accepted": 2034, "acceptance_len": 2.954, "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "d1017-46720000-OLD-c1-r1-t1"}
+rt-OLD-c1-r2: {"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 6.06, "decode_agg": 165.02, "output_tok_s": 156.69, "wall_s": 19.6, "median_ttft_s": 0.34, "mean_ptoks": 8211, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24633, "think": "off", "spec_drafts": 1025, "spec_draft_tokens": 5125, "spec_accepted": 2049, "acceptance_len": 2.999, "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "d1017-46720000-OLD-c1-r2-t1"}
+rt-OLD-c1-r3: {"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 6.18, "decode_agg": 161.7, "output_tok_s": 153.61, "wall_s": 20.0, "median_ttft_s": 0.34, "mean_ptoks": 8210, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24630, "think": "off", "spec_drafts": 1045, "spec_draft_tokens": 5225, "spec_accepted": 2030, "acceptance_len": 2.943, "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "d1017-46720000-OLD-c1-r3-t1"}
+rt-OLD-c4: {"C": 4, "np": 8, "ok": 8, "mean_tpot_ms": 12.85, "decode_agg": 311.33, "output_tok_s": 282.1, "wall_s": 29.0, "median_ttft_s": 0.64, "mean_ptoks": 8209, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 65672, "think": "off", "spec_drafts": 2697, "spec_draft_tokens": 13485, "spec_accepted": 5498, "acceptance_len": 3.039, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "d1017-46720000-OLD-c4-t1"}
+rt-OLD-c16: {"C": 16, "np": 32, "ok": 32, "mean_tpot_ms": 28.22, "decode_agg": 566.89, "output_tok_s": 521.45, "wall_s": 62.8, "median_ttft_s": 1.12, "mean_ptoks": 8208.9, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 262686, "think": "off", "spec_drafts": 12163, "spec_draft_tokens": 36559, "spec_accepted": 20603, "acceptance_len": 2.694, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "d1017-46720000-OLD-c16-t1"}
+rt-OLD-c32: {"C": 32, "np": 32, "ok": 32, "mean_tpot_ms": 39.73, "decode_agg": 805.39, "output_tok_s": 682.56, "wall_s": 48.0, "median_ttft_s": 5.37, "mean_ptoks": 8208.9, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 262686, "think": "off", "spec_drafts": 12115, "spec_draft_tokens": 36383, "spec_accepted": 20654, "acceptance_len": 2.705, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "d1017-46720000-OLD-c32-t1"}
+2026-10-17 07:34:55 [d1017] arm OLD GSM8K-200: {"n": 200, "correct": 197, "acc": 98.5, "runaways": 0, "errors": 0, "wall_s": 89, "median_ctoks": 163}
+{"len": 63000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 64112, "finish": "stop", "wall": 2.4, "answer_has_digits": true}
+{"len": 63000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 64112, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 63000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 64112, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 63000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 64112, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 63000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 64115, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 63000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": true, "ptoks": 64116, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 125000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 127199, "finish": "stop", "wall": 4.6, "answer_has_digits": true}
+{"len": 125000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 127199, "finish": "stop", "wall": 0.5, "answer_has_digits": true}
+{"len": 125000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 127199, "finish": "stop", "wall": 0.5, "answer_has_digits": true}
+{"len": 125000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 127199, "finish": "stop", "wall": 0.5, "answer_has_digits": true}
+{"len": 125000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 127203, "finish": "stop", "wall": 0.5, "answer_has_digits": true}
+{"len": 125000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": false, "ptoks": 127203, "finish": "stop", "wall": 0.5, "answer_has_digits": true}
+2026-10-17 07:55:49 [d1017] OLD long context (rc 1): {"chars_per_token": 4.695, "lengths": {"63000": {"correct": 5, "n": 6, "errors": 0, "valid": true, "ptoks_min": 64112, "ptoks_max": 64116}, "125000": {"correct": 4, "n": 6, "errors": 0, "valid": true, "ptoks_min": 127199, "ptoks_max": 127203}}, "bar": "[KIT] every length valid (prompt_tokens in [0.9
+=== NEW
+2026-10-17 08:09:14 [d1017] boot NEW (NEW) up in 722 s; GB300 242352 MiB RTX 90087 MiB; hook proven
+MEGA_PEER patched vllm.models.deepseek_v4.nvidia.model.DeepseekV4MegaMoEExperts (peer mode 0, check 0)
+MEGA_PEER patched vllm.models.deepseek_v4.nvidia.model.DeepseekV4MegaMoEExperts (peer mode 0, check 0)
+MEGA_PEER rowmap <hot/cold map fitted to a private workload, not published>: 40 layers
+MEGA_PEER layer 0 (language_model.model.layers.0.ffn.experts): 285 hot experts in MegaMoE, 99 cold on the host; peer mode 0
+2026-10-17 08:09:38 [d1017] NEW real-text c1-r1: {'decode_agg': 163.6, 'acceptance_len': 2.922, 'median_ttft_s': 0.33, 'prefix_hit_pct': 0.0}
+2026-10-17 08:09:57 [d1017] NEW real-text c1-r2: {'decode_agg': 171.16, 'acceptance_len': 3.119, 'median_ttft_s': 0.34, 'prefix_hit_pct': 0.0}
+2026-10-17 08:10:18 [d1017] NEW real-text c1-r3: {'decode_agg': 165.48, 'acceptance_len': 3.006, 'median_ttft_s': 0.34, 'prefix_hit_pct': 0.0}
+2026-10-17 08:11:24 [d1017] NEW real-text c16: {'decode_agg': 562.9, 'acceptance_len': 2.654, 'median_ttft_s': 1.03, 'prefix_hit_pct': 0.0}
+2026-10-17 08:17:39 [d1017] NEW real-text c4: {'decode_agg': 304.4, 'acceptance_len': 2.948, 'median_ttft_s': 0.73, 'prefix_hit_pct': 0.0}
+2026-10-17 08:18:30 [d1017] NEW real-text c32: {'decode_agg': 801.19, 'acceptance_len': 2.663, 'median_ttft_s': 5.49, 'prefix_hit_pct': 0.0}
+rt-NEW-c1-r1: {"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 6.11, "decode_agg": 163.6, "output_tok_s": 155.53, "wall_s": 19.8, "median_ttft_s": 0.33, "mean_ptoks": 8211, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24633, "think": "off", "spec_drafts": 1052, "spec_draft_tokens": 5260, "spec_accepted": 2022, "acceptance_len": 2.922, "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "d1017-46720000-NEW-c1-r1-t1"}
+rt-NEW-c1-r2: {"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 5.84, "decode_agg": 171.16, "output_tok_s": 162.17, "wall_s": 18.9, "median_ttft_s": 0.34, "mean_ptoks": 8211, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24633, "think": "off", "spec_drafts": 985, "spec_draft_tokens": 4925, "spec_accepted": 2087, "acceptance_len": 3.119, "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "d1017-46720000-NEW-c1-r2-t1"}
+rt-NEW-c1-r3: {"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 6.04, "decode_agg": 165.48, "output_tok_s": 157.01, "wall_s": 19.6, "median_ttft_s": 0.34, "mean_ptoks": 8210, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24630, "think": "off", "spec_drafts": 1022, "spec_draft_tokens": 5110, "spec_accepted": 2050, "acceptance_len": 3.006, "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "d1017-46720000-NEW-c1-r3-t1"}
+rt-NEW-c4: {"C": 4, "np": 8, "ok": 8, "mean_tpot_ms": 13.14, "decode_agg": 304.4, "output_tok_s": 282.43, "wall_s": 29.0, "median_ttft_s": 0.73, "mean_ptoks": 8209, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 65672, "think": "off", "spec_drafts": 2779, "spec_draft_tokens": 13895, "spec_accepted": 5414, "acceptance_len": 2.948, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "d1017-46720000-NEW-c4-t1"}
+rt-NEW-c16: {"C": 16, "np": 32, "ok": 32, "mean_tpot_ms": 28.42, "decode_agg": 562.9, "output_tok_s": 515.97, "wall_s": 63.5, "median_ttft_s": 1.03, "mean_ptoks": 8208.9, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 262686, "think": "off", "spec_drafts": 12347, "spec_draft_tokens": 37125, "spec_accepted": 20417, "acceptance_len": 2.654, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "d1017-46720000-NEW-c16-t1"}
+rt-NEW-c32: {"C": 32, "np": 32, "ok": 32, "mean_tpot_ms": 39.94, "decode_agg": 801.19, "output_tok_s": 675.87, "wall_s": 48.5, "median_ttft_s": 5.49, "mean_ptoks": 8208.9, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 262686, "think": "off", "spec_drafts": 12309, "spec_draft_tokens": 37043, "spec_accepted": 20466, "acceptance_len": 2.663, "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "d1017-46720000-NEW-c32-t1"}
+2026-10-17 08:12:34 [d1017] arm NEW GSM8K-200: {"n": 200, "correct": 195, "acc": 97.5, "runaways": 0, "errors": 0, "wall_s": 71, "median_ctoks": 155}
+{"len": 63000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 64112, "finish": "stop", "wall": 2.4, "answer_has_digits": true}
+{"len": 63000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 64112, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 63000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 64112, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 63000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 64112, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 63000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 64115, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 63000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": true, "ptoks": 64116, "finish": "stop", "wall": 0.3, "answer_has_digits": true}
+{"len": 125000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 127199, "finish": "stop", "wall": 4.6, "answer_has_digits": true}
+{"len": 125000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 127199, "finish": "stop", "wall": 0.5, "answer_has_digits": true}
+{"len": 125000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 127199, "finish": "stop", "wall": 0.5, "answer_has_digits": true}
+{"len": 125000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 127199, "finish": "stop", "wall": 0.4, "answer_has_digits": true}
+{"len": 125000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 127203, "finish": "stop", "wall": 0.4, "answer_has_digits": true}
+{"len": 125000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": false, "ptoks": 127203, "finish": "stop", "wall": 0.4, "answer_has_digits": false}
+2026-10-17 08:30:28 [d1017] NEW long context (rc 1): {"chars_per_token": 4.695, "lengths": {"63000": {"correct": 5, "n": 6, "errors": 0, "valid": true, "ptoks_min": 64112, "ptoks_max": 64116}, "125000": {"correct": 4, "n": 6, "errors": 0, "valid": true, "ptoks_min": 127199, "ptoks_max": 127203}}, "bar": "[KIT] every length valid (prompt_tokens in [0.9
