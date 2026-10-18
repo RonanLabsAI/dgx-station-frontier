@@ -1,0 +1,29 @@
+# Kimi K3 + DSpark, RTX PRO 6000 warm-expert sidecars (4,900 warm rows per rank as lossless uint4b8, marlin on
+# the RTX PRO 6000), same-session control (ctl) vs sidecars (warm), two Stations, 2026-10-15 18:11-21:25 PT.
+# Verbatim excerpts from run.log; paths, host names and unrelated containers removed.
+
+2026-10-15 18:12:30 [sc] P0 marlin4 rc 0: SUMMARY {"device": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition", "bytes_per_expert_on_gpu": 17547264, "load_s": 0.8, "pass": true}
+2026-10-15 18:12:30 [sc] P0 VERDICT {"verdict": "BOOT", "verdict_label": "BOOT (kernel-only; shm unmeasured)", "cos_min": 0.999989, "timeouts": 0, "reason": null, "ratio": 0.32779316712834716}
+2026-10-15 18:12:59 [sc] === ctl elapsed 1 min
+2026-10-15 18:37:51 [sc] parity ctl vs the ctl reference (this is the floor): {"positions": 4675, "flips": 0, "flip_pct": 0.0, "cont_positions": 3590, "cont_flips": 0, "cont_flip_pct": 0.0, "free_identical": 9, "n_prompts": 32}
+2026-10-15 18:40:19 [sc] ctl real-text c1: {'decode_agg': 25.93, 'output_tok_s': 22.11, 'median_ttft_s': 7.0, 'acceptance_len': 2.72, 'prefix_hit_pct': 0.0}
+2026-10-15 18:45:54 [sc] ctl real-text c4: {'decode_agg': 30.15, 'output_tok_s': 27.39, 'median_ttft_s': 13.53, 'acceptance_len': 2.531, 'prefix_hit_pct': 0.0}
+2026-10-15 19:00:13 [sc] ctl real-text c16-r1: {'decode_agg': 43.31, 'output_tok_s': 39.76, 'median_ttft_s': 20.18, 'acceptance_len': 2.091, 'prefix_hit_pct': 0.0}
+2026-10-15 19:14:34 [sc] ctl real-text c16-r2: {'decode_agg': 42.59, 'output_tok_s': 39.44, 'median_ttft_s': 18.39, 'acceptance_len': 2.3, 'prefix_hit_pct': 0.0}
+2026-10-15 19:26:24 [sc] ctl catid C16 rep 1 exit 0: decode_agg 54.46 tok/s (TPOT 293.81 ms) out 49.36 tok/s TTFT_med 17083.39 ms failed 0 prefix_hit 0.00% acc_len 1.455 drafts 11 draft_tokens ;
+2026-10-15 19:37:50 [sc] ctl catid C16 rep 2 exit 0: decode_agg 55.28 tok/s (TPOT 289.45 ms) out 50.03 tok/s TTFT_med 17095.22 ms failed 0 prefix_hit 0.00% acc_len 1.667 drafts 12 draft_tokens ;
+2026-10-15 19:38:19 [sc] === warm elapsed 86 min
+2026-10-15 19:39:26 [sc] sidecar launch rc 0/0: captured 1288 graphs; 80.3 GiB allocated, 87.7 GiB peak reserved serving 88391 MiB  | captured 1288 graphs; 80.3 GiB allocated, 88.4 GiB peak reserved serving 89101 MiB 
+      2 K3T 02:54:39 map /opt/k3t/k3-b1-h7300-w4900-kr1009.json (k3-b1-h7300-w4900-kr1009): 92 layers, 14600 hot, 9800 warm (both ranks)
+2026-10-15 19:56:02 [sc]   K3T 02:54:39 map /opt/k3t/k3-b1-h7300-w4900-kr1009.json (k3-b1-h7300-w4900-kr1009): 92 layers, 14600 hot, 9800 warm (both ranks)
+2026-10-15 20:00:49 [sc] parity warm vs the ctl reference: {"positions": 4675, "flips": 135, "flip_pct": 2.888, "cont_positions": 3590, "cont_flips": 96, "cont_flip_pct": 2.674, "free_identical": 10, "n_prompts": 32}
+2026-10-15 20:03:06 [sc] warm real-text c1: {'decode_agg': 28.49, 'output_tok_s': 24.01, 'median_ttft_s': 6.91, 'acceptance_len': 2.806, 'prefix_hit_pct': 0.0}
+2026-10-15 20:08:18 [sc] warm real-text c4: {'decode_agg': 32.66, 'output_tok_s': 29.52, 'median_ttft_s': 13.26, 'acceptance_len': 2.079, 'prefix_hit_pct': 0.0}
+2026-10-15 20:21:12 [sc] warm real-text c16-r1: {'decode_agg': 48.67, 'output_tok_s': 44.3, 'median_ttft_s': 19.72, 'acceptance_len': 2.4, 'prefix_hit_pct': 0.0}
+2026-10-15 20:34:05 [sc] warm real-text c16-r2: {'decode_agg': 47.98, 'output_tok_s': 44.04, 'median_ttft_s': 17.98, 'acceptance_len': 2.1, 'prefix_hit_pct': 0.0}
+2026-10-15 20:44:43 [sc] warm catid C16 rep 1 exit 0: decode_agg 61.53 tok/s (TPOT 260.02 ms) out 55.26 tok/s TTFT_med 16666.86 ms failed 0 prefix_hit 0.00% acc_len 1.500 drafts 12 draft_tokens ;
+2026-10-15 20:55:27 [sc] warm catid C16 rep 2 exit 0: decode_agg 59.24 tok/s (TPOT 270.08 ms) out 53.40 tok/s TTFT_med 16647.55 ms failed 0 prefix_hit 0.00% acc_len 1.667 drafts 12 draft_tokens ;
+2026-10-15 21:12:07 [sc] warm GSM8K-200: {"n": 200, "correct": 195, "acc": 97.5, "runaways": 0, "errors": 0, "wall_s": 1000, "median_ctoks": 195, "effort": "high"}
+2026-10-15 21:12:31 [sc] warm coherence16: auto-checked 11/12 correct
+2026-10-15 21:12:32 [sc] peer counters r0 {"published": 1554148, "completed": 1554148, "timeouts": 0, "rows": 97902787, "tokens": 144524700, "wait_ns": 8173499680, "waits": 1536297} r1 {"published": 1554156, "completed": 1554156, "timeouts": 0, "rows": 97480484, "tokens": 144524732, "wait_ns": 9108236672, "waits": 1536773} | cos gate {"n": 0}
+2026-10-15 21:25:17 [sc] summary: VERDICT KILL (gate miss: flips)

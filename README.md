@@ -74,6 +74,10 @@ Result pages:
   only, decode and prefill, with power).
 - [Can one DGX Station GB300 read a 1M-token prompt?](results/long-context-1m.md) Needle-in-a-haystack scores, prefill
   and decode at `125K`-`1M` tokens for GLM-5.3-Flash NVFP4 (SGLang) and DeepSeek-V4.1-Flash-1017 (vLLM), one Station each.
+- [Muse Spark Open on two DGX Station GB300s](results/muse-spark-open.md): Meta's NVFP4 model across both Stations with
+  some experts in Grace, with and without the DSpark drafter, on public real text; plus a failed RTX PRO 6000 sidecar gate.
+- [Negative results, October 2026](results/negative-results-2026-10.md): what did not work, with the bars it missed
+  (DS-V4-Pro NVFP4 experts on SM103; Kimi K3 tile, staging, split-hint, draft-length, prefetch and sidecar experiments).
 
 ## Methodology
 

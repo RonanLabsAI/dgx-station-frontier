@@ -1,0 +1,70 @@
+# Muse Spark Open, S7: RTX PRO 6000 expert sidecar for the Grace-resident experts, P0 kernel gate (no serving
+# boot), one Station, 2026-10-16 PT. Image as two-stations-realtext.log (same image id). Verbatim excerpts;
+# host names, GPU UUIDs and unrelated containers removed.
+
+## attempt 1 (10:14-10:42 PT): INVALID
+SELFTEST layer 1: cos 0.9998983 norm_ratio 1.000003
+SELFTEST FAILED [{'layer': 1, 'rows': 16, 'cos': 0.9998983, 'norm_ratio': 1.000003}]: not serving
+P0 INVALID: judged rows 1 not measured
+
+## attempt 2 (13:15-13:17 PT): kit bug, P0 not run
+Traceback (most recent call last):
+  File "<string>", line 4, in <module>
+torch.AcceleratorError: CUDA error: invalid device ordinal
+GPU device may be out of range, do you have enough GPUs?
+For more detailed error information, run with CUDA_LOG_FILE=stderr
+SMOKE NVIDIA GB300 (10, 3) True
+
+## attempt 3 (19:43-20:08 PT): KILL
+2026-10-16 19:44:06 [s7] effective layers 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26 (87.7501 GiB/rank, fallback False)
+OK   C1 vLLM version == 0.1.dev22954+ga34ca64c1: 0.1.dev22954+ga34ca64c1
+OK   C7 flashinfer cutlass_fused_moe kwargs the sidecar passes: flashinfer 0.7.0.post1; missing kwargs []
+OK   C16 GB300 reference path = vLLM's FLASHINFER_TRTLLM modular call (routed kernel, static NVFP4 input quant): GB300 reference = TrtLlmNvFp4ExpertsModular path (routed kernel with (ids, weights): True); kernel kwargs missing []; moe_kernel_quantize_input ['A', 'A_scale', 'quant_dtype', 'per_act_to
+SELFTEST (report-only) layer 1: cos vs fp32 emulation 0.9998983 norm_ratio 1.000003
+P0 gb300 phase: {"gb300_ref_s": 0.8, "grace_autotune_s": 1275.5, "grace_measured_tuned": true, "uva_vs_hbm_cos_min": 1.0, "grace_basis": "measured", "gb300_vs_fp32_emulation_cos_min": 0.9999971}
+P0 bench: {"1": {"sidecar_us_mean": 156.16, "grace_meas_us_mean": 339.53, "grace_const_us_mean": 328.51, "ratio_measured": 0.4599, "ratio_constant": 0.4754, "cos_min": 0.9997205, "timeouts": 0}, "4": {"sidecar_us_mean": 359.7, "grace_meas_us_mean": 1232.34, "grace_const_us_mean": 1254.62, "ratio_measured": 0.2919, "ratio_constant": 0.2867, "cos_min": 0.999745, "timeouts": 0}, "16": {"sidecar_us_mean": 1041.73, "grace_meas_us_mean": 4126.57, "grace_const_us_mean": 4265.72, "ratio_measured": 0.2524, "ratio_constant": 0.2442, "cos_min": 0.9998287, "timeouts": 0}, "64": {"sidecar_us_mean": 2091.39, "grace_meas_us_mean": 8801.69, "grace_const_us_mean": 9178.56, "ratio_measured": 0.2376, "ratio_constant": 0.2279, "cos_min": 0.9998597, "timeouts": 0}, "128": {"sidecar_us_mean": 2397.12, "grace_meas_us_mean": 10001.89, "grace_const_us_mean": 10385.31, "ratio_measured": 0.2397, "ratio_constant": 0.2308, "cos_min": 0.9998685, "timeouts": 0}} | basis measured
+P0 KILL: cos vs GB300 stock 0.9997205 < 0.9999
+{
+ "verdict": "KILL",
+ "reasons": [
+  "cos vs GB300 stock 0.9997205 < 0.9999"
+ ],
+ "rows": {
+  "1": {
+   "sidecar_us": 156.16,
+   "grace_us": 339.53,
+   "ratio": 0.4599,
+   "basis": "measured",
+   "ratio_constant": 0.4754,
+   "ratio_measured": 0.4599,
+   "ok": true
+  },
+  "4": {
+   "sidecar_us": 359.7,
+   "grace_us": 1232.34,
+   "ratio": 0.2919,
+   "basis": "measured",
+   "ratio_constant": 0.2867,
+   "ratio_measured": 0.2919,
+   "ok": true
+  },
+  "16": {
+   "sidecar_us": 1041.73,
+   "grace_us": 4126.57,
+   "ratio": 0.2524,
+   "basis": "measured",
+   "ratio_constant": 0.2442,
+   "ratio_measured": 0.2524,
+   "ok": true
+  }
+ },
+ "cos_min_vs_gb300": 0.9997205,
+ "timeouts": 0,
+ "grace_basis": "measured",
+ "grace_measured_tuned": true,
+ "selftest_cos_vs_emulation_report_only": [
+  0.9998983
+ ],
+ "gb300_vs_emulation_cos_min": 0.9999971,
+ "slope_us_per_row": 17.243
+}

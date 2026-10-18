@@ -1,0 +1,44 @@
+# DeepSeek-V4-Pro FP4-MoE Route B microbench (NVFP4 experts via FlashInfer b12x on the GB300), one GB300,
+# model-free (geometry from the checkpoint config.json, synthetic weights), 2026-10-16 10:01 PT. Verbatim excerpts.
+
+## out/admit.log
+2026-10-16 17:01:40,459 - INFO - cute_dsl_core.py:177 - flashinfer.jit: Compiling CuTe-DSL kernel b12x_moe_sm103a_cute_dsl/micro_m1_k7168_n3072_t6_r192_2dd81855d08c2f50
+{"ok": false, "stage": "execute", "entry": "flashinfer.fused_moe.B12xMoEWrapper", "resolved_quant_mode": "nvfp4", "error_head": "DSLUserCodeError: \n\u001b[91m\u001b[1merror:\u001b[0m expects arch to be one of [base_dsl.Arch.sm_120a, base_dsl.Arch.sm_120f, base_dsl.Arch.sm_121a, base_dsl.Arch.sm_121f], but got sm_103a\n   \u001b[94m-->\u001b[0m /usr/local/lib/python3.12/dist-packages/flashinfer/fused_moe/cute_dsl/blackwell_sm12x/moe_micro_kernel.py:537\n    |\n535 |             )\n536 |         else:\n537 |             mma_op = cute.nvgpu.warp.MmaMXF4NVF4Op(\n    |             \u001b[91m^\u001b[0m\n  \u001b[92msuggestion:\u001b[0m Ensure env CUTE_DSL_ARCH matches your GPU architecture\n"}
+
+## out/meta.json (GPU UUID line removed)
+{
+ "image": "vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b",
+ "seed": 20261016,
+ "marlin_entry": "vllm.model_executor.layers.fused_moe.experts.marlin_moe.fused_marlin_moe (quant float4_e2m1f, mxfp4 e8m0/32, W4A16)",
+ "timing_mode": "cuda_graph_replay (decision), eager (report-only)",
+ "vllm": "0.30.1rc1.dev245+gaf7f9488c",
+ "flashinfer": "0.7.0",
+ "flashinfer_cubin": "0.7.0",
+ "flashinfer_jit_cache": "0.7.0+cu130",
+ "torch": "2.13.0+cu130",
+ "cuda": "13.0",
+ "gpu": {
+  "name": "NVIDIA GB300",
+  "cc": "10.3",
+  "sm_count": 152,
+  "total_mem_gib": 249.8,
+  "free_gib_at_start": 249.1
+ }
+}
+
+## out/geometry.json
+{
+ "hidden_size": 7168,
+ "moe_intermediate_size": 3072,
+ "n_routed_experts": 384,
+ "num_experts_per_tok": 6,
+ "ep_size": 2,
+ "experts_per_rank": 192,
+ "hidden_act": "silu",
+ "swiglu_limit": 10.0,
+ "expert_dtype": "fp4",
+ "model_type": "deepseek_v4"
+}
+
+## out/FP4MOE_STATUS (first line)
+ROUTE_B_INFEASIBLE

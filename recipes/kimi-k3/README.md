@@ -469,9 +469,8 @@ uses one RPC server per GPU, including one on loopback for the local RTX PRO 600
 - **C16 is far below `100` tok/s** in every configuration (section A; the vLLM figure is the clean rerun).
   Our reading (modelled, not profiled): decode at C16 is bound by Grace. 16 tokens with 16 routed experts each touch
   roughly a quarter of each rank's `448` local experts in every layer, and most expert bytes (`408` of about `608` GiB
-  of weights per rank) are in Grace, read at C2C speed. Hot-expert pinning (as in our DS-V4-Pro recipe) and RTX PRO
-  6000 expert tiers are the next levers. Neither exists for K3 here yet: our pin hook relies on an expert map that we
-  have not found in this build's Humming path, and we have no 3-bit expert kernel for the RTX PRO 6000.
+  of weights per rank) are in Grace, read at C2C speed. We have since tried a hot/cold split, cold staging and RTX PRO
+  6000 warm-expert sidecars for K3; none cleared its bar ([negative results, October 2026](../../results/negative-results-2026-10.md)).
 - **llama.cpp is maxed out on this hardware.** Moving every weight out of Grace onto four GPUs moved C1 from 17.91 to
   18.18 tok/s. With a layer split, one token passes through the devices one after another, with an RPC hop between
   each; more devices add capacity, not speed. The RTX PRO 6000s also have far less memory bandwidth than the GB300s.

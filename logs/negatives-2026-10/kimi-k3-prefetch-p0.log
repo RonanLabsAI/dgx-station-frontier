@@ -1,0 +1,73 @@
+# Kimi K3 + DSpark (adopted recipe, k = 3), prefetch P0: can the union of experts the verify step touches be
+# copied Grace -> HBM ahead of it? Two Stations, 2026-10-15 02:55 PT. Verbatim excerpts; paths shortened.
+
+## run.log
+2026-10-15 02:56:08 [p0] === base (adopted recipe, adopted hook)
+2026-10-15 03:16:54 [p0] base real-text eval-c1-r1: {'decode_agg': 26.81, 'acceptance_len': 2.824, 'prefix_hit_pct': 0.0}
+2026-10-15 03:19:17 [p0] base real-text eval-c1-r2: {'decode_agg': 26.67, 'acceptance_len': 2.819, 'prefix_hit_pct': 0.0}
+2026-10-15 03:21:50 [p0] base real-text eval-c1-r3: {'decode_agg': 24.82, 'acceptance_len': 2.614, 'prefix_hit_pct': 0.0}
+2026-10-15 03:22:19 [p0] === probe (adopted recipe + p0_union + NVTX + host nsys)
+2026-10-15 03:45:24 [p0] probe real-text eval-c1-r1: {'decode_agg': 26.26, 'acceptance_len': 2.763, 'prefix_hit_pct': 0.0}
+2026-10-15 03:47:49 [p0] probe real-text eval-c1-r2: {'decode_agg': 26.43, 'acceptance_len': 2.794, 'prefix_hit_pct': 0.0}
+2026-10-15 03:50:21 [p0] probe real-text eval-c1-r3: {'decode_agg': 24.91, 'acceptance_len': 2.623, 'prefix_hit_pct': 0.0}
+
+## rt-summary.txt (base r1-r3, probe r1-r3)
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 37.3, "decode_agg": 26.81, "output_tok_s": 22.72, "wall_s": 135.2, "median_ttft_s": 7.03, "mean_ptoks": 8198, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24594, "think": "off", "spec_drafts": 1088, "spec_draft_tokens": 3264, "spec_accepted": 1984, "acceptance_len": 2.824, "spec_per_pos": [0.8051, 0.5983, 0.42], "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "p0-58135000-base-eval-c1-r1-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 37.5, "decode_agg": 26.67, "output_tok_s": 22.84, "wall_s": 134.5, "median_ttft_s": 6.5, "mean_ptoks": 8212, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24636, "think": "off", "spec_drafts": 1090, "spec_draft_tokens": 3270, "spec_accepted": 1983, "acceptance_len": 2.819, "spec_per_pos": [0.8239, 0.6037, 0.3917], "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "p0-58135000-base-eval-c1-r2-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 40.3, "decode_agg": 24.82, "output_tok_s": 21.38, "wall_s": 143.7, "median_ttft_s": 6.5, "mean_ptoks": 8196.3, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24589, "think": "off", "spec_drafts": 1176, "spec_draft_tokens": 3528, "spec_accepted": 1898, "acceptance_len": 2.614, "spec_per_pos": [0.7636, 0.5077, 0.3427], "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "p0-58135000-base-eval-c1-r3-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 38.08, "decode_agg": 26.26, "output_tok_s": 22.37, "wall_s": 137.3, "median_ttft_s": 6.97, "mean_ptoks": 8199, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24597, "think": "off", "spec_drafts": 1112, "spec_draft_tokens": 3336, "spec_accepted": 1961, "acceptance_len": 2.763, "spec_per_pos": [0.7905, 0.5737, 0.3993], "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "p0-58135000-probe-eval-c1-r1-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 37.84, "decode_agg": 26.43, "output_tok_s": 22.72, "wall_s": 135.2, "median_ttft_s": 6.34, "mean_ptoks": 8213, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24639, "think": "off", "spec_drafts": 1101, "spec_draft_tokens": 3303, "spec_accepted": 1975, "acceptance_len": 2.794, "spec_per_pos": [0.8093, 0.584, 0.4005], "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "p0-58135000-probe-eval-c1-r2-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 40.15, "decode_agg": 24.91, "output_tok_s": 21.46, "wall_s": 143.1, "median_ttft_s": 6.51, "mean_ptoks": 8197.3, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24592, "think": "off", "spec_drafts": 1171, "spec_draft_tokens": 3513, "spec_accepted": 1901, "acceptance_len": 2.623, "spec_per_pos": [0.7635, 0.5132, 0.3467], "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "p0-58135000-probe-eval-c1-r3-t1"}
+
+## copybench.log (Grace -> HBM side-stream copy, GB/s by rows per layer)
+{"source": "measured", "gbs": {"4": 245.8, "6": 255.5, "8": 260.1, "10": 262.5, "14": 265.1, "16": 266.4}}
+
+## verdict.log
+VERDICT INVALID local_union_mean=- copy_over_compute=- artefact_pct=-
+
+## reanalysis-20261015/union-vs-bars.json
+{
+ "base": {
+  "c1_reps": [
+   26.81,
+   26.67,
+   24.82
+  ],
+  "c1_mean": 26.1,
+  "acc_len": 2.752333333333333,
+  "step_ms": 105.45338441890165
+ },
+ "probe": {
+  "c1_reps": [
+   26.26,
+   26.43,
+   24.91
+  ],
+  "c1_mean": 25.866666666666667,
+  "acc_len": 2.7266666666666666,
+  "step_ms": 105.41237113402062
+ },
+ "union": {
+  "T4_steps_per_layer": 3464,
+  "local_mean_by_rank": [
+   22.14620255547746,
+   22.417037980720956
+  ],
+  "local_mean": 22.281620268099207,
+  "global_mean": 44.563240536198414,
+  "local_step_total_mib": [
+   24164.16453233256,
+   24459.678481524246
+  ],
+  "pass_line": 10,
+  "kill_line": 14
+ },
+ "copybench_gbs": null,
+ "copy": {
+  "gbs_used": 266.4,
+  "note": "largest measured chunk (16 rows/layer); local union ~22 rows/layer",
+  "ms_per_step": 96.27564498289328
+ },
+ "artefact_pct": -0.8939974457215872,
+ "verify_phase_compute": "NOT MEASURED: no nsys report"
+}

@@ -1,0 +1,88 @@
+# Kimi K3, E-A: Humming tile fix (TILE), layer-ahead cold staging (STAGE) and split-layer size hint (HINT),
+# two Stations, TP2 + EP2, no drafter, 2026-10-13 03:21-07:51 PT. Verbatim excerpts; paths shortened, unrelated
+# containers removed. Arms: kr = control (no drafter, all E-A switches off), kr-tile, kr-stage (tile + staging),
+# ke2-hint (hot/cold split map fitted to random ids + public CNN/DM fit slices, plus HINT).
+
+## master.log
+2026-10-13 03:44:34 [ea] === arm kr (boot A hint=0 tile=0 stage=0) elapsed 22 min
+2026-10-13 03:44:47 [ea] kr flush 3.6K: {"t_flush": 1791888278.7143946, "prompt_tokens": 3600, "dt": 2.79} {"t_flush": 1791888281.536177, "prompt_tokens": 3599, "dt": 2.78} {"t_flush": 1791888284.3517144, "prompt_tokens": 3599, "dt": 2.78} 
+2026-10-13 03:55:27 [ea] kr catid C1 exit 0:  decode_agg 18.11 tok/s (TPOT 55.22 ms) out 16.12 tok/s TTFT; decode_agg 18.1 tok/s (TPOT 55.24 ms) out 16.11 tok/s TTFT_; decode_agg 18.1 tok/s (TPOT 55.26 ms) out 16.11 tok/s TTFT_;
+2026-10-13 04:06:36 [ea] kr catid C16 exit 0:  decode_agg 56.64 tok/s (TPOT 282.49 ms) out 51.36 tok/s TTF;
+2026-10-13 04:31:05 [ea] kr coherence16: auto-checked 11/12 correct
+2026-10-13 04:49:28 [ea] kr GSM8K-200: {"n": 200, "correct": 197, "acc": 98.5, "runaways": 0, "errors": 0, "wall_s": 1103, "median_ctoks": 192, "effort": "high"}
+2026-10-13 04:49:38 [ea] === arm kr-tile (boot A hint=0 tile=1 stage=0) elapsed 87 min
+2026-10-13 04:49:49 [ea] kr-tile GATE PASS status=PASS token=g86916000-kr-tile fired=True ok=True n=6 bad=0 kinds={'stock': {'0': 3, '1': 3}} min_cos=0.99999994
+2026-10-13 04:50:01 [ea] kr-tile flush 3.6K: {"t_flush": 1791892192.6510248, "prompt_tokens": 3600, "dt": 2.78} {"t_flush": 1791892195.4691782, "prompt_tokens": 3600, "dt": 2.79} {"t_flush": 1791892198.291171, "prompt_tokens": 3598, "dt": 2.78} 
+2026-10-13 05:00:19 [ea] kr-tile catid C1 exit 0:  decode_agg 18.09 tok/s (TPOT 55.27 ms) out 16.75 tok/s TTFT; decode_agg 18.08 tok/s (TPOT 55.31 ms) out 16.74 tok/s TTFT; decode_agg 18.11 tok/s (TPOT 55.21 ms) out 16.77 tok/s TTFT;
+2026-10-13 05:11:52 [ea] kr-tile catid C16 exit 0:  decode_agg 54.12 tok/s (TPOT 295.66 ms) out 49.46 tok/s TTF;
+2026-10-13 05:35:42 [ea] kr-tile coherence16: auto-checked 11/12 correct
+2026-10-13 05:35:52 [ea] === arm kr-stage (boot A hint=0 tile=1 stage=1) elapsed 133 min
+2026-10-13 05:36:03 [ea] kr-stage GATE PASS status=PASS token=g86916000-kr-stage fired=True ok=True n=8 bad=0 kinds={'stage': {'0': 3, '1': 3}, 'stock': {'0': 1, '1': 1}} min_cos=0.99999988
+2026-10-13 05:36:12 [ea] kr-stage flush 3.6K: {"t_flush": 1791894966.8579307, "prompt_tokens": 3600, "dt": 1.78} {"t_flush": 1791894968.673978, "prompt_tokens": 3599, "dt": 1.78} {"t_flush": 1791894970.4888732, "prompt_tokens": 3600, "dt": 1.78} 
+2026-10-13 05:46:17 [ea] kr-stage catid C1 exit 0:  decode_agg 18.09 tok/s (TPOT 55.27 ms) out 17.08 tok/s TTFT; decode_agg 18.13 tok/s (TPOT 55.17 ms) out 17.11 tok/s TTFT; decode_agg 18.11 tok/s (TPOT 55.22 ms) out 17.10 tok/s TTFT;
+2026-10-13 05:56:36 [ea] kr-stage catid C16 exit 0:  decode_agg 59.61 tok/s (TPOT 268.42 ms) out 55.36 tok/s TTF;
+2026-10-13 06:19:13 [ea] kr-stage coherence16: auto-checked 11/12 correct
+2026-10-13 06:46:58 [ea] === arm ke2-hint (boot B hint=1 tile=0 stage=0) elapsed 205 min
+2026-10-13 06:47:21 [ea] ke2-hint GATE PASS status=PASS token=g86916000-ke2-hint fired=True ok=True n=12 bad=0 kinds={'cold': {'0': 3, '1': 3}, 'hot': {'0': 3, '1': 3}} min_cos=0.99999988
+2026-10-13 06:47:42 [ea] ke2-hint flush 3.6K: {"t_flush": 1791899248.183264, "prompt_tokens": 3599, "dt": 4.59} {"t_flush": 1791899252.8142326, "prompt_tokens": 3600, "dt": 4.6} {"t_flush": 1791899257.447858, "prompt_tokens": 3600, "dt": 4.6} 
+2026-10-13 06:57:24 [ea] ke2-hint catid C1 exit 0:  decode_agg 21.71 tok/s (TPOT 46.07 ms) out 18.05 tok/s TTFT; decode_agg 21.38 tok/s (TPOT 46.78 ms) out 17.82 tok/s TTFT; decode_agg 21.69 tok/s (TPOT 46.11 ms) out 18.03 tok/s TTFT;
+2026-10-13 07:09:00 [ea] ke2-hint catid C16 exit 0:  decode_agg 57.06 tok/s (TPOT 280.43 ms) out 49.13 tok/s TTF;
+2026-10-13 07:34:21 [ea] ke2-hint coherence16: auto-checked 11/12 correct
+2026-10-13 07:34:33 [ea] === arm ke2-hint-tile (boot B hint=1 tile=1 stage=0) elapsed 252 min
+2026-10-13 07:35:50 [ea] ke2-hint-tile GATE FAIL (did not fire) status=NOT_RUN token=g86916000-ke2-hint-tile fired=False ok=False n=6 bad=0 kinds={'cold': {'0': 3, '1': 3}, 'hot': {'0': 0, '1': 0}} min_cos=1.0 why=too few records (need >= 3 per kind per rank): hot@rank0=0, hot@rank1=0
+2026-10-13 07:35:51 [ea] arm ke2-hint-tile: GATE NOT RUN (gate did not fire; see gate-<arm>.json): no performance measurements for this arm
+2026-10-13 07:35:51 [ea] === arm ke2-hint-tile-stage (boot B hint=1 tile=1 stage=1) elapsed 253 min
+2026-10-13 07:37:06 [ea] ke2-hint-tile-stage GATE FAIL (did not fire) status=NOT_RUN token=g86916000-ke2-hint-tile-stage fired=False ok=False n=8 bad=0 kinds={'cold': {'0': 1, '1': 1}, 'hot': {'0': 0, '1': 0}, 'stage': {'0': 3, '1': 3}} min_cos=0.99999988 why=too few records (need >= 3 per kind per rank): hot@rank0=0, hot@rank1=0
+2026-10-13 07:37:06 [ea] arm ke2-hint-tile-stage: GATE NOT RUN (gate did not fire; see gate-<arm>.json): no performance measurements for this arm
+
+## catid summaries
+== 2026-10-13 03:44:47 PDT kr nonce=86926000 CS=[1] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+kr C1 rep1 seed 86926101: decode_agg 18.11 tok/s (TPOT 55.22 ms) out 16.12 tok/s TTFT_med 7039.49 ms failed 0 prefix_hit 0.00%
+kr C1 rep2 seed 86926102: decode_agg 18.1 tok/s (TPOT 55.24 ms) out 16.11 tok/s TTFT_med 7043.67 ms failed 0 prefix_hit 0.00%
+kr C1 rep3 seed 86926103: decode_agg 18.1 tok/s (TPOT 55.26 ms) out 16.11 tok/s TTFT_med 7040.22 ms failed 0 prefix_hit 0.00%
+DONE 03:55:27 contaminated=0
+== 2026-10-13 03:55:27 PDT kr nonce=86926000 CS=[16] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+kr C16 rep1 seed 86927601: decode_agg 56.64 tok/s (TPOT 282.49 ms) out 51.36 tok/s TTFT_med 13392.67 ms failed 0 prefix_hit 0.00%
+DONE 04:06:36 contaminated=0
+== 2026-10-13 04:50:01 PDT kr-tile nonce=86936000 CS=[1] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+kr-tile C1 rep1 seed 86936101: decode_agg 18.09 tok/s (TPOT 55.27 ms) out 16.75 tok/s TTFT_med 4586.97 ms failed 0 prefix_hit 0.00%
+kr-tile C1 rep2 seed 86936102: decode_agg 18.08 tok/s (TPOT 55.31 ms) out 16.74 tok/s TTFT_med 4584.03 ms failed 0 prefix_hit 0.00%
+kr-tile C1 rep3 seed 86936103: decode_agg 18.11 tok/s (TPOT 55.21 ms) out 16.77 tok/s TTFT_med 4580.58 ms failed 0 prefix_hit 0.00%
+DONE 05:00:19 contaminated=0
+== 2026-10-13 05:00:19 PDT kr-tile nonce=86936000 CS=[16] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+kr-tile C16 rep1 seed 86937601: decode_agg 54.12 tok/s (TPOT 295.66 ms) out 49.46 tok/s TTFT_med 13396.40 ms failed 0 prefix_hit 0.00%
+DONE 05:11:52 contaminated=0
+== 2026-10-13 05:36:12 PDT kr-stage nonce=86946000 CS=[1] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+kr-stage C1 rep1 seed 86946101: decode_agg 18.09 tok/s (TPOT 55.27 ms) out 17.08 tok/s TTFT_med 3410.48 ms failed 0 prefix_hit 0.00%
+kr-stage C1 rep2 seed 86946102: decode_agg 18.13 tok/s (TPOT 55.17 ms) out 17.11 tok/s TTFT_med 3408.34 ms failed 0 prefix_hit 0.00%
+kr-stage C1 rep3 seed 86946103: decode_agg 18.11 tok/s (TPOT 55.22 ms) out 17.10 tok/s TTFT_med 3408.75 ms failed 0 prefix_hit 0.00%
+DONE 05:46:17 contaminated=0
+== 2026-10-13 05:46:17 PDT kr-stage nonce=86946000 CS=[16] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+kr-stage C16 rep1 seed 86947601: decode_agg 59.61 tok/s (TPOT 268.42 ms) out 55.36 tok/s TTFT_med 9861.07 ms failed 0 prefix_hit 0.00%
+DONE 05:56:36 contaminated=0
+== 2026-10-13 06:47:42 PDT ke2-hint nonce=86956000 CS=[1] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+ke2-hint C1 rep1 seed 86956101: decode_agg 21.71 tok/s (TPOT 46.07 ms) out 18.05 tok/s TTFT_med 9610.28 ms failed 0 prefix_hit 0.00%
+ke2-hint C1 rep2 seed 86956102: decode_agg 21.38 tok/s (TPOT 46.78 ms) out 17.82 tok/s TTFT_med 9611.46 ms failed 0 prefix_hit 0.00%
+ke2-hint C1 rep3 seed 86956103: decode_agg 21.69 tok/s (TPOT 46.11 ms) out 18.03 tok/s TTFT_med 9612.20 ms failed 0 prefix_hit 0.00%
+DONE 06:57:24 contaminated=0
+== 2026-10-13 06:57:24 PDT ke2-hint nonce=86956000 CS=[16] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+ke2-hint C16 rep1 seed 86957601: decode_agg 57.06 tok/s (TPOT 280.43 ms) out 49.13 tok/s TTFT_med 21462.13 ms failed 0 prefix_hit 0.00%
+DONE 07:09:00 contaminated=0
+
+## rt-summary.txt (real text, CNN/DM, order kr, kr-tile, kr-stage, ke2-hint; C1 r1-r3 then C16)
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 55.29, "decode_agg": 18.09, "output_tok_s": 16.15, "wall_s": 190.3, "median_ttft_s": 6.98, "mean_ptoks": 8198, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24594, "think": "off", "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "ea-86916000-kr-eval-c1-r1-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 55.31, "decode_agg": 18.08, "output_tok_s": 16.18, "wall_s": 189.9, "median_ttft_s": 6.61, "mean_ptoks": 8212, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24636, "think": "off", "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "ea-86916000-kr-eval-c1-r2-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 55.3, "decode_agg": 18.08, "output_tok_s": 16.18, "wall_s": 189.8, "median_ttft_s": 6.57, "mean_ptoks": 8196.3, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24589, "think": "off", "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "ea-86916000-kr-eval-c1-r3-t1"}
+{"C": 16, "np": 32, "ok": 32, "mean_tpot_ms": 359.85, "decode_agg": 44.46, "output_tok_s": 40.5, "wall_s": 809.1, "median_ttft_s": 23.59, "mean_ptoks": 8208.1, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 262659, "think": "off", "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "ea-86916000-kr-eval-c16-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 55.29, "decode_agg": 18.09, "output_tok_s": 16.58, "wall_s": 185.3, "median_ttft_s": 4.53, "mean_ptoks": 8200, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24600, "think": "off", "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "ea-86916000-kr-tile-eval-c1-r1-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 55.31, "decode_agg": 18.08, "output_tok_s": 16.22, "wall_s": 189.4, "median_ttft_s": 6.56, "mean_ptoks": 8214, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24642, "think": "off", "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "ea-86916000-kr-tile-eval-c1-r2-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 55.3, "decode_agg": 18.08, "output_tok_s": 16.4, "wall_s": 187.3, "median_ttft_s": 6.56, "mean_ptoks": 8198.3, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24595, "think": "off", "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "ea-86916000-kr-tile-eval-c1-r3-t1"}
+{"C": 16, "np": 32, "ok": 32, "mean_tpot_ms": 354.95, "decode_agg": 45.08, "output_tok_s": 41.49, "wall_s": 789.8, "median_ttft_s": 22.33, "mean_ptoks": 8210.1, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 262723, "think": "off", "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "ea-86916000-kr-tile-eval-c16-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 55.3, "decode_agg": 18.08, "output_tok_s": 17.03, "wall_s": 180.4, "median_ttft_s": 3.38, "mean_ptoks": 8199, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24597, "think": "off", "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "ea-86916000-kr-stage-eval-c1-r1-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 55.29, "decode_agg": 18.09, "output_tok_s": 16.93, "wall_s": 181.5, "median_ttft_s": 3.93, "mean_ptoks": 8213, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24639, "think": "off", "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "ea-86916000-kr-stage-eval-c1-r2-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 55.28, "decode_agg": 18.09, "output_tok_s": 16.98, "wall_s": 180.9, "median_ttft_s": 3.93, "mean_ptoks": 8197.3, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24592, "think": "off", "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "ea-86916000-kr-stage-eval-c1-r3-t1"}
+{"C": 16, "np": 32, "ok": 32, "mean_tpot_ms": 341.33, "decode_agg": 46.88, "output_tok_s": 44.0, "wall_s": 744.7, "median_ttft_s": 16.5, "mean_ptoks": 8209.1, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 262691, "think": "off", "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "ea-86916000-kr-stage-eval-c16-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 53.44, "decode_agg": 18.71, "output_tok_s": 15.97, "wall_s": 192.4, "median_ttft_s": 9.45, "mean_ptoks": 8200, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24600, "think": "off", "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "ea-86916000-ke2-hint-eval-c1-r1-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 53.17, "decode_agg": 18.81, "output_tok_s": 16.06, "wall_s": 191.3, "median_ttft_s": 9.37, "mean_ptoks": 8214, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24642, "think": "off", "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "ea-86916000-ke2-hint-eval-c1-r2-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 53.71, "decode_agg": 18.62, "output_tok_s": 15.91, "wall_s": 193.1, "median_ttft_s": 9.39, "mean_ptoks": 8198.3, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24595, "think": "off", "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "ea-86916000-ke2-hint-eval-c1-r3-t1"}
+{"C": 16, "np": 32, "ok": 32, "mean_tpot_ms": 355.6, "decode_agg": 44.99, "output_tok_s": 39.23, "wall_s": 835.3, "median_ttft_s": 37.02, "mean_ptoks": 8210.1, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 262723, "think": "off", "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "ea-86916000-ke2-hint-eval-c16-t1"}

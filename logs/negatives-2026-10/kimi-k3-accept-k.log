@@ -1,0 +1,46 @@
+# Kimi K3 + DSpark, draft length k = 3 (arm A) vs k = 2 (arm B) at one and two users, two Stations,
+# 2026-10-14 23:42 - 2026-10-15 01:08 PT. Verbatim excerpts from run.log; paths shortened.
+
+2026-10-14 23:42:52 [ak] === A (rows [[1,1,3],[2,3,3],[4,16,0]], num_speculative_tokens 3) elapsed 0 min
+spec={"method":"dspark","model":"/drafter","num_speculative_tokens":3,"attention_backend":"FLASHINFER_MLA","draft_sample_method":"greedy","num_speculative_tokens_per_batch_size":[[1,1,3],[2,3,3],[4,16,0]]}
+spec={"method":"dspark","model":"/drafter","num_speculative_tokens":3,"attention_backend":"FLASHINFER_MLA","draft_sample_method":"greedy","num_speculative_tokens_per_batch_size":[[1,1,3],[2,3,3],[4,16,0]]}
+2026-10-15 00:07:13 [ak] parity A vs the A reference (this is the floor): {"positions": 4671, "flips": 0, "flip_pct": 0.0, "cont_positions": 3586, "cont_flips": 0, "cont_flip_pct": 0.0, "free_identical": 9, "n_prompts": 32}
+2026-10-15 00:09:36 [ak] A real-text eval-c1-r1: {'decode_agg': 27.37, 'output_tok_s': 23.14, 'acceptance_len': 2.855, 'spec_per_pos': [0.8152, 0.6072, 0.4327], 'prefix_hit_pct': 0.0}
+2026-10-15 00:12:02 [ak] A real-text eval-c1-r2: {'decode_agg': 25.91, 'output_tok_s': 22.29, 'acceptance_len': 2.707, 'spec_per_pos': [0.7833, 0.5551, 0.3692], 'prefix_hit_pct': 0.0}
+2026-10-15 00:14:31 [ak] A real-text eval-c1-r3: {'decode_agg': 25.55, 'output_tok_s': 21.94, 'acceptance_len': 2.667, 'spec_per_pos': [0.7812, 0.5365, 0.349], 'prefix_hit_pct': 0.0}
+2026-10-15 00:20:50 [ak] A real-text eval-c2: {'decode_agg': 30.42, 'output_tok_s': 26.9, 'acceptance_len': 2.682, 'spec_per_pos': [0.7819, 0.5363, 0.3635], 'prefix_hit_pct': 0.0}
+2026-10-15 00:20:56 [ak] DIV PASS [A] light [269, 269] calls [8475, 8475] checks [16, 16] free_min_gib [21.15, 21.15]
+2026-10-15 00:21:19 [ak] === B (rows [[1,1,2],[2,3,2],[4,16,0]], num_speculative_tokens 2) elapsed 39 min
+spec={"method":"dspark","model":"/drafter","num_speculative_tokens":2,"attention_backend":"FLASHINFER_MLA","draft_sample_method":"greedy","num_speculative_tokens_per_batch_size":[[1,1,2],[2,3,2],[4,16,0]]}
+spec={"method":"dspark","model":"/drafter","num_speculative_tokens":2,"attention_backend":"FLASHINFER_MLA","draft_sample_method":"greedy","num_speculative_tokens_per_batch_size":[[1,1,2],[2,3,2],[4,16,0]]}
+2026-10-15 00:42:27 [ak] parity B vs the A reference: {"positions": 4671, "flips": 0, "flip_pct": 0.0, "cont_positions": 3586, "cont_flips": 0, "cont_flip_pct": 0.0, "free_identical": 7, "n_prompts": 32}
+2026-10-15 00:44:51 [ak] B real-text eval-c1-r1: {'decode_agg': 26.89, 'output_tok_s': 22.84, 'acceptance_len': 2.425, 'spec_per_pos': [0.819, 0.6063], 'prefix_hit_pct': 0.0}
+2026-10-15 00:47:15 [ak] B real-text eval-c1-r2: {'decode_agg': 26.69, 'output_tok_s': 22.79, 'acceptance_len': 2.407, 'spec_per_pos': [0.8174, 0.5893], 'prefix_hit_pct': 0.0}
+2026-10-15 00:49:43 [ak] B real-text eval-c1-r3: {'decode_agg': 25.67, 'output_tok_s': 22.07, 'acceptance_len': 2.315, 'spec_per_pos': [0.7898, 0.5252], 'prefix_hit_pct': 0.0}
+2026-10-15 00:56:20 [ak] B real-text eval-c2: {'decode_agg': 30.88, 'output_tok_s': 27.42, 'acceptance_len': 2.337, 'spec_per_pos': [0.7895, 0.5471], 'prefix_hit_pct': 0.0}
+2026-10-15 00:56:26 [ak] DIV PASS [B] light [302, 302] calls [8160, 8160] checks [15, 15] free_min_gib [21.19, 21.19]
+
+## catid-A-c1/summary.txt
+== 2026-10-15 00:14:31 PDT A nonce=46546000 CS=[1] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+A C1 rep1 seed 46546101: decode_agg 33.76 tok/s (TPOT 29.62 ms) out 27.90 tok/s TTFT_med 6396.39 ms failed 0 prefix_hit 0.00% acc_len 3.459 drafts 296 draft_tokens 888 accepted 728
+A C1 rep2 seed 46546102: decode_agg 32.69 tok/s (TPOT 30.59 ms) out 27.19 tok/s TTFT_med 6366.78 ms failed 0 prefix_hit 0.00% acc_len 3.353 drafts 306 draft_tokens 918 accepted 720
+A C1 rep3 seed 46546103: decode_agg 35.17 tok/s (TPOT 28.43 ms) out 28.89 tok/s TTFT_med 6368.59 ms failed 0 prefix_hit 0.00% acc_len 3.908 drafts 262 draft_tokens 786 accepted 762
+DONE 00:17:42 contaminated=0
+## catid-B-c1/summary.txt
+== 2026-10-15 00:49:43 PDT B nonce=46556000 CS=[1] image=vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
+B C1 rep1 seed 46556101: decode_agg 20.8 tok/s (TPOT 48.07 ms) out 18.46 tok/s TTFT_med 6301.26 ms failed 0 prefix_hit 0.00% acc_len 2.020 drafts 507 draft_tokens 1014 accepted 517
+B C1 rep2 seed 46556102: decode_agg 33.9 tok/s (TPOT 29.50 ms) out 28.07 tok/s TTFT_med 6301.79 ms failed 0 prefix_hit 0.00% acc_len 2.971 drafts 345 draft_tokens 690 accepted 680
+B C1 rep3 seed 46556103: decode_agg 31.27 tok/s (TPOT 31.98 ms) out 26.24 tok/s TTFT_med 6304.42 ms failed 0 prefix_hit 0.00% acc_len 2.965 drafts 345 draft_tokens 690 accepted 678
+DONE 00:53:15 contaminated=0
+
+## rt-summary.txt (A C1 r1-r3, A C2, B C1 r1-r3, B C2)
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 36.54, "decode_agg": 27.37, "output_tok_s": 23.14, "wall_s": 132.8, "median_ttft_s": 7.08, "mean_ptoks": 8197, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24591, "think": "off", "spec_drafts": 1077, "spec_draft_tokens": 3231, "spec_accepted": 1998, "acceptance_len": 2.855, "spec_per_pos": [0.8152, 0.6072, 0.4327], "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "ak-46536000-A-eval-c1-r1-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 38.6, "decode_agg": 25.91, "output_tok_s": 22.29, "wall_s": 137.8, "median_ttft_s": 6.45, "mean_ptoks": 8211, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24633, "think": "off", "spec_drafts": 1135, "spec_draft_tokens": 3405, "spec_accepted": 1938, "acceptance_len": 2.707, "spec_per_pos": [0.7833, 0.5551, 0.3692], "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "ak-46536000-A-eval-c1-r2-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 39.14, "decode_agg": 25.55, "output_tok_s": 21.94, "wall_s": 140.0, "median_ttft_s": 6.46, "mean_ptoks": 8195.3, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24586, "think": "off", "spec_drafts": 1152, "spec_draft_tokens": 3456, "spec_accepted": 1920, "acceptance_len": 2.667, "spec_per_pos": [0.7812, 0.5365, 0.349], "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "ak-46536000-A-eval-c1-r3-t1"}
+{"C": 2, "np": 4, "ok": 4, "mean_tpot_ms": 65.74, "decode_agg": 30.42, "output_tok_s": 26.9, "wall_s": 152.3, "median_ttft_s": 7.07, "mean_ptoks": 8229.5, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 32918, "think": "off", "spec_drafts": 1527, "spec_draft_tokens": 4581, "spec_accepted": 2568, "acceptance_len": 2.682, "spec_per_pos": [0.7819, 0.5363, 0.3635], "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "ak-46536000-A-eval-c2-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 37.19, "decode_agg": 26.89, "output_tok_s": 22.84, "wall_s": 134.5, "median_ttft_s": 6.97, "mean_ptoks": 8197, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24591, "think": "off", "spec_drafts": 1260, "spec_draft_tokens": 2520, "spec_accepted": 1796, "acceptance_len": 2.425, "spec_per_pos": [0.819, 0.6063], "forced": true, "pool": "pool/long/eval-c1-r1-try1.jsonl", "nonce": "ak-46536000-B-eval-c1-r1-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 37.47, "decode_agg": 26.69, "output_tok_s": 22.79, "wall_s": 134.8, "median_ttft_s": 6.39, "mean_ptoks": 8211, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24633, "think": "off", "spec_drafts": 1276, "spec_draft_tokens": 2552, "spec_accepted": 1795, "acceptance_len": 2.407, "spec_per_pos": [0.8174, 0.5893], "forced": true, "pool": "pool/long/eval-c1-r2-try1.jsonl", "nonce": "ak-46536000-B-eval-c1-r2-t1"}
+{"C": 1, "np": 3, "ok": 3, "mean_tpot_ms": 38.95, "decode_agg": 25.67, "output_tok_s": 22.07, "wall_s": 139.2, "median_ttft_s": 6.29, "mean_ptoks": 8195.3, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 24586, "think": "off", "spec_drafts": 1327, "spec_draft_tokens": 2654, "spec_accepted": 1745, "acceptance_len": 2.315, "spec_per_pos": [0.7898, 0.5252], "forced": true, "pool": "pool/long/eval-c1-r3-try1.jsonl", "nonce": "ak-46536000-B-eval-c1-r3-t1"}
+{"C": 2, "np": 4, "ok": 4, "mean_tpot_ms": 64.77, "decode_agg": 30.88, "output_tok_s": 27.42, "wall_s": 149.4, "median_ttft_s": 6.83, "mean_ptoks": 8229.5, "mean_ctoks": 1024, "prefix_hit_pct": 0.0, "prefix_queries": 32918, "think": "off", "spec_drafts": 1753, "spec_draft_tokens": 3506, "spec_accepted": 2343, "acceptance_len": 2.337, "spec_per_pos": [0.7895, 0.5471], "forced": true, "pool": "pool/long/eval-c16-try1.jsonl", "nonce": "ak-46536000-B-eval-c2-t1"}
+
+2026-10-15 01:08:35 [ak] summary: VERDICT KEEP k=3 B/A=1.005 C/A=- why ['B/A real-text C1 = 1.0053 in [0.97, 1.03): report, keep k=3 (incumbent wins ties)', 'GSM8K-200 reference 98.5 is CARRIED from ds-1013-075146 (arm A was not run live for GSM8K)']
