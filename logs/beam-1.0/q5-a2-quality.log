@@ -1,0 +1,66 @@
+# Reflection Beam-1.0-501B-A23B NVFP4, the a2 configuration (two Stations, TP2, DFlash2 block 8; same image, flags and launcher as
+# e-a2-two-stations.log), quality pass. Run 2026-10-16 21:57-22:46 PT, boot A (0 retries).
+# GSM8K-200: first 200 rows of the GSM8K test set (not the full 1,319), reasoning_effort low (Beam template budget 32), temperature 0,
+# max_tokens 6000, C16. Tools: our in-house tests, OpenAI tools format with the server's beam tool parser: 3 smoke cases + 12 extended
+# cases (selection, parallel calls, no-tool, enum, typed number, date, tool-result follow-up). Long context: our in-house needle test,
+# public CNN/DailyMail text cut to ~64K and ~126.6K prompt tokens with synthetic 6-digit codes at fixed depths (4 single needles +
+# 2 two-hop chains per length), reasoning_effort low, temperature 0. Soak: 20 minutes at C16, non-streaming, a seeded mix of seven
+# request classes (GSM8K effort high and low, random ids, long synthetic text, short chat, GSM8K at temperature 0.6, a shared-prefix
+# class); short chat and the 0.6 GSM8K class sample at temperature 0.6, the rest are greedy; 600 s per-request timeout.
+# Not the a2 throughput rows: those are in e-a2-two-stations.log.
+# Excerpt: lines selected verbatim from the raw files named below; host names, GPU UUIDs, rail IPs and private paths replaced with
+# <placeholders>. Times are Pacific (PT).
+# Engine: lmsysorg/sglang:beam, image id sha256:0ea912aadc3d7827858de9aa5a312c4d51c254e7dbe670dbbe8181895b92071d (its SGLang source
+# matches sgl-project/sglang PR #44747 head f7473673 for the Beam model, offloader and argument files). Context 131072, BF16 KV, 16 running
+# requests, chunked prefill 8192, page 64, trtllm_mha attention. All runs on stock SGLang (no patches, no hooks).
+
+--- boot-A/try1/launch-rank0.txt
+launched 2026-10-16 22:00:17 PDT host=<host> rank=0 gpu=<GB300-uuid> image=lmsysorg/sglang:beam
+model=/models/hf/reflection__Beam-1.0-501B-A23B-NVFP4 nnodes=2 tp=2 offgb=0 memf=0.85 spec=1 block=8 nograph=0 ctx=131072 seqs=16 chunk=8192 page=64 optflags='--enable-metrics --cuda-graph-max-bs-decode 16'
+args: -m sglang.launch_server --model-path /model --served-model-name beam --tp 2 --attention-backend trtllm_mha --page-size 64 --context-length 131072 --max-running-requests 16 --chunked-prefill-size 8192 --mem-fraction-static 0.85 --enable-unified-memory --tool-call-parser beam --reasoning-parser beam --watchdog-timeout 1800 --speculative-algorithm DFLASH --speculative-draft-model-path /drafter --speculative-dflash-block-size 8 --nnodes 2 --node-rank 0 --dist-init-addr <rail-ip-left>:29650 --disable-custom-all-reduce --enforce-disable-flashinfer-allreduce-fusion --host 0.0.0.0 --port 8050 --enable-metrics --cuda-graph-max-bs-decode 16
+
+--- boot-A/try1/image-digest-rank0.txt
+sha256:0ea912aadc3d7827858de9aa5a312c4d51c254e7dbe670dbbe8181895b92071d
+
+--- run.log (boot A quality rows)
+2026-10-16 22:03:05 [beamq5] boot A up in 189 s (memf 0.85 nograph 0 optflags '--enable-metrics --cuda-graph-max-bs-decode 16'); L: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 89201 MiB;NVIDIA GB300, 223816 MiB; R: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 93603 MiB;NVIDIA GB300, 223818 MiB;
+2026-10-16 22:03:05 [beamq5] boot A 391 probe: 391
+2026-10-16 22:04:09 [beamq5] boot A quality: auto-checked 11/12 correct (empty answers 0) | toolcall 3/3 ok | toolext 12/12 ok
+2026-10-16 22:04:45 [beamq5] boot A GSM8K-200 (rc 0): {"n": 200, "correct": 194, "acc": 97.0, "runaways": 0, "errors": 0, "wall_s": 36, "median_ctoks": 246, "effort": "low"}
+2026-10-16 22:05:07 [beamq5] boot A long context (rc 0): {"chars_per_token": 4.612, "lengths": {"63000": {"correct": 6, "n": 6, "errors": 0, "valid": true, "ptoks_min": 63884, "ptoks_max": 63889}, "125000": {"correct": 6, "n": 6, "errors": 0, "valid": true, "ptoks_min": 126577, "ptoks_max": 126582}}, "bar": "[KIT] every length valid (prompt_tokens in [0.9
+2026-10-16 22:25:12 [beamq5] boot A soak (rc 0): {"mode": "soak", "ok": 1526, "timeout": 0, "http_error": 0, "other": 0, "submitted": 1526, "healthy_after": true, "by_kind": {"gsmnt": {"ok": 242, "bad": 0}, "gsm": {"ok": 446, "bad": 0}, "chat": {"ok": 162, "bad": 0}, "pfx": {"ok": 146, "bad": 0}, "gsmT": {"ok": 142, "bad": 0}, "long": {"ok": 164, 
+2026-10-16 22:46:12 [beamq5] beam q5 verdict: QUALITY PASS | G1=PASS G2=PASS G3=PASS G4=PASS G5=PASS G6=PASS
+
+--- gsm8k200-A.log (last line)
+{"n": 200, "correct": 194, "acc": 97.0, "runaways": 0, "errors": 0, "wall_s": 36, "median_ctoks": 246, "effort": "low"}
+
+--- toolcall-A.log
+{"q": "What's the weather like in Denver right now?", "want": "get_weather", "ok": true, "calls": [{"name": "get_weather", "arguments": "{\"city\": \"Denver\"}"}]}
+{"q": "Use the calculator to compute 1234 * 5678.", "want": "calculator", "ok": true, "calls": [{"name": "calculator", "arguments": "{\"expression\": \"1234 * 5678\"}"}]}
+{"q": "Is it raining in Seattle? Check with the tool.", "want": "get_weather", "ok": true, "calls": [{"name": "get_weather", "arguments": "{\"city\": \"Seattle\"}"}]}
+toolcall 3/3 ok
+
+--- toolext-A.log
+{"tag": "select-weather", "kind": "calls", "ok": true, "calls": [{"name": "get_weather", "arguments": "{\"city\": \"Reykjavik\"}"}]}
+{"tag": "select-calc", "kind": "calls", "ok": true, "calls": [{"name": "calculator", "arguments": "{\"expression\": \"987 * 654\"}"}]}
+{"tag": "select-flight", "kind": "calls", "ok": true, "calls": [{"name": "search_flights", "arguments": "{\"date\": \"2026-12-01\", \"destination\": \"ORD\", \"origin\": \"LAX\"}"}]}
+{"tag": "select-convert", "kind": "calls", "ok": true, "calls": [{"name": "convert_units", "arguments": "{\"from_unit\": \"celsius\", \"to_unit\": \"fahrenheit\", \"value\": 30.0}"}]}
+{"tag": "parallel-weather", "kind": "calls", "ok": true, "calls": [{"name": "get_weather", "arguments": "{\"city\": \"Paris\"}"}, {"name": "get_weather", "arguments": "{\"city\": \"Tokyo\"}"}]}
+{"tag": "parallel-calc", "kind": "calls", "ok": true, "calls": [{"name": "calculator", "arguments": "{\"expression\": \"12*12\"}"}, {"name": "calculator", "arguments": "{\"expression\": \"15*15\"}"}]}
+{"tag": "notool-capital", "kind": "notool", "ok": true, "calls": []}
+{"tag": "notool-arith", "kind": "notool", "ok": true, "calls": []}
+{"tag": "enum-unit", "kind": "calls", "ok": true, "calls": [{"name": "get_weather", "arguments": "{\"city\": \"Boston\", \"unit\": \"fahrenheit\"}"}]}
+{"tag": "typed-number", "kind": "typed", "ok": true, "calls": [{"name": "convert_units", "arguments": "{\"from_unit\": \"miles\", \"to_unit\": \"kilometers\", \"value\": 5.0}"}]}
+{"tag": "date-flight", "kind": "calls", "ok": true, "calls": [{"name": "search_flights", "arguments": "{\"date\": \"2026-11-03\", \"destination\": \"JFK\", \"origin\": \"SFO\"}"}]}
+{"tag": "result-followup", "kind": "result", "ok": true, "calls": []}
+toolext 12/12 ok
+
+--- soak-A.log (last line)
+{"mode": "soak", "ok": 1526, "timeout": 0, "http_error": 0, "other": 0, "submitted": 1526, "healthy_after": true, "by_kind": {"gsmnt": {"ok": 242, "bad": 0}, "gsm": {"ok": 446, "bad": 0}, "chat": {"ok": 162, "bad": 0}, "pfx": {"ok": 146, "bad": 0}, "gsmT": {"ok": 142, "bad": 0}, "long": {"ok": 164, "bad": 0}, "ids": {"ok": 224, "bad": 0}}, "duration_s": 1200.0, "conc": 16, "req_timeout_s": 600.0, "seed": 7}
+
+--- VERDICT.md (pre-registered gates)
+**QUALITY PASS** -- failed []; incomplete []
+- G1 GSM8K-200 >= 94.0 %: PASS (acc 97.0 % (194/200, errors 0, runaways 0))
+- G3 tools smoke 3/3 + extended >= 11/12: PASS (smoke 3/3, extended 12/12)
+- G4 20-min soak C16 clean: PASS (ok 1526 timeout 0 http 0 other 0 healthy_after True (duration 1200.0 s))
+- G5 long context 64K+128K >= 5/6 each [KIT]: PASS ({"63000": {"correct": 6, "n": 6, "errors": 0, "valid": true, "ptoks_min": 63884, "ptoks_max": 63889}, "125000": {"correct": 6, "n": 6, "errors": 0, "valid": true, "ptoks_min": 126577, "ptoks_max": 126)

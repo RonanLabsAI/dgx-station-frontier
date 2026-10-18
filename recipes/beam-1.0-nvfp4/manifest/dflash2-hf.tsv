@@ -1,0 +1,5 @@
+# HF API tree reflection/Beam-1.0-501B-A23B-DFlash2 main (listing fetched 2026-10-16; no commit hash recorded): path<TAB>size<TAB>sha256(lfs) or git-oid
+.gitattributes	1519	git:a6344aac8c09253b3b630fb776ae94478aa0275b
+README.md	20325	git:ecb89777edf404ee91f7ee7f190ec9a970b1fc34
+config.json	1296	git:6740acaee1e8d3d1a78c3b789411a775cd46cdd3
+model.safetensors	3854978296	34b99ca539b1d595d0db0edf072158173d89411eca0e6b1dd2c2601437352bf4

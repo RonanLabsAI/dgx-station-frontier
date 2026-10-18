@@ -1,0 +1,83 @@
+# Reflection Beam-1.0-501B-A23B NVFP4, arm a2: TWO DGX Station GB300s, SGLang TP2 over one 400G RoCE link (nnodes 2), no weight offload,
+# DFlash2 speculative decoding (reflection/Beam-1.0-501B-A23B-DFlash2, --speculative-dflash-block-size 8; the drafter's config.json says 16).
+# Run 2026-10-16 19:03-19:27 PT (the third arm of one window that started 17:50 PT with a1 and b1; boot 1, 0 retries).
+# Excerpt: lines selected verbatim from the raw files named below; host names, GPU UUIDs, rail IPs and private paths replaced with
+# <placeholders>. Times are Pacific (PT).
+# Definitions: decode_agg = C x 1000 / mean TPOT (tok/s, the repo's decode metric; TPOT = (t_last - t_first) / (completion tokens - 1)
+# per request, so it excludes TTFT and queueing); output_tok_s = all completion tokens / wall-clock of the run, including TTFT. decode_agg is
+# NOT user-seen throughput; output_tok_s is closer to it. Real text = public CNN/DailyMail 3.0.0 test articles, the long pool of
+# recipes/kimi-k3/bench/build_pool_k3.py (slices eval-c1-r1..r3: first prompt each; eval-c16: first 4 / 16 prompts), about 8,230-8,370 Beam
+# prompt tokens, chat template with reasoning_effort minimal, 512 forced output tokens (ignore_eos + min_tokens), temperature 0, streaming
+# (bench/kbench_chat_beam.py). Each run has its own nonce prefix and a separate warm-up slice. SGLang exposes no prefix-cache hit/query
+# counters, so prefix_hit_pct / prefix_queries read 0 by construction; hygiene is the nonce + disjoint slices, and the server's
+# cache_hit_rate gauge (recorded) read 0.0. chunk_acc = completion tokens / streamed chunks = observed tokens per verify step (1.0 without
+# a drafter). catid = RANDOM TOKEN IDS (8,192 in / 1,024 forced out, temperature 0, one request, a fresh seed per rep; bench/beam_rand.py):
+# a control, not real-text speed; the drafter accepts nothing on random ids (chunk_acc ~1.0). In rt-summary lines, spec_drafts /
+# spec_draft_tokens / spec_accepted / acceptance_len are vLLM counters that SGLang does not expose (0 / null); chunk_acc and
+# sglang_accept_len_gauge are the acceptance readings here.
+# Engine: lmsysorg/sglang:beam, image id sha256:0ea912aadc3d7827858de9aa5a312c4d51c254e7dbe670dbbe8181895b92071d (its SGLang source
+# matches sgl-project/sglang PR #44747 head f7473673 for the Beam model, offloader and argument files). Context 131072, BF16 KV, 16 running
+# requests, chunked prefill 8192, page 64, trtllm_mha attention. All runs on stock SGLang (no patches, no hooks).
+
+--- boot-a2/try1/launch-rank0.txt
+launched 2026-10-16 19:03:41 PDT host=<host> rank=0 gpu=<GB300-uuid> image=lmsysorg/sglang:beam
+model=/models/hf/reflection__Beam-1.0-501B-A23B-NVFP4 nnodes=2 tp=2 offgb=0 memf=0.85 spec=1 block=8 nograph=0 ctx=131072 seqs=16 chunk=8192 page=64 optflags='--enable-metrics --cuda-graph-max-bs-decode 16'
+args: -m sglang.launch_server --model-path /model --served-model-name beam --tp 2 --attention-backend trtllm_mha --page-size 64 --context-length 131072 --max-running-requests 16 --chunked-prefill-size 8192 --mem-fraction-static 0.85 --enable-unified-memory --tool-call-parser beam --reasoning-parser beam --watchdog-timeout 1800 --speculative-algorithm DFLASH --speculative-draft-model-path /drafter --speculative-dflash-block-size 8 --nnodes 2 --node-rank 0 --dist-init-addr <rail-ip-left>:29650 --disable-custom-all-reduce --enforce-disable-flashinfer-allreduce-fusion --host 0.0.0.0 --port 8050 --enable-metrics --cuda-graph-max-bs-decode 16
+
+--- run.log (rank-1 launch record, second Station)
+launched 2026-10-16 19:03:20 PDT host=<host> rank=1 gpu=<GB300-uuid> image=lmsysorg/sglang:beam
+model=/models/hf/reflection__Beam-1.0-501B-A23B-NVFP4 nnodes=2 tp=2 offgb=0 memf=0.85 spec=1 block=8 nograph=0 ctx=131072 seqs=16 chunk=8192 page=64 optflags='--enable-metrics --cuda-graph-max-bs-decode 16'
+args: -m sglang.launch_server --model-path /model --served-model-name beam --tp 2 --attention-backend trtllm_mha --page-size 64 --context-length 131072 --max-running-requests 16 --chunked-prefill-size 8192 --mem-fraction-static 0.85 --enable-unified-memory --tool-call-parser beam --reasoning-parser beam --watchdog-timeout 1800 --speculative-algorithm DFLASH --speculative-draft-model-path /drafter --speculative-dflash-block-size 8 --nnodes 2 --node-rank 1 --dist-init-addr <rail-ip-left>:29650 --disable-custom-all-reduce --enforce-disable-flashinfer-allreduce-fusion --enable-metrics --cuda-graph-max-bs-decode 16
+
+--- boot-a2/try1/image-digest-rank0.txt
+sha256:0ea912aadc3d7827858de9aa5a312c4d51c254e7dbe670dbbe8181895b92071d
+
+--- boot-a2/try1/server-rank0.log (NCCL: version, tuner plugin, Data Direct)
+<host>:189:189 [0] NCCL INFO NCCL version 2.30.7+cuda13.3
+<host>:189:189 [0] NCCL INFO NET/IB: Data Direct DMA Interface is detected for device mlx5_1
+<host>:189:189 [0] NCCL INFO Successfully loaded external tuner plugin /opt/nccl-tuner/libnccl-tuner-example.so
+
+--- rt-summary.txt (a2 real-text rows: c1-r1, c1-r2, c1-r3, c4, c16)
+{"C": 1, "np": 1, "ok": 1, "mean_tpot_ms": 4.21, "decode_agg": 237.81, "output_tok_s": 201.94, "wall_s": 2.5, "median_ttft_s": 0.39, "mean_ptoks": 8230, "mean_ctoks": 512, "prefix_hit_pct": 0.0, "prefix_queries": 0, "think": "off", "spec_drafts": 0, "spec_draft_tokens": 0, "spec_accepted": 0, "acceptance_len": null, "forced": true, "pool": "<pool>/long/eval-c1-r1-try1.jsonl", "nonce": "beam-98235000-a2-c1-r1-t1", "chunk_acc": 2.681, "sglang_accept_len_gauge": 2.225, "sglang_cache_hit_rate_gauge": 0.0}
+{"C": 1, "np": 1, "ok": 1, "mean_tpot_ms": 4.73, "decode_agg": 211.21, "output_tok_s": 179.99, "wall_s": 2.8, "median_ttft_s": 0.42, "mean_ptoks": 8356, "mean_ctoks": 512, "prefix_hit_pct": 0.0, "prefix_queries": 0, "think": "off", "spec_drafts": 0, "spec_draft_tokens": 0, "spec_accepted": 0, "acceptance_len": null, "forced": true, "pool": "<pool>/long/eval-c1-r2-try1.jsonl", "nonce": "beam-98235000-a2-c1-r2-t1", "chunk_acc": 2.393, "sglang_accept_len_gauge": 3.075, "sglang_cache_hit_rate_gauge": 0.0}
+{"C": 1, "np": 1, "ok": 1, "mean_tpot_ms": 4.04, "decode_agg": 247.73, "output_tok_s": 208.37, "wall_s": 2.5, "median_ttft_s": 0.39, "mean_ptoks": 8313, "mean_ctoks": 512, "prefix_hit_pct": 0.0, "prefix_queries": 0, "think": "off", "spec_drafts": 0, "spec_draft_tokens": 0, "spec_accepted": 0, "acceptance_len": null, "forced": true, "pool": "<pool>/long/eval-c1-r3-try1.jsonl", "nonce": "beam-98235000-a2-c1-r3-t1", "chunk_acc": 2.813, "sglang_accept_len_gauge": 2.95, "sglang_cache_hit_rate_gauge": 0.0}
+{"C": 4, "np": 4, "ok": 4, "mean_tpot_ms": 6.81, "decode_agg": 587.57, "output_tok_s": 399.76, "wall_s": 5.1, "median_ttft_s": 1.44, "mean_ptoks": 8366.5, "mean_ctoks": 512, "prefix_hit_pct": 0.0, "prefix_queries": 0, "think": "off", "spec_drafts": 0, "spec_draft_tokens": 0, "spec_accepted": 0, "acceptance_len": null, "forced": true, "pool": "<pool>/long/eval-c16-try1.jsonl", "nonce": "beam-98235000-a2-c4-t1", "chunk_acc": 2.705, "sglang_accept_len_gauge": 2.7125, "sglang_cache_hit_rate_gauge": 0.0}
+{"C": 16, "np": 16, "ok": 16, "mean_tpot_ms": 12.24, "decode_agg": 1306.84, "output_tok_s": 577.85, "wall_s": 14.2, "median_ttft_s": 5.25, "mean_ptoks": 8358.1, "mean_ctoks": 512, "prefix_hit_pct": 0.0, "prefix_queries": 0, "think": "off", "spec_drafts": 0, "spec_draft_tokens": 0, "spec_accepted": 0, "acceptance_len": null, "forced": true, "pool": "<pool>/long/eval-c16-try1.jsonl", "nonce": "beam-98235000-a2-c16-t1", "chunk_acc": 2.708, "sglang_accept_len_gauge": 2.275, "sglang_cache_hit_rate_gauge": 0.0}
+
+--- run.log (a2 rows)
+2026-10-16 19:25:28 [beam] a2 real-text c1-r1: {'decode_agg': 237.81, 'chunk_acc': 2.681, 'sglang_accept_len_gauge': 2.225, 'median_ttft_s': 0.39}
+2026-10-16 19:25:32 [beam] a2 real-text c1-r2: {'decode_agg': 211.21, 'chunk_acc': 2.393, 'sglang_accept_len_gauge': 3.075, 'median_ttft_s': 0.42}
+2026-10-16 19:25:35 [beam] a2 real-text c1-r3: {'decode_agg': 247.73, 'chunk_acc': 2.813, 'sglang_accept_len_gauge': 2.95, 'median_ttft_s': 0.39}
+2026-10-16 19:25:42 [beam] a2 real-text c4: {'decode_agg': 587.57, 'chunk_acc': 2.705, 'sglang_accept_len_gauge': 2.7125, 'median_ttft_s': 1.44}
+2026-10-16 19:25:58 [beam] a2 real-text c16: {'decode_agg': 1306.84, 'chunk_acc': 2.708, 'sglang_accept_len_gauge': 2.275, 'median_ttft_s': 5.25}
+2026-10-16 19:26:33 [beam] arm a2 catid: {"mode": "catid", "isl": 8192, "osl": 1024, "reps": 3, "ok": 3, "decode_agg_reps": [92.5, 91.44, 92.42], "decode_agg_median": 92.42, "chunk_acc_median": 1.001}
+2026-10-16 19:26:40 [beam] arm a2 TTFT: 8K {"mode": "ttft", "isl": 8192, "osl": 8, "reps": 3, "ok": 3, "ttft_reps_s": [0.33, 0.329, 0.329], "ttft_median_s": 0.329, "prefill_tok_s_median": 24869.1} | 64K {"mode": "ttft", "isl": 65536, "osl": 8, "reps": 2, "ok": 2, "ttft_reps_s": [2.715, 2.719], "ttft_median_s": 2.717, "prefill_tok_s_median": 24119.4}
+2026-10-16 19:26:43 [beam] arm a2 quality: auto-checked 11/12 correct (empty answers 0) | toolcall 3/3 ok
+
+--- catid-a2.log (RANDOM TOKEN IDS)
+catid rep 1: decode_agg 92.5 tok/s TTFT 0.3292391300201416 s ptoks 8192 ctoks 1024 chunk_acc 1.0 gauge_acc 1.0
+catid rep 2: decode_agg 91.44 tok/s TTFT 0.32972216606140137 s ptoks 8192 ctoks 1024 chunk_acc 1.001 gauge_acc 1.0
+catid rep 3: decode_agg 92.42 tok/s TTFT 0.33029651641845703 s ptoks 8192 ctoks 1024 chunk_acc 1.001 gauge_acc 1.0
+{"mode": "catid", "isl": 8192, "osl": 1024, "reps": 3, "ok": 3, "decode_agg_reps": [92.5, 91.44, 92.42], "decode_agg_median": 92.42, "chunk_acc_median": 1.001}
+
+--- ttft8k-a2.log (random ids, 8 output tokens)
+ttft isl 8192 rep 1: TTFT 0.32999539375305176 s prefill 24824.6 tok/s ptoks 8192
+ttft isl 8192 rep 2: TTFT 0.3293483257293701 s prefill 24873.4 tok/s ptoks 8192
+ttft isl 8192 rep 3: TTFT 0.3294048309326172 s prefill 24869.1 tok/s ptoks 8192
+{"mode": "ttft", "isl": 8192, "osl": 8, "reps": 3, "ok": 3, "ttft_reps_s": [0.33, 0.329, 0.329], "ttft_median_s": 0.329, "prefill_tok_s_median": 24869.1}
+
+--- ttft64k-a2.log (random ids, 8 output tokens)
+ttft isl 65536 rep 1: TTFT 2.7154788970947266 s prefill 24134.2 tok/s ptoks 65536
+ttft isl 65536 rep 2: TTFT 2.7188122272491455 s prefill 24104.6 tok/s ptoks 65536
+{"mode": "ttft", "isl": 65536, "osl": 8, "reps": 2, "ok": 2, "ttft_reps_s": [2.715, 2.719], "ttft_median_s": 2.717, "prefill_tok_s_median": 24119.4}
+
+--- toolcall-a2.log (last line)
+toolcall 3/3 ok
+
+--- summary.log (C1 = median of the three C1 repetitions)
+summary: a1: C1 5.7 C16 84.97 [measured] | b1: C1 14.02 C16 211.01 [measured] | a2: C1 237.81 C16 1306.84 [measured] | verdict: {"a1_c1": "IN BAND", "a1_c16": "ABOVE", "b1_c1": "IN BAND", "b1_c16": "IN BAND", "b1_acc_len_c1": "IN BAND", "a2_c1": "IN BAND", "a2_c16": "IN BAND", "a2_acc_len_c1": "IN BAND", "b1_over_a1_c1": 2.46, "b1_over_a1_band": "IN BAND", "drafter_bar": "MET", "single_station_best": {"arm": "b1", "c1": 14.02, "c16": 211.01}, "single_station_lane": "NOT VIABLE", "a2_over_best_single_c1": 16.962}
+
+--- VERDICT.md (pre-registered bars, scored by the kit)
+- drafter bar (b1 vs a1): MET (b1/a1 C1 2.46)
+- single-Station lane: NOT VIABLE {"arm": "b1", "c1": 14.02, "c16": 211.01}
+- a2 / best single-Station C1: 16.962
