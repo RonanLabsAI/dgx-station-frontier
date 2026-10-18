@@ -72,6 +72,8 @@ Result pages:
 - [How much does an RTX PRO 6000 expert sidecar add to a DGX Station GB300?](results/sidecar-ab.md) Same-session A/B
   with the sidecar on and off: DS-V4-Pro across both Stations, and DS-V4.1-Flash on one Station (sidecar vs Grace
   only, decode and prefill, with power).
+- [Can one DGX Station GB300 read a 1M-token prompt?](results/long-context-1m.md) Needle-in-a-haystack scores, prefill
+  and decode at `125K`-`1M` tokens for GLM-5.3-Flash NVFP4 (SGLang) and DeepSeek-V4.1-Flash-1017 (vLLM), one Station each.
 
 ## Methodology
 

@@ -1,0 +1,92 @@
+# DeepSeek-V4.1-Flash-1017 (arm LCN) and DeepSeek-V4.1-Flash rev dba1be0a (arm LCO), one DGX Station GB300 (right),
+# vLLM nightly af7f9488, --max-model-len 1,048,576, run d1017lc2-1017-143747 on 2026-10-17:
+# LCN boot 14:38-14:50 PT, rows 14:50-14:59 PT; LCO boot 15:00-15:11 PT, rows 15:11-15:21 PT. Same flags, same image, same map.
+# Placement: hot experts in GB300 HBM (MegaMoE), cold experts read from pinned Grace memory (MEGA_PEER=0, MEGA_COLD_TRT=1);
+# RTX PRO 6000 unused. The hot/cold map was fitted to a private workload (not published); its file name is replaced below.
+# Needle probe tools/lc_probe.py: seed 1016, 6 items per length (4 single needles + 2 two-hop chains), C1, sequential,
+# temperature 0, thinking off, max_tokens 64, streamed. prefill tok/s = prompt_tokens / TTFT; prefix_hit_pct from the
+# server's /metrics deltas around each item. ttft_s_median / prefill_tok_s_median = upper median of the 6 items (index 3 of 6).
+# Decode probe: one more cold request at 1M, 256 forced tokens; decode tok/s = (tokens - 1) / (last - first token time),
+# DSpark speculative decoding on. Real text, not random token ids.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. vLLM log stamps are UTC (PT = UTC-7).
+
+--- preflight.txt (selected)
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063 present
+1017 weights: OK 83 files, 475.26 GiB, one revision 1bae0e108899, no .incomplete, no download running
+config.json identical (yarn 16 x 65536 = 1048576 in both)
+max_position_embeddings 1048576 rope {'rope_type': 'yarn', 'factor': 16, 'beta_fast': 32, 'beta_slow': 1, 'original_max_position_embeddings': 65536}
+
+--- boot-LCN/try1/create-body.json: image, server command, MEGA_* env (/model = deepseek-ai/DeepSeek-V4.1-Flash-1017)
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+cmd ["--membind=0", "vllm", "serve", "--model", "/model", "--served-model-name", "deepseek-v4.1-flash", "<alias>", "--trust-remote-code", "--tensor-parallel-size", "1", "--moe-backend", "deep_gemm_mega_moe", "--enable-expert-parallel", "--engram-config", "{\"cpu_offload\": true}", "--max-model-len", "1048576", "--max-num-seqs", "32", "--max-num-batched-tokens", "8192", "--gpu-memory-utilization", "0.95", "--kv-cache-dtype", "fp8_ds_mla", "--tool-call-parser", "deepseek_v41", "--reasoning-parser", "deepseek_v41", "--enable-auto-tool-choice", "--long-prefill-token-threshold", "6144", "--enable-prefix-caching", "--default-chat-template-kwargs", "{\"thinking\": false}", "--speculative-config", "{\"method\":\"dspark\",\"num_speculative_tokens\":5,\"num_speculative_tokens_per_batch_size\":[[1,4,5],[5,8,3],[9,32,3]],\"draft_sample_method\":\"probabilistic\"}", "--cudagraph-capture-sizes", "1", "2", "4", "6", "8", "12", "16", "18", "20", "24", "28", "32", "36", "40", "48", "56", "64", "72", "80", "96", "128", "--host", "0.0.0.0", "--port", "8013"]
+env (selected) MEGA_FUSED_SEND=0 MEGA_LL_GEMM=1 MEGA_COUNT= MEGA_PEER=0 MEGA_MHC_OVERLAP=1 MEGA_HOOK=/w/mega_peer_hook.py MEGA_ROWMAP=/w/<private-map>.json MEGA_COLD_TRT=1
+# binds (container side, selected): the vllm#58132 replay overlay files vllm/config/cache.py, vllm/models/deepseek_v41/decoder_replay_layers.py, vllm/models/deepseek_v41/nvidia/model.py, vllm/models/deepseek_v41/nvidia/model_state.py, vllm/models/deepseek_v41/nvidia/vl_model.py (read-only)
+
+--- boot-LCO/try1/create-body.json: same image, same cmd, same MEGA_* env; /model = deepseek-ai/DeepSeek-V4.1-Flash (rev dba1be0a)
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+env (selected) MEGA_FUSED_SEND=0 MEGA_LL_GEMM=1 MEGA_COUNT= MEGA_PEER=0 MEGA_MHC_OVERLAP=1 MEGA_HOOK=/w/mega_peer_hook.py MEGA_ROWMAP=/w/<private-map>.json MEGA_COLD_TRT=1
+
+--- bootfacts-LCN.txt (vLLM boot lines)
+(EngineCore pid=403) INFO 10-17 21:43:20 [model_runner.py:407] Model loading took 218.88 GiB memory and 265.208811 seconds
+(EngineCore pid=403) INFO 10-17 21:43:46 [kv_cache_utils.py:2408] GPU KV cache size: 3,459,043 tokens, Maximum concurrency for 1,048,576 tokens per request: 3.30x
+
+--- lc-LCN.log (one line per item, then the decode probe, then the per-length summary)
+{"len": 125000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 127216, "ttft_s": 4.809, "wall_s": 4.81, "finish": "stop", "prefill_tok_s": 26453.7, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 125000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 127216, "ttft_s": 4.717, "wall_s": 4.72, "finish": "stop", "prefill_tok_s": 26969.7, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 125000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 127216, "ttft_s": 4.714, "wall_s": 4.72, "finish": "stop", "prefill_tok_s": 26986.8, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 125000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 127216, "ttft_s": 4.703, "wall_s": 4.71, "finish": "stop", "prefill_tok_s": 27050.0, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 125000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 127220, "ttft_s": 4.728, "wall_s": 4.73, "finish": "stop", "prefill_tok_s": 26907.8, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 125000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": false, "ptoks": 127220, "ttft_s": 4.716, "wall_s": 4.72, "finish": "stop", "prefill_tok_s": 26976.3, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 250000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 254679, "ttft_s": 9.843, "wall_s": 9.85, "finish": "stop", "prefill_tok_s": 25874.1, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 250000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 254677, "ttft_s": 9.797, "wall_s": 9.8, "finish": "stop", "prefill_tok_s": 25995.4, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 250000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 254678, "ttft_s": 9.823, "wall_s": 9.83, "finish": "stop", "prefill_tok_s": 25926.7, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 250000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 254678, "ttft_s": 9.804, "wall_s": 9.81, "finish": "stop", "prefill_tok_s": 25976.9, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 250000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 254682, "ttft_s": 9.825, "wall_s": 9.83, "finish": "stop", "prefill_tok_s": 25921.8, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 250000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": false, "ptoks": 254683, "ttft_s": 9.815, "wall_s": 9.82, "finish": "stop", "prefill_tok_s": 25948.3, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 500000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 506813, "ttft_s": 20.932, "wall_s": 20.94, "finish": "stop", "prefill_tok_s": 24212.4, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 500000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 506812, "ttft_s": 20.894, "wall_s": 20.9, "finish": "stop", "prefill_tok_s": 24256.3, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 500000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 506813, "ttft_s": 20.899, "wall_s": 20.91, "finish": "stop", "prefill_tok_s": 24250.6, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 500000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 506812, "ttft_s": 20.892, "wall_s": 20.9, "finish": "stop", "prefill_tok_s": 24258.7, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 500000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": true, "ptoks": 506815, "ttft_s": 20.872, "wall_s": 20.88, "finish": "stop", "prefill_tok_s": 24282.1, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 500000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": false, "ptoks": 506816, "ttft_s": 20.86, "wall_s": 20.87, "finish": "stop", "prefill_tok_s": 24296.1, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 1000000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 1014363, "ttft_s": 51.043, "wall_s": 51.05, "finish": "stop", "prefill_tok_s": 19872.7, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 1000000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 1014363, "ttft_s": 51.179, "wall_s": 51.19, "finish": "stop", "prefill_tok_s": 19819.9, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 1000000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 1014363, "ttft_s": 51.175, "wall_s": 51.19, "finish": "stop", "prefill_tok_s": 19821.5, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 1000000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 1014363, "ttft_s": 51.136, "wall_s": 51.15, "finish": "stop", "prefill_tok_s": 19836.6, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 1000000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 1014367, "ttft_s": 51.153, "wall_s": 51.17, "finish": "stop", "prefill_tok_s": 19830.1, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 1000000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": false, "ptoks": 1014367, "ttft_s": 51.14, "wall_s": 51.15, "finish": "stop", "prefill_tok_s": 19835.1, "prefix_hit_pct": 0.0, "attempt": 0}
+{"decode_probe": {"len": 1000000, "ptoks": 1004091, "ctoks": 256, "ttft_s": 50.429, "decode_tok_s": 188.36, "wall_s": 51.78}}
+{"chars_per_token": 4.695, "lengths": {"125000": {"correct": 4, "n": 6, "errors": 0, "valid": true, "ptoks_min": 127216, "ptoks_max": 127220, "ttft_s_median": 4.717, "prefill_tok_s_median": 26976.3}, "250000": {"correct": 4, "n": 6, "errors": 0, "valid": true, "ptoks_min": 254677, "ptoks_max": 254683, "ttft_s_median": 9.823, "prefill_tok_s_median": 25948.3}, "500000": {"correct": 5, "n": 6, "errors": 0, "valid": true, "ptoks_min": 506812, "ptoks_max": 506816, "ttft_s_median": 20.894, "prefill_tok_s_median": 24258.7}, "1000000": {"correct": 4, "n": 6, "errors": 0, "valid": true, "ptoks_min": 1014363, "ptoks_max": 1014367, "ttft_s_median": 51.153, "prefill_tok_s_median": 19835.1}}, "decode_probe": {"len": 1000000, "ptoks": 1004091, "ctoks": 256, "ttft_s": 50.429, "decode_tok_s": 188.36, "wall_s": 51.78}}
+
+--- bootfacts-LCO.txt (vLLM boot lines)
+(EngineCore pid=404) INFO 10-17 22:05:06 [model_runner.py:407] Model loading took 218.88 GiB memory and 264.926626 seconds
+(EngineCore pid=404) INFO 10-17 22:05:32 [kv_cache_utils.py:2408] GPU KV cache size: 3,459,043 tokens, Maximum concurrency for 1,048,576 tokens per request: 3.30x
+
+--- lc-LCO.log (one line per item, then the decode probe, then the per-length summary)
+{"len": 125000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 127216, "ttft_s": 4.878, "wall_s": 4.88, "finish": "stop", "prefill_tok_s": 26079.5, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 125000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 127216, "ttft_s": 4.834, "wall_s": 4.84, "finish": "stop", "prefill_tok_s": 26316.9, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 125000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 127216, "ttft_s": 4.828, "wall_s": 4.83, "finish": "stop", "prefill_tok_s": 26349.6, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 125000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 127216, "ttft_s": 4.839, "wall_s": 4.84, "finish": "stop", "prefill_tok_s": 26289.7, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 125000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 127220, "ttft_s": 4.828, "wall_s": 4.83, "finish": "stop", "prefill_tok_s": 26350.5, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 125000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": false, "ptoks": 127220, "ttft_s": 4.832, "wall_s": 4.83, "finish": "stop", "prefill_tok_s": 26328.6, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 250000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 254679, "ttft_s": 10.016, "wall_s": 10.02, "finish": "stop", "prefill_tok_s": 25427.2, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 250000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 254677, "ttft_s": 10.011, "wall_s": 10.02, "finish": "stop", "prefill_tok_s": 25439.7, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 250000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 254678, "ttft_s": 9.986, "wall_s": 9.99, "finish": "stop", "prefill_tok_s": 25503.5, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 250000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 254678, "ttft_s": 9.991, "wall_s": 9.99, "finish": "stop", "prefill_tok_s": 25490.7, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 250000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 254682, "ttft_s": 10.015, "wall_s": 10.02, "finish": "stop", "prefill_tok_s": 25430.1, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 250000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": false, "ptoks": 254683, "ttft_s": 10.006, "wall_s": 10.01, "finish": "stop", "prefill_tok_s": 25453.0, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 500000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 506813, "ttft_s": 21.251, "wall_s": 21.26, "finish": "stop", "prefill_tok_s": 23848.9, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 500000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 506812, "ttft_s": 21.283, "wall_s": 21.29, "finish": "stop", "prefill_tok_s": 23813.0, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 500000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 506813, "ttft_s": 21.246, "wall_s": 21.25, "finish": "stop", "prefill_tok_s": 23854.5, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 500000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 506812, "ttft_s": 21.294, "wall_s": 21.3, "finish": "stop", "prefill_tok_s": 23800.7, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 500000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": true, "ptoks": 506815, "ttft_s": 21.267, "wall_s": 21.27, "finish": "stop", "prefill_tok_s": 23831.1, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 500000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": false, "ptoks": 506816, "ttft_s": 21.245, "wall_s": 21.25, "finish": "stop", "prefill_tok_s": 23855.8, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 1000000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 1014363, "ttft_s": 51.972, "wall_s": 51.98, "finish": "stop", "prefill_tok_s": 19517.5, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 1000000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 1014363, "ttft_s": 52.02, "wall_s": 52.03, "finish": "stop", "prefill_tok_s": 19499.5, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 1000000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 1014363, "ttft_s": 52.04, "wall_s": 52.05, "finish": "stop", "prefill_tok_s": 19492.0, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 1000000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 1014363, "ttft_s": 52.001, "wall_s": 52.01, "finish": "stop", "prefill_tok_s": 19506.6, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 1000000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 1014367, "ttft_s": 52.077, "wall_s": 52.09, "finish": "stop", "prefill_tok_s": 19478.2, "prefix_hit_pct": 0.0, "attempt": 0}
+{"len": 1000000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": false, "ptoks": 1014367, "ttft_s": 52.01, "wall_s": 52.02, "finish": "stop", "prefill_tok_s": 19503.3, "prefix_hit_pct": 0.0, "attempt": 0}
+{"decode_probe": {"len": 1000000, "ptoks": 1004091, "ctoks": 256, "ttft_s": 51.371, "decode_tok_s": 187.36, "wall_s": 52.73}}
+{"chars_per_token": 4.695, "lengths": {"125000": {"correct": 4, "n": 6, "errors": 0, "valid": true, "ptoks_min": 127216, "ptoks_max": 127220, "ttft_s_median": 4.834, "prefill_tok_s_median": 26328.6}, "250000": {"correct": 4, "n": 6, "errors": 0, "valid": true, "ptoks_min": 254677, "ptoks_max": 254683, "ttft_s_median": 10.011, "prefill_tok_s_median": 25453.0}, "500000": {"correct": 5, "n": 6, "errors": 0, "valid": true, "ptoks_min": 506812, "ptoks_max": 506816, "ttft_s_median": 21.267, "prefill_tok_s_median": 23848.9}, "1000000": {"correct": 4, "n": 6, "errors": 0, "valid": true, "ptoks_min": 1014363, "ptoks_max": 1014367, "ttft_s_median": 52.02, "prefill_tok_s_median": 19503.3}}, "decode_probe": {"len": 1000000, "ptoks": 1004091, "ctoks": 256, "ttft_s": 51.371, "decode_tok_s": 187.36, "wall_s": 52.73}}

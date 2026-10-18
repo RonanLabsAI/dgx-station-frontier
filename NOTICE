@@ -41,6 +41,8 @@ Third-party software used but NOT included
 - NCCL and nccl-tests (BSD-3-Clause, NVIDIA): NCCL from the images; the example tuner plugin built from the NCCL source.
 - perftest (linux-rdma, BSD/GPL dual): host package.
 - J-M-Recipes flash_bench.py (MIT): the decode harness behind logs/fabric-data-direct/fused-glm-*.log; not vendored.
+- J-M-Recipes GLM-5.3-Flash recipe (MIT), Dockerfile.0922-revert39688: builds the SGLang image behind the GLM rows of
+  results/long-context-1m.md; not vendored.
 - GSM8K test set (openai/grade-school-math, MIT): downloaded at run time, not vendored.
 - llama.cpp (MIT), commits 99b95488 and c479922a: built from source for recipes/kimi-k3 (with the patch above); not vendored.
 - compressed-tensors (neuralmagic, Apache-2.0) and humming (in vLLM, Apache-2.0): recipes/kimi-k3/vllm/hook converts
@@ -53,6 +55,7 @@ Referenced, nothing copied
   for comparison and credit it for the benchmark shape and the Data Direct container overlay. No file, script or text
   from it is included; the Data Direct helper in recipes/fabric-data-direct was written from our own notes.
 
-Model weights are not included. DeepSeek-V4.1-Flash, DeepSeek-V4-Pro-0813, GLM-5.3, Nemotron 3 Ultra and Kimi K3 (Kimi K3 License,
+Model weights are not included. DeepSeek-V4.1-Flash (and -1017), DeepSeek-V4-Pro-0813, GLM-5.3 (and NVIDIA's GLM-5.3-Flash NVFP4,
+with incoai's GLM-5.3-Flash-DFlash2 drafter), Nemotron 3 Ultra and Kimi K3 (Kimi K3 License,
 including vellum-ai/Kimi-K3-W3A16-g64, unsloth/Kimi-K3-GGUF and Inferact/Kimi-K3-DSpark) are used under their own licences;
 check each model card before redistributing anything derived from them.

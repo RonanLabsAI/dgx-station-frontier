@@ -1,0 +1,63 @@
+# GLM-5.3-Flash NVFP4 with DFlash2 drafts (block 7), one DGX Station GB300 (left), SGLang local build, context 1,048,576.
+# 2026-10-17, run glmflc-1017-140722: boot 14:07-14:14 PT, needle rows 14:17-14:27 PT, decode probe 14:26-14:27 PT.
+# Needle probe tools/lc_probe_glm.py: seed 1016, 6 items per length (4 single needles + 2 two-hop chains), C1, sequential,
+# temperature 0, reasoning_effort low, max_tokens 1500, streamed. TTFT = first streamed token (reasoning or answer);
+# prefill tok/s = prompt_tokens / TTFT. ttft_s_median / prefill_tok_s_median = upper median of the 6 items (index 3 of 6).
+# Decode probe: one more cold request at 1M, 256 forced tokens; decode tok/s = (tokens - 1) / (last - first token time),
+# DFlash2 speculative decoding on (the server's normal decode path). Real text, not random token ids.
+# Excerpt: lines selected verbatim from the raw files named below; hostnames, IPs, user names and GPU UUIDs
+# replaced with <placeholders>. Nothing else edited. Server-log stamps are UTC (PT = UTC-7).
+
+--- create-body.json: image id and server command (/model = nvidia/GLM-5.3-Flash-NVFP4, /draft = incoai/GLM-5.3-Flash-DFlash2)
+image sha256:64fa8ec394f2ccbd42e38e765e9af23213f67df21e1bc5c5f6ff5ac8e3bbc28b
+cmd ["python3", "-m", "sglang.launch_server", "--model-path", "/model", "--host", "0.0.0.0", "--port", "8011", "--quantization", "modelopt_fp4", "--trust-remote-code", "--served-model-name", "glm-5.3-flash", "--tool-call-parser", "glm47", "--reasoning-parser", "glm45", "--context-length", "1048576", "--mem-fraction-static", "0.88", "--cuda-graph-max-bs-decode", "16", "--max-running-requests", "16", "--max-prefill-tokens", "8192", "--chunked-prefill-size", "8192", "--kv-cache-dtype", "fp8_e4m3", "--speculative-algorithm", "DFLASH", "--speculative-draft-model-path", "/draft", "--speculative-draft-attention-backend", "fa4", "--max-mamba-cache-size", "48", "--speculative-dflash-block-size", "7", "--enable-linear-replayssm-spec"]
+
+--- boot-R1M/bootfacts.txt (server-log lines from the boot)
+[2026-10-17 21:09:56] Load weight end. elapsed=98.14 s, type=Glm5NextForConditionalGeneration, quant=modelopt_fp4, quant_algo=NVFP4, avail mem=71.93 GB, mem usage=176.97 GB.
+[2026-10-17 21:10:01] Load weight end. elapsed=0.30 s, type=DFlash2DraftModel, avail mem=69.12 GB, mem usage=2.68 GB.
+[2026-10-17 21:10:02] max_running_requests is capped to 9 by the mamba state cache (max_mamba_cache_size=48, 5 state slots per request). To raise it: increase --mamba-full-memory-ratio or --max-mamba-cache-size, or halve the state size with --mamba-ssm-dtype bfloat16.
+[2026-10-17 21:10:02] Mamba Cache is allocated. max_mamba_cache_size: 48, conv_state size: 0.24GB, ssm_state size: 6.70GB intermediate_ssm_state_cache size: 0.00GB intermediate_conv_window_cache size: 0.34GB 
+[2026-10-17 21:10:02] KV Cache is allocated. dtype: torch.float8_e4m3fn, #tokens: 1147584, KV size: 7.57 GB
+[2026-10-17 21:10:04] KV Cache is allocated. dtype: torch.bfloat16, #tokens: 1147584, K size: 10.94 GB, V size: 10.94 GB
+[2026-10-17 21:14:50] max_total_num_tokens=1147584, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=9, context_len=1048576, available_gpu_mem=27.94 GB
+
+--- boot-R1M/kvpool.txt (KV pool tokens; tokens needed for the 1M length = ceil(1.02 x 1,000,000) + 1,600)
+1147584 1021600
+
+--- lc-R1M.log (one line per item, then the decode probe, then the per-length summary)
+{"len": 125000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 126855, "ctoks": 148, "ttft_s": 17.391, "wall_s": 17.86, "finish": "stop", "reasoning_chars": 560, "answer_chars": 6, "prefill_tok_s": 7294.3, "prefix_hit_pct": null, "attempt": 0}
+{"len": 125000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 126855, "ctoks": 6, "ttft_s": 4.932, "wall_s": 4.94, "finish": "stop", "reasoning_chars": 0, "answer_chars": 6, "prefill_tok_s": 25720.8, "prefix_hit_pct": null, "attempt": 0}
+{"len": 125000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 126855, "ctoks": 8, "ttft_s": 4.944, "wall_s": 4.97, "finish": "stop", "reasoning_chars": 6, "answer_chars": 6, "prefill_tok_s": 25658.4, "prefix_hit_pct": null, "attempt": 0}
+{"len": 125000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 126854, "ctoks": 10, "ttft_s": 4.952, "wall_s": 4.97, "finish": "stop", "reasoning_chars": 6, "answer_chars": 6, "prefill_tok_s": 25616.7, "prefix_hit_pct": null, "attempt": 0}
+{"len": 125000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": true, "ptoks": 126859, "ctoks": 412, "ttft_s": 4.969, "wall_s": 6.2, "finish": "stop", "reasoning_chars": 1610, "answer_chars": 6, "prefill_tok_s": 25530.1, "prefix_hit_pct": null, "attempt": 0}
+{"len": 125000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": true, "ptoks": 126859, "ctoks": 15, "ttft_s": 4.967, "wall_s": 5.03, "finish": "stop", "reasoning_chars": 15, "answer_chars": 6, "prefill_tok_s": 25540.4, "prefix_hit_pct": null, "attempt": 0}
+{"len": 250000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 253609, "ctoks": 275, "ttft_s": 10.169, "wall_s": 10.95, "finish": "stop", "reasoning_chars": 1075, "answer_chars": 6, "prefill_tok_s": 24939.4, "prefix_hit_pct": null, "attempt": 0}
+{"len": 250000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 253607, "ctoks": 8, "ttft_s": 10.161, "wall_s": 10.18, "finish": "stop", "reasoning_chars": 6, "answer_chars": 6, "prefill_tok_s": 24958.9, "prefix_hit_pct": null, "attempt": 0}
+{"len": 250000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 253608, "ctoks": 159, "ttft_s": 10.172, "wall_s": 10.74, "finish": "stop", "reasoning_chars": 650, "answer_chars": 6, "prefill_tok_s": 24932.0, "prefix_hit_pct": null, "attempt": 0}
+{"len": 250000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 253608, "ctoks": 162, "ttft_s": 10.146, "wall_s": 10.71, "finish": "stop", "reasoning_chars": 655, "answer_chars": 6, "prefill_tok_s": 24995.9, "prefix_hit_pct": null, "attempt": 0}
+{"len": 250000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": true, "ptoks": 253612, "ctoks": 409, "ttft_s": 10.156, "wall_s": 11.25, "finish": "stop", "reasoning_chars": 1640, "answer_chars": 6, "prefill_tok_s": 24971.6, "prefix_hit_pct": null, "attempt": 0}
+{"len": 250000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": true, "ptoks": 253613, "ctoks": 13, "ttft_s": 10.14, "wall_s": 10.17, "finish": "stop", "reasoning_chars": 14, "answer_chars": 6, "prefill_tok_s": 25011.1, "prefix_hit_pct": null, "attempt": 0}
+{"len": 500000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 504821, "ctoks": 310, "ttft_s": 21.676, "wall_s": 22.58, "finish": "stop", "reasoning_chars": 1155, "answer_chars": 6, "prefill_tok_s": 23289.4, "prefix_hit_pct": null, "attempt": 0}
+{"len": 500000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 504819, "ctoks": 135, "ttft_s": 21.654, "wall_s": 22.16, "finish": "stop", "reasoning_chars": 502, "answer_chars": 6, "prefill_tok_s": 23313.0, "prefix_hit_pct": null, "attempt": 0}
+{"len": 500000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 504820, "ctoks": 144, "ttft_s": 21.586, "wall_s": 22.02, "finish": "stop", "reasoning_chars": 577, "answer_chars": 6, "prefill_tok_s": 23386.5, "prefix_hit_pct": null, "attempt": 0}
+{"len": 500000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 504819, "ctoks": 73, "ttft_s": 21.551, "wall_s": 21.78, "finish": "stop", "reasoning_chars": 267, "answer_chars": 6, "prefill_tok_s": 23424.4, "prefix_hit_pct": null, "attempt": 0}
+{"len": 500000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": true, "ptoks": 504822, "ctoks": 321, "ttft_s": 21.567, "wall_s": 22.55, "finish": "stop", "reasoning_chars": 1263, "answer_chars": 6, "prefill_tok_s": 23407.1, "prefix_hit_pct": null, "attempt": 0}
+{"len": 500000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": true, "ptoks": 504823, "ctoks": 163, "ttft_s": 21.592, "wall_s": 22.17, "finish": "stop", "reasoning_chars": 658, "answer_chars": 6, "prefill_tok_s": 23380.1, "prefix_hit_pct": null, "attempt": 0}
+{"len": 1000000, "i": 0, "kind": "single", "depth": 0.1, "ok": true, "ptoks": 1010184, "ctoks": 145, "ttft_s": 61.478, "wall_s": 61.99, "finish": "stop", "reasoning_chars": 563, "answer_chars": 6, "prefill_tok_s": 16431.6, "prefix_hit_pct": null, "attempt": 0}
+{"len": 1000000, "i": 1, "kind": "single", "depth": 0.35, "ok": true, "ptoks": 1010184, "ctoks": 66, "ttft_s": 48.746, "wall_s": 48.94, "finish": "stop", "reasoning_chars": 232, "answer_chars": 6, "prefill_tok_s": 20723.4, "prefix_hit_pct": null, "attempt": 0}
+{"len": 1000000, "i": 2, "kind": "single", "depth": 0.6, "ok": true, "ptoks": 1010184, "ctoks": 66, "ttft_s": 48.746, "wall_s": 48.93, "finish": "stop", "reasoning_chars": 234, "answer_chars": 6, "prefill_tok_s": 20723.4, "prefix_hit_pct": null, "attempt": 0}
+{"len": 1000000, "i": 3, "kind": "single", "depth": 0.9, "ok": true, "ptoks": 1010184, "ctoks": 61, "ttft_s": 48.764, "wall_s": 48.94, "finish": "stop", "reasoning_chars": 228, "answer_chars": 6, "prefill_tok_s": 20715.8, "prefix_hit_pct": null, "attempt": 0}
+{"len": 1000000, "i": 4, "kind": "two-hop", "depth": [0.05, 0.5], "ok": false, "ptoks": 1010188, "ctoks": 1500, "ttft_s": 48.782, "wall_s": 52.33, "finish": "length", "reasoning_chars": 6310, "answer_chars": 0, "prefill_tok_s": 20708.2, "prefix_hit_pct": null, "attempt": 0}
+{"len": 1000000, "i": 5, "kind": "two-hop", "depth": [0.2, 0.75], "ok": false, "ptoks": 1010188, "ctoks": 1500, "ttft_s": 48.774, "wall_s": 53.22, "finish": "length", "reasoning_chars": 5972, "answer_chars": 0, "prefill_tok_s": 20711.6, "prefix_hit_pct": null, "attempt": 0}
+{"decode_probe": {"len": 1000000, "ptoks": 1000024, "ctoks": 256, "ttft_s": 61.784, "decode_tok_s": 188.15, "wall_s": 63.14}}
+{"chars_per_token": 4.699, "lengths": {"125000": {"correct": 6, "n": 6, "errors": 0, "valid": true, "measured": 6, "ptoks_min": 126854, "ptoks_max": 126859, "ttft_s_median": 4.967, "prefill_tok_s_median": 25616.7}, "250000": {"correct": 6, "n": 6, "errors": 0, "valid": true, "measured": 6, "ptoks_min": 253607, "ptoks_max": 253613, "ttft_s_median": 10.161, "prefill_tok_s_median": 24971.6}, "500000": {"correct": 6, "n": 6, "errors": 0, "valid": true, "measured": 6, "ptoks_min": 504819, "ptoks_max": 504823, "ttft_s_median": 21.592, "prefill_tok_s_median": 23386.5}, "1000000": {"correct": 4, "n": 6, "errors": 0, "valid": true, "measured": 6, "ptoks_min": 1010184, "ptoks_max": 1010188, "ttft_s_median": 48.774, "prefill_tok_s_median": 20715.8}}, "decode_probe": {"len": 1000000, "ptoks": 1000024, "ctoks": 256, "ttft_s": 61.784, "decode_tok_s": 188.15, "wall_s": 63.14}, "server_dead_at": null, "skipped_from": null}
+
+--- boot-R1M/server.log, prefix cache: the first 1M item's first three prefill chunks (8,192 tokens each) and its last one; the decode probe's first chunk
+# Every one of the 1,521 "Prefill batch" lines from the first needle item to the end of the run reports #cached-token: 0.
+# (The only non-zero #cached-token lines in the boot are earlier: a different suite that shares one document per length by design,
+# and the probe's 40,000-character calibration request.)
+[2026-10-17 21:21:23] Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, full token usage: 0.01, mamba usage: 0.08, #running-req: 0, #queue-req: 0, #pending-token: 1001992, cuda graph: False, input throughput (token/s): 1611.66
+[2026-10-17 21:21:23] Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, full token usage: 0.02, mamba usage: 0.08, #running-req: 0, #queue-req: 0, #pending-token: 993800, cuda graph: False, input throughput (token/s): 28739.02
+[2026-10-17 21:21:23] Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, full token usage: 0.03, mamba usage: 0.08, #running-req: 0, #queue-req: 0, #pending-token: 985608, cuda graph: False, input throughput (token/s): 28695.59
+[2026-10-17 21:22:20] Prefill batch, #new-seq: 1, #new-token: 2568, #cached-token: 0, full token usage: 0.88, mamba usage: 0.08, #running-req: 0, #queue-req: 0, #pending-token: 0, cuda graph: False, input throughput (token/s): 64101.50
+[2026-10-17 21:26:37] Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, full token usage: 0.01, mamba usage: 0.08, #running-req: 0, #queue-req: 0, #pending-token: 991832, cuda graph: False, input throughput (token/s): 906.83
