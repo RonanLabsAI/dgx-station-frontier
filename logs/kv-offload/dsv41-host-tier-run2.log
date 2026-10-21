@@ -1,0 +1,208 @@
+# KV host tier on DeepSeek-V4.1-Flash-1017, one DGX Station GB300 (right), second run: run kvr-right-1019-073657, 2026-10-19:
+# arm OFF boot 07:38-07:48 PT, rows 07:49-08:01 PT; arm ON (16 GiB host tier) boot 08:01-08:11 PT, rows 08:12-08:17 PT.
+# Model deepseek-ai/DeepSeek-V4.1-Flash-1017 (rev 1bae0e10), vLLM nightly af7f9488 with the vllm#58132 replay overlay (5 files)
+# and original-el8's expert hook; GB300-only placement: hot experts in HBM (MegaMoE), cold experts and the engram tables read from
+# pinned Grace memory (MEGA_PEER=0, MEGA_COLD_TRT=1, engram cpu_offload); the RTX PRO 6000 is unused. The hot/cold map was fitted
+# to a private workload (not published); its file name is replaced below. --max-model-len 1048576, fp8_ds_mla KV, prefix caching,
+# DSpark 5/3/3, thinking off. Arm OFF: no host tier. Arm ON: + --kv-offloading-size N --kv-offloading-backend native
+# (OffloadingConnector, pinned host region in /dev/shm = Grace LPDDR5X over NVLink-C2C). Arms run one after the other.
+# Both arms: server bound to 127.0.0.1 + VLLM_SERVER_DEV_MODE=1; eviction by POST /reset_prefix_cache (GPU only) or
+# ?reset_external=true (GPU + host). Probe: tools/kvr_probe.py (+ tools/kvo_probe.py, tools/lc_probe_2hop_ds.py as libraries).
+# Excerpt: lines selected verbatim from the raw files named below; GPU UUIDs, host paths and a served-model alias are replaced
+# with <placeholders>; each container's create-body.json is shown as its image, command, selected env and CapAdd fields.
+# Nothing else edited. vLLM log stamps are UTC (PT = UTC-7); runner stamps are PT.
+
+--- preflight.txt (selected)
+fit.jsonl == pin (11c1f306)
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063 present
+image vLLM commit af7f9488c2210d67e1033ecdc845b087ee7fe92b (= the source read for REQUEST.md: reset_prefix_cache dev router + OffloadingConnector)
+overlay config/cache.py == pin 5c51794a (kv_offloading_size / kv_offloading_backend fields present)
+1017 weights: OK 83 files, 475.26 GiB, one revision 1bae0e108899, no .incomplete, no download running
+1017 config.json: max_position_embeddings >= 1048576
+
+--- arm-OFF/create-body.json
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+entrypoint ["/usr/local/bin/numactl"] cmd ["--membind=0", "vllm", "serve", "--model", "/model", "--served-model-name", "deepseek-v4.1-flash", "<alias>", "--trust-remote-code", "--tensor-parallel-size", "1", "--moe-backend", "deep_gemm_mega_moe", "--enable-expert-parallel", "--engram-config", "{\"cpu_offload\": true}", "--max-model-len", "1048576", "--max-num-seqs", "32", "--max-num-batched-tokens", "8192", "--gpu-memory-utilization", "0.95", "--kv-cache-dtype", "fp8_ds_mla", "--tool-call-parser", "deepseek_v41", "--reasoning-parser", "deepseek_v41", "--enable-auto-tool-choice", "--long-prefill-token-threshold", "6144", "--enable-prefix-caching", "--default-chat-template-kwargs", "{\"thinking\": false}", "--speculative-config", "{\"method\":\"dspark\",\"num_speculative_tokens\":5,\"num_speculative_tokens_per_batch_size\":[[1,4,5],[5,8,3],[9,32,3]],\"draft_sample_method\":\"probabilistic\"}", "--cudagraph-capture-sizes", "1", "2", "4", "6", "8", "12", "16", "18", "20", "24", "28", "32", "36", "40", "48", "56", "64", "72", "80", "96", "128", "--host", "127.0.0.1", "--port", "8013"]
+env (selected) MEGA_FUSED_SEND=0 MEGA_LL_GEMM=1 MEGA_COUNT= MEGA_PEER=0 MEGA_MHC_OVERLAP=1 HF_HUB_OFFLINE=1 CUDA_DEVICE_ORDER=PCI_BUS_ID MEGA_HOOK=/w/mega_peer_hook.py MEGA_ROWMAP=/w/<private-map>.json MEGA_COLD_TRT=1 VLLM_USAGE_SOURCE=production-docker-image VLLM_SERVER_DEV_MODE=1
+CapAdd ["CAP_IPC_LOCK", "CAP_SYS_NICE"]
+
+--- arm-ON/create-body.json
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+entrypoint ["/usr/local/bin/numactl"] cmd ["--membind=0", "vllm", "serve", "--model", "/model", "--served-model-name", "deepseek-v4.1-flash", "<alias>", "--trust-remote-code", "--tensor-parallel-size", "1", "--moe-backend", "deep_gemm_mega_moe", "--enable-expert-parallel", "--engram-config", "{\"cpu_offload\": true}", "--max-model-len", "1048576", "--max-num-seqs", "32", "--max-num-batched-tokens", "8192", "--gpu-memory-utilization", "0.95", "--kv-cache-dtype", "fp8_ds_mla", "--tool-call-parser", "deepseek_v41", "--reasoning-parser", "deepseek_v41", "--enable-auto-tool-choice", "--long-prefill-token-threshold", "6144", "--enable-prefix-caching", "--default-chat-template-kwargs", "{\"thinking\": false}", "--speculative-config", "{\"method\":\"dspark\",\"num_speculative_tokens\":5,\"num_speculative_tokens_per_batch_size\":[[1,4,5],[5,8,3],[9,32,3]],\"draft_sample_method\":\"probabilistic\"}", "--cudagraph-capture-sizes", "1", "2", "4", "6", "8", "12", "16", "18", "20", "24", "28", "32", "36", "40", "48", "56", "64", "72", "80", "96", "128", "--host", "127.0.0.1", "--port", "8013", "--kv-offloading-size", "16", "--kv-offloading-backend", "native"]
+env (selected) MEGA_FUSED_SEND=0 MEGA_LL_GEMM=1 MEGA_COUNT= MEGA_PEER=0 MEGA_MHC_OVERLAP=1 HF_HUB_OFFLINE=1 CUDA_DEVICE_ORDER=PCI_BUS_ID MEGA_HOOK=/w/mega_peer_hook.py MEGA_ROWMAP=/w/<private-map>.json MEGA_COLD_TRT=1 VLLM_USAGE_SOURCE=production-docker-image VLLM_SERVER_DEV_MODE=1
+CapAdd ["CAP_IPC_LOCK", "CAP_SYS_NICE"]
+
+--- arm-OFF/bootfacts.txt (selected)
+(EngineCore pid=403) INFO 10-19 14:41:48 [model_runner.py:407] Model loading took 218.88 GiB memory and 173.824370 seconds
+(EngineCore pid=403) INFO 10-19 14:42:15 [gpu_worker.py:692] Available KV cache memory: 6.68 GiB
+(EngineCore pid=403) INFO 10-19 14:42:15 [kv_cache_utils.py:2408] GPU KV cache size: 3,459,043 tokens, Maximum concurrency for 1,048,576 tokens per request: 3.30x
+
+--- arm-OFF/listen.txt + devreset.txt
+LISTEN 0      2048                    127.0.0.1:8013       0.0.0.0:*          
+ok ({"reset_tries": 1})
+
+--- arm-OFF/memmin.txt (lowest MemAvailable GiB while serving)
+32
+
+--- arm-ON/bootfacts.txt (selected)
+(EngineCore pid=403) INFO 10-19 15:04:56 [model_runner.py:407] Model loading took 218.88 GiB memory and 193.972457 seconds
+(EngineCore pid=403) INFO 10-19 15:05:22 [gpu_worker.py:692] Available KV cache memory: 6.68 GiB
+(EngineCore pid=403) INFO 10-19 15:05:22 [kv_cache_utils.py:2408] GPU KV cache size: 3,459,043 tokens, Maximum concurrency for 1,048,576 tokens per request: 3.30x
+(EngineCore pid=403) INFO 10-19 15:05:22 [factory.py:62] Creating v1 connector with name: OffloadingConnector and engine_id: 08637da4-d28b-44d5-85b7-cf3f71c032a4
+
+--- arm-ON/listen.txt + devreset.txt
+LISTEN 0      2048                    127.0.0.1:8013       0.0.0.0:*          
+ok ({"reset_tries": 1})
+
+--- arm-ON/memmin.txt (lowest MemAvailable GiB while serving)
+19
+
+--- host-gib.txt (host tier size rule)
+16 GiB (rule: min(18, MemAvailable_min OFF 32 - 16, /dev/shm free 247 - 8), >= 12)
+
+--- boots.tsv
+OFF	up	max-model-len 1048576	632 s	KV 3459043
+ON	up	host 16 GiB	647 s	KV 3459043
+
+--- run.log (selected)
+2026-10-19 07:48:50 [kvr-right] arm OFF up in 632 s: max-model-len 1048576, KV pool 3459043 tokens (6.68 GiB), host 0 GiB , HMA on, hook proven, listen 127.0.0.1:8013 only, dev reset ok ({"reset_tries": 1}), 391 391; GB300 242332 MiB, MemAvailable 33 GiB
+2026-10-19 07:49:42 [kvr-right] arm-OFF turn1 (cap 7 min, rc 0, elapsed 12 min): {"phase": "turn", "valid": true, "out": "<bench>/kvr-right-1019-073657/arm-OFF/turn-1.json"}
+2026-10-19 07:50:05 [kvr-right] arm-OFF turn2 (cap 7 min, rc 0, elapsed 13 min): {"phase": "turn", "valid": true, "out": "<bench>/kvr-right-1019-073657/arm-OFF/turn-2.json"}
+2026-10-19 07:50:31 [kvr-right] arm-OFF turn3 (cap 7 min, rc 0, elapsed 13 min): {"phase": "turn", "valid": true, "out": "<bench>/kvr-right-1019-073657/arm-OFF/turn-3.json"}
+2026-10-19 07:51:00 [kvr-right] arm-OFF turn4 (cap 7 min, rc 0, elapsed 14 min): {"phase": "turn", "valid": true, "out": "<bench>/kvr-right-1019-073657/arm-OFF/turn-4.json"}
+2026-10-19 07:51:32 [kvr-right] arm-OFF turn5 (cap 7 min, rc 0, elapsed 14 min): {"phase": "turn", "valid": true, "out": "<bench>/kvr-right-1019-073657/arm-OFF/turn-5.json"}
+2026-10-19 07:52:06 [kvr-right] arm-OFF corr1 (cap 9 min, rc 0, elapsed 15 min): {"phase": "corr", "valid": true, "correct": 17, "n": 20, "out": "<bench>/kvr-right-1019-073657/arm-OFF/corr-p1.json"}
+2026-10-19 07:55:25 [kvr-right] arm-OFF corr2 (cap 15 min, rc 0, elapsed 18 min): {"phase": "corr", "valid": true, "correct": 18, "n": 20, "out": "<bench>/kvr-right-1019-073657/arm-OFF/corr-p2.json"}
+2026-10-19 07:56:00 [kvr-right] arm-OFF corr3 (cap 9 min, rc 0, elapsed 19 min): {"phase": "corr", "valid": true, "correct": 18, "n": 20, "out": "<bench>/kvr-right-1019-073657/arm-OFF/corr-p3.json"}
+2026-10-19 07:57:25 [kvr-right] arm-OFF ladder500000 (cap 9 min, rc 0, elapsed 20 min): {"phase": "ladder", "valid": true, "correct": 6, "n": 6, "out": "<bench>/kvr-right-1019-073657/arm-OFF/ladder-500000.json"}
+2026-10-19 08:00:52 [kvr-right] arm-OFF ladder1000000 (cap 13 min, rc 0, elapsed 23 min): {"phase": "ladder", "valid": true, "correct": 6, "n": 6, "out": "<bench>/kvr-right-1019-073657/arm-OFF/ladder-1000000.json"}
+2026-10-19 08:11:50 [kvr-right] arm ON up in 647 s: max-model-len 1048576, KV pool 3459043 tokens (6.68 GiB), host 16 GiB pinned, HMA on, hook proven, listen 127.0.0.1:8013 only, dev reset ok ({"reset_tries": 1}), 391 391; GB300 242332 MiB, MemAvailable 21 GiB
+2026-10-19 08:12:12 [kvr-right] arm-ON turn1 (cap 7 min, rc 0, elapsed 35 min): {"phase": "turn", "valid": true, "out": "<bench>/kvr-right-1019-073657/arm-ON/turn-1.json"}
+2026-10-19 08:12:24 [kvr-right] arm-ON turn2 (cap 7 min, rc 0, elapsed 35 min): {"phase": "turn", "valid": true, "out": "<bench>/kvr-right-1019-073657/arm-ON/turn-2.json"}
+2026-10-19 08:12:37 [kvr-right] arm-ON turn3 (cap 7 min, rc 0, elapsed 35 min): {"phase": "turn", "valid": true, "out": "<bench>/kvr-right-1019-073657/arm-ON/turn-3.json"}
+2026-10-19 08:12:50 [kvr-right] arm-ON turn4 (cap 7 min, rc 0, elapsed 35 min): {"phase": "turn", "valid": true, "out": "<bench>/kvr-right-1019-073657/arm-ON/turn-4.json"}
+2026-10-19 08:13:03 [kvr-right] arm-ON turn5 (cap 7 min, rc 0, elapsed 36 min): {"phase": "turn", "valid": true, "out": "<bench>/kvr-right-1019-073657/arm-ON/turn-5.json"}
+2026-10-19 08:13:37 [kvr-right] arm-ON corr1 (cap 9 min, rc 0, elapsed 36 min): {"phase": "corr", "valid": true, "correct": 18, "n": 20, "out": "<bench>/kvr-right-1019-073657/arm-ON/corr-p1.json"}
+2026-10-19 08:13:53 [kvr-right] arm-ON corr2 (cap 7 min, rc 0, elapsed 36 min): {"phase": "corr", "valid": true, "correct": 18, "n": 20, "out": "<bench>/kvr-right-1019-073657/arm-ON/corr-p2.json"}
+2026-10-19 08:14:27 [kvr-right] arm-ON corr3 (cap 9 min, rc 0, elapsed 37 min): {"phase": "corr", "valid": true, "correct": 18, "n": 20, "out": "<bench>/kvr-right-1019-073657/arm-ON/corr-p3.json"}
+2026-10-19 08:15:14 [kvr-right] arm-ON ladder500000 (cap 7 min, rc 0, elapsed 38 min): {"phase": "ladder", "valid": true, "correct": 6, "n": 6, "out": "<bench>/kvr-right-1019-073657/arm-ON/ladder-500000.json"}
+2026-10-19 08:17:06 [kvr-right] arm-ON ladder1000000 (cap 9 min, rc 0, elapsed 40 min): {"phase": "ladder", "valid": true, "correct": 6, "n": 6, "out": "<bench>/kvr-right-1019-073657/arm-ON/ladder-1000000.json"}
+2026-10-19 08:25:13 [kvr-right] {"P0": "HELD", "P1": "HELD", "P2": "HELD", "P3": "HELD", "P4": "HELD", "P5": "HELD", "P6": "HELD", "P7": "HELD"}
+2026-10-19 08:25:13 [kvr-right] kvr-right done rc=0; elapsed 48 min; outputs <bench>/kvr-right-1019-073657
+
+--- arm-OFF/ladder500000.log (cold1, reload1-2, gpu1-2, cold2, phase line)
+{"state": "cold1", "q": 1, "reset": "all", "reset_tries": 1, "ptoks": 496536, "ctoks": 3, "ttft_s": 20.597, "wall_s": 20.6, "finish": "stop", "t_first": 1792421781.3301475, "t_last": 1792421781.3365412, "prefill_tok_s": 24107.2, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 496536.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "911573"}
+{"state": "reload1", "q": 1, "reset": "gpu", "reset_tries": 1, "ptoks": 496536, "ctoks": 3, "ttft_s": 20.569, "wall_s": 20.58, "finish": "stop", "t_first": 1792421801.9334319, "t_last": 1792421801.939798, "prefill_tok_s": 24140.0, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 496536.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "911573"}
+{"state": "reload2", "q": 2, "reset": "gpu", "reset_tries": 1, "ptoks": 496535, "ctoks": 3, "ttft_s": 20.573, "wall_s": 20.58, "finish": "stop", "t_first": 1792421822.5414853, "t_last": 1792421822.5477965, "prefill_tok_s": 24135.3, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 496535.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "130599"}
+{"state": "gpu1", "q": 1, "reset": null, "ptoks": 496536, "ctoks": 3, "ttft_s": 1.402, "wall_s": 1.41, "finish": "stop", "t_first": 1792421823.9734287, "t_last": 1792421823.979886, "prefill_tok_s": 354162.6, "m": {"gpu_hit_tok": 496512.0, "gpu_query_tok": 496536.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 496512.0}, "ok": true, "answer": "911573"}
+{"state": "gpu2", "q": 2, "reset": null, "ptoks": 496535, "ctoks": 3, "ttft_s": 1.373, "wall_s": 1.38, "finish": "stop", "t_first": 1792421825.3752806, "t_last": 1792421825.381845, "prefill_tok_s": 361642.4, "m": {"gpu_hit_tok": 496512.0, "gpu_query_tok": 496535.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 496512.0}, "ok": true, "answer": "130599"}
+{"state": "cold2", "q": 1, "reset": "all", "reset_tries": 1, "ptoks": 496536, "ctoks": 3, "ttft_s": 20.528, "wall_s": 20.53, "finish": "stop", "t_first": 1792421845.936762, "t_last": 1792421845.9426174, "prefill_tok_s": 24188.2, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 496536.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "911573"}
+{"phase": "ladder", "valid": true, "correct": 6, "n": 6, "out": "<bench>/kvr-right-1019-073657/arm-OFF/ladder-500000.json"}
+
+--- arm-ON/ladder500000.log (cold1, reload1-2, gpu1-2, cold2, phase line)
+{"state": "cold1", "q": 1, "reset": "all", "reset_tries": 1, "ptoks": 496536, "ctoks": 3, "ttft_s": 20.387, "wall_s": 20.39, "finish": "stop", "t_first": 1792422888.564841, "t_last": 1792422888.571609, "prefill_tok_s": 24355.5, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 496536.0, "ext_hit_tok": 0.0, "ext_query_tok": 496536.0, "load_bytes": 0.0, "store_bytes": 822223872.0, "load_time": 0.0, "store_time": 0.003, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 822223872.0, "store_time": 0.0025742719899863008, "ext_hit_tok": 0.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "911573"}
+{"state": "reload1", "q": 1, "reset": "gpu", "reset_tries": 1, "ptoks": 496536, "ctoks": 3, "ttft_s": 1.426, "wall_s": 1.43, "finish": "stop", "t_first": 1792422890.027558, "t_last": 1792422890.0344894, "prefill_tok_s": 348202.0, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 496536.0, "ext_hit_tok": 496512.0, "ext_query_tok": 496536.0, "load_bytes": 822223872.0, "store_bytes": 0.0, "load_time": 0.004, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 822223872.0, "load_time": 0.0036048319339752194, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 496512.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "911573"}
+{"state": "reload2", "q": 2, "reset": "gpu", "reset_tries": 1, "ptoks": 496535, "ctoks": 3, "ttft_s": 1.391, "wall_s": 1.4, "finish": "stop", "t_first": 1792422891.4547553, "t_last": 1792422891.4610832, "prefill_tok_s": 356962.6, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 496535.0, "ext_hit_tok": 496512.0, "ext_query_tok": 496535.0, "load_bytes": 822223872.0, "store_bytes": 0.0, "load_time": 0.004, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 822223872.0, "load_time": 0.0038599040508270274, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 496512.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "130599"}
+{"state": "gpu1", "q": 1, "reset": null, "ptoks": 496536, "ctoks": 3, "ttft_s": 1.373, "wall_s": 1.38, "finish": "stop", "t_first": 1792422892.8596747, "t_last": 1792422892.8666964, "prefill_tok_s": 361643.1, "m": {"gpu_hit_tok": 496512.0, "gpu_query_tok": 496536.0, "ext_hit_tok": 0.0, "ext_query_tok": 24.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 496512.0}, "ok": true, "answer": "911573"}
+{"state": "gpu2", "q": 2, "reset": null, "ptoks": 496535, "ctoks": 3, "ttft_s": 1.382, "wall_s": 1.39, "finish": "stop", "t_first": 1792422894.274179, "t_last": 1792422894.2813404, "prefill_tok_s": 359287.3, "m": {"gpu_hit_tok": 496512.0, "gpu_query_tok": 496535.0, "ext_hit_tok": 0.0, "ext_query_tok": 23.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 496512.0}, "ok": true, "answer": "130599"}
+{"state": "cold2", "q": 1, "reset": "all", "reset_tries": 1, "ptoks": 496536, "ctoks": 3, "ttft_s": 20.403, "wall_s": 20.41, "finish": "stop", "t_first": 1792422914.7151916, "t_last": 1792422914.721198, "prefill_tok_s": 24336.4, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 496536.0, "ext_hit_tok": 0.0, "ext_query_tok": 496536.0, "load_bytes": 0.0, "store_bytes": 822223872.0, "load_time": 0.0, "store_time": 0.003, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 822223872.0, "store_time": 0.0025565119888633463, "ext_hit_tok": 0.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "911573"}
+{"phase": "ladder", "valid": true, "correct": 6, "n": 6, "out": "<bench>/kvr-right-1019-073657/arm-ON/ladder-500000.json"}
+
+--- arm-OFF/ladder1000000.log (cold1, reload1-2, gpu1-2, cold2, phase line)
+{"state": "cold1", "q": 1, "reset": "all", "reset_tries": 1, "ptoks": 993989, "ctoks": 3, "ttft_s": 49.969, "wall_s": 49.98, "finish": "stop", "t_first": 1792421896.47867, "t_last": 1792421896.4903562, "prefill_tok_s": 19892.1, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 993989.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "944711"}
+{"state": "reload1", "q": 1, "reset": "gpu", "reset_tries": 1, "ptoks": 993989, "ctoks": 3, "ttft_s": 50.028, "wall_s": 50.04, "finish": "stop", "t_first": 1792421946.5515473, "t_last": 1792421946.5624073, "prefill_tok_s": 19868.7, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 993989.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "944711"}
+{"state": "reload2", "q": 2, "reset": "gpu", "reset_tries": 1, "ptoks": 993989, "ctoks": 3, "ttft_s": 49.974, "wall_s": 49.99, "finish": "stop", "t_first": 1792421996.570143, "t_last": 1792421996.58202, "prefill_tok_s": 19890.1, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 993989.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "823728"}
+{"state": "gpu1", "q": 1, "reset": null, "ptoks": 993989, "ctoks": 3, "ttft_s": 2.715, "wall_s": 2.73, "finish": "stop", "t_first": 1792421999.3260627, "t_last": 1792421999.3372383, "prefill_tok_s": 366110.1, "m": {"gpu_hit_tok": 993920.0, "gpu_query_tok": 993989.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 993920.0}, "ok": true, "answer": "944711"}
+{"state": "gpu2", "q": 2, "reset": null, "ptoks": 993989, "ctoks": 3, "ttft_s": 2.719, "wall_s": 2.73, "finish": "stop", "t_first": 1792422002.0845006, "t_last": 1792422002.0968852, "prefill_tok_s": 365571.5, "m": {"gpu_hit_tok": 993920.0, "gpu_query_tok": 993989.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 993920.0}, "ok": true, "answer": "823728"}
+{"state": "cold2", "q": 1, "reset": "all", "reset_tries": 1, "ptoks": 993989, "ctoks": 3, "ttft_s": 49.966, "wall_s": 49.98, "finish": "stop", "t_first": 1792422052.0962868, "t_last": 1792422052.1072447, "prefill_tok_s": 19893.3, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 993989.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "944711"}
+{"phase": "ladder", "valid": true, "correct": 6, "n": 6, "out": "<bench>/kvr-right-1019-073657/arm-OFF/ladder-1000000.json"}
+
+--- arm-ON/ladder1000000.log (cold1, reload1-2, gpu1-2, cold2, phase line)
+{"state": "cold1", "q": 1, "reset": "all", "reset_tries": 1, "ptoks": 993989, "ctoks": 3, "ttft_s": 49.666, "wall_s": 49.68, "finish": "stop", "t_first": 1792422964.9582157, "t_last": 1792422964.9709265, "prefill_tok_s": 20013.5, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 993989.0, "ext_hit_tok": 0.0, "ext_query_tok": 993989.0, "load_bytes": 0.0, "store_bytes": 1645931520.0, "load_time": 0.0, "store_time": 0.005, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 1645931520.0, "store_time": 0.00511836799234151, "ext_hit_tok": 0.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "944711"}
+{"state": "reload1", "q": 1, "reset": "gpu", "reset_tries": 1, "ptoks": 993989, "ctoks": 3, "ttft_s": 2.836, "wall_s": 2.85, "finish": "stop", "t_first": 1792422967.8448188, "t_last": 1792422967.8574228, "prefill_tok_s": 350489.8, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 993989.0, "ext_hit_tok": 993920.0, "ext_query_tok": 993989.0, "load_bytes": 1645931520.0, "store_bytes": 0.0, "load_time": 0.008, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 1645931520.0, "load_time": 0.0075890879631042435, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 993920.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "944711"}
+{"state": "reload2", "q": 2, "reset": "gpu", "reset_tries": 1, "ptoks": 993989, "ctoks": 3, "ttft_s": 2.775, "wall_s": 2.79, "finish": "stop", "t_first": 1792422970.6689167, "t_last": 1792422970.6802397, "prefill_tok_s": 358194.2, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 993989.0, "ext_hit_tok": 993920.0, "ext_query_tok": 993989.0, "load_bytes": 1645931520.0, "store_bytes": 0.0, "load_time": 0.008, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 1645931520.0, "load_time": 0.0076446399688720745, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 993920.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "823728"}
+{"state": "gpu1", "q": 1, "reset": null, "ptoks": 993989, "ctoks": 3, "ttft_s": 2.767, "wall_s": 2.78, "finish": "stop", "t_first": 1792422973.4787693, "t_last": 1792422973.4900703, "prefill_tok_s": 359229.9, "m": {"gpu_hit_tok": 993920.0, "gpu_query_tok": 993989.0, "ext_hit_tok": 0.0, "ext_query_tok": 69.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 993920.0}, "ok": true, "answer": "944711"}
+{"state": "gpu2", "q": 2, "reset": null, "ptoks": 993989, "ctoks": 3, "ttft_s": 2.756, "wall_s": 2.77, "finish": "stop", "t_first": 1792422976.2771747, "t_last": 1792422976.2886999, "prefill_tok_s": 360663.6, "m": {"gpu_hit_tok": 993920.0, "gpu_query_tok": 993989.0, "ext_hit_tok": 0.0, "ext_query_tok": 69.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 0.0, "store_time": 0.0, "ext_hit_tok": 0.0, "gpu_hit_tok": 993920.0}, "ok": true, "answer": "823728"}
+{"state": "cold2", "q": 1, "reset": "all", "reset_tries": 1, "ptoks": 993989, "ctoks": 3, "ttft_s": 49.713, "wall_s": 49.72, "finish": "stop", "t_first": 1792423026.0404263, "t_last": 1792423026.0516338, "prefill_tok_s": 19994.5, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 993989.0, "ext_hit_tok": 0.0, "ext_query_tok": 993989.0, "load_bytes": 0.0, "store_bytes": 1645931520.0, "load_time": 0.0, "store_time": 0.005, "preempt": 0.0, "alloc_fail": 0.0}, "mx": {"load_bytes": 0.0, "load_time": 0.0, "store_bytes": 1645931520.0, "store_time": 0.005110112007707338, "ext_hit_tok": 0.0, "gpu_hit_tok": 0.0}, "ok": true, "answer": "944711"}
+{"phase": "ladder", "valid": true, "correct": 6, "n": 6, "out": "<bench>/kvr-right-1019-073657/arm-ON/ladder-1000000.json"}
+
+--- summary.log
+{"P0": "HELD", "P1": "HELD", "P2": "HELD", "P3": "HELD", "P4": "HELD", "P5": "HELD", "P6": "HELD", "P7": "HELD"}
+
+--- SUMMARY.md (the runner's checked summary, verbatim apart from its title line and the arm label)
+REPORT ONLY. Arms: OFF = the first run's GB300-only clone at --max-model-len 1048576; ON = the same + --kv-offloading-size 16 --kv-offloading-backend native (OffloadingConnector, host tier in /dev/shm = Grace LPDDR over NVLink-C2C). Both arms: --host 127.0.0.1 + VLLM_SERVER_DEV_MODE=1; eviction by POST /reset_prefix_cache (GPU only) or ?reset_external=true (GPU + host).
+
+## Boots
+
+| arm | up (s) | max-model-len | GPU KV pool (tokens) | GPU KV GiB | host tier GiB | pinned | connector | HMA | listen | dev reset | min MemAvailable GiB |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| OFF | 632 | 1048576 | 3459043 | 6.68 | 0 | - | - | on | 127.0.0.1:8013 only | ok ({"reset_tries": 1}) | 32 |
+| ON | 647 | 1048576 | 3459043 | 6.68 | 16 | pinned | OffloadingConnector, 16 GiB | on | 127.0.0.1:8013 only | ok ({"reset_tries": 1}) | 19 |
+
+Host tier link (ON, whole arm, /metrics at teardown): load 15.09 GiB in 0.081 s = **199.2 GB/s**; store 7.13 GiB in 0.025 s = **308.2 GB/s**.
+
+## (1) Multi-turn: 8 sessions x 5 turns over a shared ~250K system prefix; reset(GPU) before each of turns 2-5
+
+| arm | turn | first toucher TTFT s (host hit tok / GPU hit tok / reset tries) | followers TTFT p50 / p90 s | followers host hit tok (sum) | all p50 / p90 s | valid |
+|---|---|---|---|---|---|---|
+| OFF | 1 | 10.381 (0.0 / 0.0 / 1) | 1.069 / 1.092 | 0 | 1.069 / 10.381 | VALID |
+| OFF | 2 | 10.627 (0.0 / 0.0 / 1) | 1.412 / 1.455 | 0 | 1.412 / 10.627 | VALID |
+| OFF | 3 | 10.97 (0.0 / 0.0 / 1) | 1.713 / 1.794 | 0 | 1.713 / 10.97 | VALID |
+| OFF | 4 | 11.234 (0.0 / 0.0 / 1) | 2.096 / 2.123 | 0 | 2.096 / 11.234 | VALID |
+| OFF | 5 | 11.667 (0.0 / 0.0 / 1) | 2.474 / 2.53 | 0 | 2.474 / 11.667 | VALID |
+| ON | 1 | 10.257 (0.0 / 0.0 / 1) | 1.07 / 1.114 | 0 | 1.07 / 10.257 | VALID |
+| ON | 2 | 1.126 (262656.0 / 0.0 / 1) | 1.11 / 1.129 | 56960.0 | 1.11 / 1.129 | VALID |
+| ON | 3 | 1.14 (270848.0 / 0.0 / 1) | 1.11 / 1.15 | 113920.0 | 1.11 / 1.15 | VALID |
+| ON | 4 | 1.024 (279040.0 / 0.0 / 1) | 1.14 / 1.176 | 171392.0 | 1.134 / 1.176 | VALID |
+| ON | 5 | 1.219 (286976.0 / 0.0 / 1) | 1.176 / 1.229 | 228992.0 | 1.176 / 1.229 | VALID |
+Eviction check turn 2: OK
+Eviction check turn 3: OK
+Eviction check turn 4: OK
+Eviction check turn 5: OK
+
+Turns [2, 3, 4, 5] pooled (n=32 per arm): first toucher p50 OFF 10.97 s vs ON 1.126 s; all-session p50 OFF 1.966 / ON 1.131 s; p90 OFF 10.627 / ON 1.18 s.
+Eviction check: 4 of 4 turns pass
+
+## (2) Single-session reload ladder (TTFT s; cold = recompute after reset(all); reload = after reset(GPU): ON from the host tier, OFF recomputed; gpu = prefix still on the GPU)
+
+| arm | L | cold1 | reload1 / reload2 | reload p50 | gpu p50 | cold2 | reload host hit tok (min) | reload GPU hit tok (max) | engine load GB/s | load B/token | correct | reload1==cold1 | gpu_k==reload_k | cold2==cold1 | valid |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| OFF | 500K | 20.597 | 20.569 / 20.573 | 20.569 | 1.373 | 20.528 | 0 | 0 | None | None | 6/6 | True | 2/2 | True | VALID |
+| ON | 500K | 20.387 | 1.426 / 1.391 | 1.391 | 1.373 | 20.403 | 496512.0 | 0 | 220.3 | 1656 | 6/6 | True | 2/2 | True | VALID |
+| OFF | 1000K | 49.969 | 50.028 / 49.974 | 49.974 | 2.715 | 49.966 | 0 | 0 | None | None | 6/6 | True | 2/2 | True | VALID |
+| ON | 1000K | 49.666 | 2.836 / 2.775 | 2.775 | 2.756 | 49.713 | 993920.0 | 0 | 216.1 | 1656 | 6/6 | True | 2/2 | True | VALID |
+
+## (3) Answers on the same 20 items (2 x 250K documents x 10 questions; thinking off, temperature 0)
+
+| arm | pass | eviction before | correct / n | items with host hits >= 80% of prompt | items with GPU hits < 10% | valid |
+|---|---|---|---|---|---|---|
+| OFF | 1 | reset(all) once | 17 / 20 | 0 | 2 | VALID |
+| OFF | 2 | reset(GPU) every item | 18 / 20 | 0 | 20 | VALID |
+| OFF | 3 | reset(all) once | 18 / 20 | 0 | 2 | VALID |
+| ON | 1 | reset(all) once | 18 / 20 | 0 | 2 | VALID |
+| ON | 2 | reset(GPU) every item | 18 / 20 | 20 | 20 | VALID |
+| ON | 3 | reset(all) once | 18 / 20 | 0 | 2 | VALID |
+
+| comparison | identical / n | differing |
+|---|---|---|
+| OFF p3 vs OFF p1 (recompute baseline, connector absent) | 19 / 20 | 1 |
+| ON p3 vs ON p1 (recompute baseline, connector present) | 20 / 20 | 0 |
+| ON p1 vs OFF p1 (connector present vs absent, same path) | 19 / 20 | 1 |
+| OFF p2 vs OFF p1 (per-item recompute vs cold + GPU hits) | 19 / 20 | 1 |
+| ON p2 vs ON p1 (per-item HOST RELOAD vs cold + GPU hits) | 20 / 20 | 0 |
+| ON p2 vs OFF p2 (host reload vs recompute, item by item) | 20 / 20 | 0 |
+
+Attribution: a P7-style ON-vs-OFF answer difference is attributed to the host tier only if it exceeds the measured nondeterminism baseline (P6 NOT HELD). Here: within the baseline (not attributable to the host tier).
+
+## Predictions (prereg.json)
+
+| prediction | verdict | detail |
+|---|---|---|
+| P0 ON boots with OffloadingConnector; ON GPU KV pool >= 0.97 x OFF | HELD | ON GPU pool 3459043.0 vs OFF 3459043.0; connector OffloadingConnector, 16 GiB; host region pinned |
+| P1 eviction is deterministic: turns 2-5 4/4 pass in both arms; every ladder reload row passes | HELD | turns 2-5 pass: [2, 3, 4, 5]; ladder reload rows pass per measured arm x length: [True, True, True, True] |
+| P2 turns 2-5 first-toucher TTFT p50: ON <= 0.25 x OFF | HELD | first toucher p50 ON 1.126 vs OFF 10.97 s (turns [2, 3, 4, 5]) |
+| P3 turns 2-5 all-session TTFT p50 and p90: ON <= OFF | HELD | all-session p50 ON 1.131 vs OFF 1.966; p90 ON 1.18 vs OFF 10.627 s (turns [2, 3, 4, 5]) |
+| P4 ladder 500K + 1M: ON reload p50 <= 0.25 x OFF reload (recompute) p50 and <= 0.25 x ON cold1 | HELD | 500K: ON reload p50 1.391 vs OFF reload (recompute) p50 20.569 and ON cold1 20.387; 1000K: ON reload p50 2.775 vs OFF reload (recompute) p50 49.974 and ON cold1 49.666 |
+| P5 engine load GB/s (ON ladder reload rows pooled) in [64, 384.1] | HELD | ON reload rows pooled: 4.597 GiB in 0.0227 s = 217.5 GB/s (bars 64.0 .. 384.1) |
+| P6 host reload adds no answer change beyond the measured nondeterminism baseline | HELD | reload adds 0 differing items vs recompute's 1 (<= +1: True); ON-vs-OFF 1 vs baselines 1/0 (<= max+1: True); correct ON p2 18 vs OFF p2 18 (>= -1: True); 20/20 ON p2 items host-reloaded |
+| P7 ladder: ON reload rows correct >= OFF - 1; ON gpu_k == reload_k on >= all but one pair | HELD | reload rows correct ON 4 vs OFF 4 (of 4); ON gpu_k == reload_k 4 of 4 |

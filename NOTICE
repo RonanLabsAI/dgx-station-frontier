@@ -56,6 +56,7 @@ Referenced, nothing copied
   from it is included; the Data Direct helper in recipes/fabric-data-direct was written from our own notes.
 
 Model weights are not included. DeepSeek-V4.1-Flash (and -1017), DeepSeek-V4-Pro-0813, GLM-5.3 (and NVIDIA's GLM-5.3-Flash NVFP4,
-with incoai's GLM-5.3-Flash-DFlash2 drafter), Nemotron 3 Ultra and Kimi K3 (Kimi K3 License,
+with incoai's GLM-5.3-Flash-DFlash2 drafter), Qwen3.8-27B and NVIDIA's NVFP4 checkpoint of it (both Apache-2.0; model cards
+checked 2026-10-21), Nemotron 3 Ultra and Kimi K3 (Kimi K3 License,
 including vellum-ai/Kimi-K3-W3A16-g64, unsloth/Kimi-K3-GGUF and Inferact/Kimi-K3-DSpark) are used under their own licences;
 check each model card before redistributing anything derived from them.

@@ -1,0 +1,200 @@
+# KV host tier on DeepSeek-V4.1-Flash-1017, one DGX Station GB300 (right), first run: run kvo-right-1019-044854, 2026-10-19:
+# arm OFF boot 04:50-05:01 PT, rows 05:01-05:17 PT; arm ON (18 GiB host tier) boot 05:17-05:28 PT, rows 05:28-05:43 PT.
+# Model deepseek-ai/DeepSeek-V4.1-Flash-1017 (rev 1bae0e10), vLLM nightly af7f9488 with the vllm#58132 replay overlay (5 files)
+# and original-el8's expert hook; GB300-only placement: hot experts in HBM (MegaMoE), cold experts and the engram tables read from
+# pinned Grace memory (MEGA_PEER=0, MEGA_COLD_TRT=1, engram cpu_offload); the RTX PRO 6000 is unused. The hot/cold map was fitted
+# to a private workload (not published); its file name is replaced below. --max-model-len 1048576, fp8_ds_mla KV, prefix caching,
+# DSpark 5/3/3, thinking off. Arm OFF: no host tier. Arm ON: + --kv-offloading-size N --kv-offloading-backend native
+# (OffloadingConnector, pinned host region in /dev/shm = Grace LPDDR5X over NVLink-C2C). Arms run one after the other.
+# Probe: tools/kvo_probe.py (+ tools/lc_probe_2hop_ds.py as a library). GPU flush between turns = the cap / press phases
+# (N distinct documents of ceil(1.15 x GPU pool / L) at once).
+# Excerpt: lines selected verbatim from the raw files named below; GPU UUIDs, host paths and a served-model alias are replaced
+# with <placeholders>; each container's create-body.json is shown as its image, command, selected env and CapAdd fields.
+# Nothing else edited. vLLM log stamps are UTC (PT = UTC-7); runner stamps are PT.
+
+--- preflight.txt (selected)
+fit.jsonl == pin (11c1f306)
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063 present
+image vLLM commit af7f9488c2210d67e1033ecdc845b087ee7fe92b (= the source read for REQUEST.md)
+overlay config/cache.py == pin 5c51794a (kv_offloading_size / kv_offloading_backend fields present)
+1017 weights: OK 83 files, 475.26 GiB, one revision 1bae0e108899, no .incomplete, no download running
+1017 config.json: max_position_embeddings >= 1048576
+
+--- arm-OFF/create-body.json
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+entrypoint ["/usr/local/bin/numactl"] cmd ["--membind=0", "vllm", "serve", "--model", "/model", "--served-model-name", "deepseek-v4.1-flash", "<alias>", "--trust-remote-code", "--tensor-parallel-size", "1", "--moe-backend", "deep_gemm_mega_moe", "--enable-expert-parallel", "--engram-config", "{\"cpu_offload\": true}", "--max-model-len", "1048576", "--max-num-seqs", "32", "--max-num-batched-tokens", "8192", "--gpu-memory-utilization", "0.95", "--kv-cache-dtype", "fp8_ds_mla", "--tool-call-parser", "deepseek_v41", "--reasoning-parser", "deepseek_v41", "--enable-auto-tool-choice", "--long-prefill-token-threshold", "6144", "--enable-prefix-caching", "--default-chat-template-kwargs", "{\"thinking\": false}", "--speculative-config", "{\"method\":\"dspark\",\"num_speculative_tokens\":5,\"num_speculative_tokens_per_batch_size\":[[1,4,5],[5,8,3],[9,32,3]],\"draft_sample_method\":\"probabilistic\"}", "--cudagraph-capture-sizes", "1", "2", "4", "6", "8", "12", "16", "18", "20", "24", "28", "32", "36", "40", "48", "56", "64", "72", "80", "96", "128", "--host", "0.0.0.0", "--port", "8013"]
+env (selected) MEGA_FUSED_SEND=0 MEGA_LL_GEMM=1 MEGA_COUNT= MEGA_PEER=0 MEGA_MHC_OVERLAP=1 HF_HUB_OFFLINE=1 CUDA_DEVICE_ORDER=PCI_BUS_ID MEGA_HOOK=/w/mega_peer_hook.py MEGA_ROWMAP=/w/<private-map>.json MEGA_COLD_TRT=1 VLLM_USAGE_SOURCE=production-docker-image
+CapAdd ["CAP_IPC_LOCK", "CAP_SYS_NICE"]
+
+--- arm-ON/create-body.json
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+entrypoint ["/usr/local/bin/numactl"] cmd ["--membind=0", "vllm", "serve", "--model", "/model", "--served-model-name", "deepseek-v4.1-flash", "<alias>", "--trust-remote-code", "--tensor-parallel-size", "1", "--moe-backend", "deep_gemm_mega_moe", "--enable-expert-parallel", "--engram-config", "{\"cpu_offload\": true}", "--max-model-len", "1048576", "--max-num-seqs", "32", "--max-num-batched-tokens", "8192", "--gpu-memory-utilization", "0.95", "--kv-cache-dtype", "fp8_ds_mla", "--tool-call-parser", "deepseek_v41", "--reasoning-parser", "deepseek_v41", "--enable-auto-tool-choice", "--long-prefill-token-threshold", "6144", "--enable-prefix-caching", "--default-chat-template-kwargs", "{\"thinking\": false}", "--speculative-config", "{\"method\":\"dspark\",\"num_speculative_tokens\":5,\"num_speculative_tokens_per_batch_size\":[[1,4,5],[5,8,3],[9,32,3]],\"draft_sample_method\":\"probabilistic\"}", "--cudagraph-capture-sizes", "1", "2", "4", "6", "8", "12", "16", "18", "20", "24", "28", "32", "36", "40", "48", "56", "64", "72", "80", "96", "128", "--host", "0.0.0.0", "--port", "8013", "--kv-offloading-size", "18", "--kv-offloading-backend", "native"]
+env (selected) MEGA_FUSED_SEND=0 MEGA_LL_GEMM=1 MEGA_COUNT= MEGA_PEER=0 MEGA_MHC_OVERLAP=1 HF_HUB_OFFLINE=1 CUDA_DEVICE_ORDER=PCI_BUS_ID MEGA_HOOK=/w/mega_peer_hook.py MEGA_ROWMAP=/w/<private-map>.json MEGA_COLD_TRT=1 VLLM_USAGE_SOURCE=production-docker-image
+CapAdd ["CAP_IPC_LOCK", "CAP_SYS_NICE"]
+
+--- arm-OFF/bootfacts.txt (selected)
+(EngineCore pid=403) INFO 10-19 11:53:55 [model_runner.py:407] Model loading took 218.88 GiB memory and 180.366729 seconds
+(EngineCore pid=403) INFO 10-19 11:54:22 [gpu_worker.py:692] Available KV cache memory: 6.68 GiB
+(EngineCore pid=403) INFO 10-19 11:54:22 [kv_cache_utils.py:2408] GPU KV cache size: 3,459,043 tokens, Maximum concurrency for 1,048,576 tokens per request: 3.30x
+
+--- arm-OFF/memmin.txt (lowest MemAvailable GiB while serving)
+34
+
+--- arm-ON/bootfacts.txt (selected)
+(EngineCore pid=403) INFO 10-19 12:21:29 [model_runner.py:407] Model loading took 218.88 GiB memory and 190.566852 seconds
+(EngineCore pid=403) INFO 10-19 12:21:54 [gpu_worker.py:692] Available KV cache memory: 6.68 GiB
+(EngineCore pid=403) INFO 10-19 12:21:54 [kv_cache_utils.py:2408] GPU KV cache size: 3,459,043 tokens, Maximum concurrency for 1,048,576 tokens per request: 3.30x
+(EngineCore pid=403) INFO 10-19 12:21:54 [factory.py:62] Creating v1 connector with name: OffloadingConnector and engine_id: 9d9aa1a7-cd10-4c4a-bb97-3e980ef88a5a
+
+--- arm-ON/memmin.txt (lowest MemAvailable GiB while serving)
+14
+
+--- host-gib.txt (host tier size rule)
+18 GiB (rule: min(48, MemAvailable_min OFF 34 - 16, /dev/shm free 247 - 8), >= 12)
+
+--- boots.tsv
+OFF	up	max-model-len 1048576	646 s	KV 3459043
+ON	up	host 18 GiB	662 s	KV 3459043
+
+--- run.log (selected)
+2026-10-19 05:01:02 [kvo-right] arm OFF up in 646 s: max-model-len 1048576, KV pool 3459043 tokens (6.68 GiB), host 0 GiB , HMA on, hook proven, 391 391; GB300 242332 MiB, MemAvailable 36 GiB
+2026-10-19 05:02:08 [kvo-right] arm-OFF corr1 (cap 7 min, rc 0, elapsed 13 min): {"phase": "corr", "valid": true, "correct": 16, "n": 20, "out": "<bench>/kvo-right-1019-044854/arm-OFF/corr-p1.json"}
+2026-10-19 05:02:28 [kvo-right] arm-OFF turn1 (cap 7 min, rc 0, elapsed 13 min): {"phase": "turn", "valid": true, "out": "<bench>/kvo-right-1019-044854/arm-OFF/turn-1.json"}
+2026-10-19 05:05:09 [kvo-right] arm-OFF cap250000 (cap 15 min, rc 0, elapsed 16 min): {"phase": "cap", "n": 16, "summary": {"n": 16, "n_ok": 16, "errors": 0, "wall_s": 160.56, "max_running": 3.0, "max_waiting": 14.0, "peak_kv_usage": 0.1468919877097613, "preemptions": 0.0, "preempt_sampled": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "ext_hit_tok": 0.0, "agg_prefill_tok_s": 24771.3,
+2026-10-19 05:05:44 [kvo-right] arm-OFF corr2 (cap 7 min, rc 0, elapsed 16 min): {"phase": "corr", "valid": true, "correct": 18, "n": 20, "out": "<bench>/kvo-right-1019-044854/arm-OFF/corr-p2.json"}
+2026-10-19 05:06:08 [kvo-right] arm-OFF turn2 (cap 7 min, rc 0, elapsed 17 min): {"phase": "turn", "valid": true, "out": "<bench>/kvo-right-1019-044854/arm-OFF/turn-2.json"}
+2026-10-19 05:09:02 [kvo-right] arm-OFF cap500000 (cap 15 min, rc 0, elapsed 20 min): {"phase": "cap", "n": 8, "summary": {"n": 8, "n_ok": 8, "errors": 0, "wall_s": 173.37, "max_running": 3.0, "max_waiting": 6.0, "peak_kv_usage": 0.22284920822500587, "preemptions": 0.0, "preempt_sampled": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "ext_hit_tok": 0.0, "agg_prefill_tok_s": 22942.6, "t
+2026-10-19 05:09:25 [kvo-right] arm-OFF turn3 (cap 7 min, rc 0, elapsed 20 min): {"phase": "turn", "valid": true, "out": "<bench>/kvo-right-1019-044854/arm-OFF/turn-3.json"}
+2026-10-19 05:12:55 [kvo-right] arm-OFF cap1000000 (cap 15 min, rc 0, elapsed 24 min): {"phase": "cap", "n": 4, "summary": {"n": 4, "n_ok": 4, "errors": 0, "wall_s": 209.14, "max_running": 3.0, "max_waiting": 2.0, "peak_kv_usage": 0.37396596549279126, "preemptions": 0.0, "preempt_sampled": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "ext_hit_tok": 0.0, "agg_prefill_tok_s": 19020.3, "t
+2026-10-19 05:13:21 [kvo-right] arm-OFF turn4 (cap 7 min, rc 0, elapsed 24 min): {"phase": "turn", "valid": true, "out": "<bench>/kvo-right-1019-044854/arm-OFF/turn-4.json"}
+2026-10-19 05:16:03 [kvo-right] arm-OFF press (cap 13 min, rc 0, elapsed 27 min): {"phase": "press", "n": 16, "summary": {"n": 16, "n_ok": 16, "errors": 0, "wall_s": 160.92, "max_running": 3.0, "max_waiting": 2.0, "peak_kv_usage": 0.13507445048451905, "preemptions": 0.0, "preempt_sampled": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "ext_hit_tok": 0.0, "agg_prefill_tok_s": 24715.
+2026-10-19 05:16:31 [kvo-right] arm-OFF turn5 (cap 7 min, rc 0, elapsed 27 min): {"phase": "turn", "valid": true, "out": "<bench>/kvo-right-1019-044854/arm-OFF/turn-5.json"}
+2026-10-19 05:17:29 [kvo-right] arm-OFF decode (cap 9 min, rc 0, elapsed 28 min): {"phase": "decode", "summary": {"prefill_c1_tok_s_median": 24925.8, "prime_valid": true, "decode_c1_tok_s_median": 155.1, "decode_c4_per_stream_median": 73.4, "decode_c4_agg_tok_s": 250.9, "ctoks": [512, 512, 512, 512, 512, 512]}, "out": "<bench>/kvo-right-1019-044854/ar
+2026-10-19 05:28:41 [kvo-right] arm ON up in 662 s: max-model-len 1048576, KV pool 3459043 tokens (6.68 GiB), host 18 GiB pinned, HMA on, hook proven, 391 391; GB300 242332 MiB, MemAvailable 15 GiB
+2026-10-19 05:29:15 [kvo-right] arm-ON corr1 (cap 7 min, rc 0, elapsed 40 min): {"phase": "corr", "valid": true, "correct": 18, "n": 20, "out": "<bench>/kvo-right-1019-044854/arm-ON/corr-p1.json"}
+2026-10-19 05:29:36 [kvo-right] arm-ON turn1 (cap 7 min, rc 0, elapsed 40 min): {"phase": "turn", "valid": true, "out": "<bench>/kvo-right-1019-044854/arm-ON/turn-1.json"}
+2026-10-19 05:32:10 [kvo-right] arm-ON cap250000 (cap 15 min, rc 0, elapsed 43 min): {"phase": "cap", "n": 16, "summary": {"n": 16, "n_ok": 16, "errors": 0, "wall_s": 154.04, "max_running": 3.0, "max_waiting": 14.0, "peak_kv_usage": 0.15028952966201847, "preemptions": 0.0, "preempt_sampled": 0.0, "load_bytes": 0.0, "store_bytes": 6584785920.0, "ext_hit_tok": 0.0, "agg_prefill_tok_s"
+2026-10-19 05:32:26 [kvo-right] arm-ON corr2 (cap 7 min, rc 0, elapsed 43 min): {"phase": "corr", "valid": true, "correct": 18, "n": 20, "out": "<bench>/kvo-right-1019-044854/arm-ON/corr-p2.json"}
+2026-10-19 05:32:39 [kvo-right] arm-ON turn2 (cap 7 min, rc 0, elapsed 43 min): {"phase": "turn", "valid": true, "out": "<bench>/kvo-right-1019-044854/arm-ON/turn-2.json"}
+2026-10-19 05:35:26 [kvo-right] arm-ON cap500000 (cap 15 min, rc 0, elapsed 46 min): {"phase": "cap", "n": 8, "summary": {"n": 8, "n_ok": 8, "errors": 0, "wall_s": 167.3, "max_running": 3.0, "max_waiting": 6.0, "peak_kv_usage": 0.22284920822500587, "preemptions": 0.0, "preempt_sampled": 0.0, "load_bytes": 0.0, "store_bytes": 6586057728.0, "ext_hit_tok": 0.0, "agg_prefill_tok_s": 237
+2026-10-19 05:35:39 [kvo-right] arm-ON turn3 (cap 7 min, rc 0, elapsed 46 min): {"phase": "turn", "valid": true, "out": "<bench>/kvo-right-1019-044854/arm-ON/turn-3.json"}
+2026-10-19 05:39:02 [kvo-right] arm-ON cap1000000 (cap 15 min, rc 0, elapsed 50 min): {"phase": "cap", "n": 4, "summary": {"n": 4, "n_ok": 4, "errors": 0, "wall_s": 202.57, "max_running": 3.0, "max_waiting": 2.0, "peak_kv_usage": 0.3758567714488301, "preemptions": 0.0, "preempt_sampled": 0.0, "load_bytes": 0.0, "store_bytes": 6587117568.0, "ext_hit_tok": 0.0, "agg_prefill_tok_s": 196
+2026-10-19 05:39:14 [kvo-right] arm-ON turn4 (cap 7 min, rc 0, elapsed 50 min): {"phase": "turn", "valid": true, "out": "<bench>/kvo-right-1019-044854/arm-ON/turn-4.json"}
+2026-10-19 05:41:49 [kvo-right] arm-ON press (cap 13 min, rc 0, elapsed 52 min): {"phase": "press", "n": 16, "summary": {"n": 16, "n_ok": 16, "errors": 0, "wall_s": 154.54, "max_running": 2.0, "max_waiting": 2.0, "peak_kv_usage": 0.1373493264003781, "preemptions": 0.0, "preempt_sampled": 0.0, "load_bytes": 0.0, "store_bytes": 6584573952.0, "ext_hit_tok": 0.0, "agg_prefill_tok_s"
+2026-10-19 05:42:02 [kvo-right] arm-ON turn5 (cap 7 min, rc 0, elapsed 53 min): {"phase": "turn", "valid": true, "out": "<bench>/kvo-right-1019-044854/arm-ON/turn-5.json"}
+2026-10-19 05:42:58 [kvo-right] arm-ON decode (cap 9 min, rc 0, elapsed 54 min): {"phase": "decode", "summary": {"prefill_c1_tok_s_median": 25952.9, "prime_valid": true, "decode_c1_tok_s_median": 156.2, "decode_c4_per_stream_median": 70.9, "decode_c4_agg_tok_s": 244.7, "ctoks": [512, 512, 512, 512, 512, 512]}, "out": "<bench>/kvo-right-1019-044854/ar
+2026-10-19 05:51:06 [kvo-right] {"P0": "HELD", "P1": "HELD", "P2": "NOT HELD", "P3": "NOT MEASURED", "P4": "NOT MEASURED", "P5": "HELD", "P6": "HELD", "P7": "NOT HELD"}
+2026-10-19 05:51:06 [kvo-right] kvo-right done rc=0; elapsed 62 min; outputs <bench>/kvo-right-1019-044854
+
+--- arm-OFF/cap250000.log (the 16 x 250K batch: one item and the phase summary)
+{"i": 13, "ptoks": 249332, "ctoks": 16, "ttft_s": 160.461, "wall_s": 160.46, "finish": "length", "t_first": 1792411509.7276092, "t_last": 1792411509.7313087, "prefill_tok_s": 1553.8, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 3977272.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "answer_tail": "This text is a collection of news articles covering a wide range of topics, from"}
+{"phase": "cap", "n": 16, "summary": {"n": 16, "n_ok": 16, "errors": 0, "wall_s": 160.56, "max_running": 3.0, "max_waiting": 14.0, "peak_kv_usage": 0.1468919877097613, "preemptions": 0.0, "preempt_sampled": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "ext_hit_tok": 0.0, "agg_prefill_tok_s": 24771.3, "ttft_p50": 83.462, "ttft_p90": 153.332, "valid": true, "samples": 160}, "out": "<bench>/kvo-right-1019-044854/arm-OFF/cap-250000.json"}
+
+--- arm-ON/cap250000.log (phase summary)
+{"phase": "cap", "n": 16, "summary": {"n": 16, "n_ok": 16, "errors": 0, "wall_s": 154.04, "max_running": 3.0, "max_waiting": 14.0, "peak_kv_usage": 0.15028952966201847, "preemptions": 0.0, "preempt_sampled": 0.0, "load_bytes": 0.0, "store_bytes": 6584785920.0, "ext_hit_tok": 0.0, "agg_prefill_tok_s": 25819.7, "ttft_p50": 79.938, "ttft_p90": 147.056, "valid": true, "samples": 154}, "out": "<bench>/kvo-right-1019-044854/arm-ON/cap-250000.json"}
+
+--- arm-OFF/turn2.log (first toucher)
+{"session": 1, "turn": 2, "role": "first", "ptoks": 270965, "ctoks": 78, "ttft_s": 10.991, "wall_s": 11.51, "finish": "stop", "t_first": 1792411555.637264, "t_last": 1792411556.151668, "prefill_tok_s": 24653.4, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 270965.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "answer_tail": "ed nutrient deficiencies, a gas explosion pet rescue, and AP McCoy's retirement."}
+
+--- arm-ON/turn2.log (first toucher)
+{"session": 1, "turn": 2, "role": "first", "ptoks": 270955, "ctoks": 74, "ttft_s": 1.152, "wall_s": 1.61, "finish": "stop", "t_first": 1792413147.7402873, "t_last": 1792413148.1969147, "prefill_tok_s": 235204.0, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 270955.0, "ext_hit_tok": 262656.0, "ext_query_tok": 270955.0, "load_bytes": 434958336.0, "store_bytes": 13565952.0, "load_time": 0.002, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "answer_tail": "ed nutrient deficiencies, a gas explosion pet rescue, and AP McCoy's retirement."}
+
+--- arm-OFF/turn3.log (first toucher)
+{"session": 1, "turn": 3, "role": "first", "ptoks": 279108, "ctoks": 73, "ttft_s": 8.22, "wall_s": 8.66, "finish": "stop", "t_first": 1792411750.7512648, "t_last": 1792411751.1906285, "prefill_tok_s": 33954.7, "m": {"gpu_hit_tok": 88448.0, "gpu_query_tok": 279108.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "answer_tail": "airport assault case, and an Indian minister's \"presstitutes\" tweet controversy."}
+
+--- arm-ON/turn3.log (first toucher)
+{"session": 1, "turn": 3, "role": "first", "ptoks": 279094, "ctoks": 58, "ttft_s": 1.157, "wall_s": 1.49, "finish": "stop", "t_first": 1792413328.1100166, "t_last": 1792413328.4405403, "prefill_tok_s": 241222.1, "m": {"gpu_hit_tok": 84864.0, "gpu_query_tok": 279094.0, "ext_hit_tok": 185984.0, "ext_query_tok": 194230.0, "load_bytes": 307989504.0, "store_bytes": 13565952.0, "load_time": 0.001, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "answer_tail": "ty's decline, an airport assault case, and India's Yemen evacuation controversy."}
+
+--- arm-OFF/turn4.log (first toucher)
+{"session": 1, "turn": 4, "role": "first", "ptoks": 287079, "ctoks": 96, "ttft_s": 8.762, "wall_s": 9.27, "finish": "length", "t_first": 1792411984.1572573, "t_last": 1792411984.6659925, "prefill_tok_s": 32764.1, "m": {"gpu_hit_tok": 81536.0, "gpu_query_tok": 287079.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "answer_tail": "oadcasts, fish shoaling around sharks, and an Afghan rape victim forced to marry"}
+
+--- arm-ON/turn4.log (first toucher)
+{"session": 1, "turn": 4, "role": "first", "ptoks": 287050, "ctoks": 87, "ttft_s": 1.042, "wall_s": 1.51, "finish": "stop", "t_first": 1792413543.4421856, "t_last": 1792413543.9069526, "prefill_tok_s": 275479.8, "m": {"gpu_hit_tok": 85632.0, "gpu_query_tok": 287050.0, "ext_hit_tok": 193408.0, "ext_query_tok": 201418.0, "load_bytes": 320283648.0, "store_bytes": 13142016.0, "load_time": 0.002, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "answer_tail": "s, fish avoiding sharks, and an Afghan rape victim forced to marry her attacker."}
+
+--- arm-OFF/turn5.log (first toucher)
+{"session": 1, "turn": 5, "role": "first", "ptoks": 295615, "ctoks": 79, "ttft_s": 8.879, "wall_s": 9.27, "finish": "stop", "t_first": 1792412172.1755717, "t_last": 1792412172.5621154, "prefill_tok_s": 33293.7, "m": {"gpu_hit_tok": 85760.0, "gpu_query_tok": 295615.0, "ext_hit_tok": 0.0, "ext_query_tok": 0.0, "load_bytes": 0.0, "store_bytes": 0.0, "load_time": 0.0, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "answer_tail": " draw with Aston Villa, Swansea vs Hull team news, and a homemade Iron Man suit."}
+
+--- arm-ON/turn5.log (first toucher)
+{"session": 1, "turn": 5, "role": "first", "ptoks": 295576, "ctoks": 78, "ttft_s": 1.251, "wall_s": 1.66, "finish": "stop", "t_first": 1792413711.1247861, "t_last": 1792413711.5323246, "prefill_tok_s": 236271.8, "m": {"gpu_hit_tok": 85760.0, "gpu_query_tok": 295576.0, "ext_hit_tok": 201216.0, "ext_query_tok": 209816.0, "load_bytes": 333213696.0, "store_bytes": 14201856.0, "load_time": 0.002, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "answer_tail": " draw with Aston Villa, Swansea vs Hull team news, and a homemade Iron Man suit."}
+
+--- arm-ON/corr2.log (the two pass-2 items with host hits; the other 18 have ext_hit_tok 0.0)
+{"seed": 1016, "i": 0, "kind": "single", "ptoks": 254677, "ctoks": 3, "ttft_s": 0.796, "wall_s": 0.8, "finish": "stop", "t_first": 1792413131.6936724, "t_last": 1792413131.6979046, "prefill_tok_s": 319946.0, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 254677.0, "ext_hit_tok": 254592.0, "ext_query_tok": 254677.0, "load_bytes": 421604352.0, "store_bytes": 0.0, "load_time": 0.002, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "ok": true, "answer": "456129"}
+{"seed": 1017, "i": 0, "kind": "single", "ptoks": 254673, "ctoks": 3, "ttft_s": 0.772, "wall_s": 0.78, "finish": "stop", "t_first": 1792413139.3460705, "t_last": 1792413139.349906, "prefill_tok_s": 329887.3, "m": {"gpu_hit_tok": 0.0, "gpu_query_tok": 254673.0, "ext_hit_tok": 254592.0, "ext_query_tok": 254673.0, "load_bytes": 421604352.0, "store_bytes": 0.0, "load_time": 0.002, "store_time": 0.0, "preempt": 0.0, "alloc_fail": 0.0}, "ok": true, "answer": "207153"}
+
+--- summary.log
+{"P0": "HELD", "P1": "HELD", "P2": "NOT HELD", "P3": "NOT MEASURED", "P4": "NOT MEASURED", "P5": "HELD", "P6": "HELD", "P7": "NOT HELD"}
+
+--- SUMMARY.md (the runner's checked summary, verbatim apart from its title line and the arm label)
+REPORT ONLY. Arms: OFF = GB300-only clone at --max-model-len 1048576; ON = the same + --kv-offloading-size 18 GiB --kv-offloading-backend native (OffloadingConnector, host tier in /dev/shm, Grace LPDDR over NVLink-C2C).
+
+## Boots
+
+| arm | up (s) | max-model-len | GPU KV pool (tokens) | GPU KV GiB | host tier GiB | pinned | connector | HMA | min MemAvailable GiB |
+|---|---|---|---|---|---|---|---|---|---|
+| OFF | 646 | 1048576 | 3459043 | 6.68 | 0 | - | - | on | 34 |
+| ON | 662 | 1048576 | 3459043 | 6.68 | 18 | pinned | OffloadingConnector, 18 GiB | on | 14 |
+
+Host tier link (ON, whole arm, from /metrics at teardown): load 2.97 GiB in 0.02 s = **172.1 GB/s**; store 27.77 GiB in 0.1 s = **285.4 GB/s**.
+
+## (1) Capacity: N distinct L-token documents at once (max_tokens 16)
+
+| L | arm | N | held (max running) | max waiting | preemptions | peak GPU KV use | wall s | agg prefill tok/s | host store GiB | host load GiB | valid |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 250K | OFF | 16 | 3.0 | 14.0 | 0.0 | 0.1468919877097613 | 160.56 | 24771.3 | 0.0 | 0.0 | VALID |
+| 250K | ON | 16 | 3.0 | 14.0 | 0.0 | 0.15028952966201847 | 154.04 | 25819.7 | 6.13 | 0.0 | VALID |
+| 500K | OFF | 8 | 3.0 | 6.0 | 0.0 | 0.22284920822500587 | 173.37 | 22942.6 | 0.0 | 0.0 | VALID |
+| 500K | ON | 8 | 3.0 | 6.0 | 0.0 | 0.22284920822500587 | 167.3 | 23775.0 | 6.13 | 0.0 | VALID |
+| 1000K | OFF | 4 | 3.0 | 2.0 | 0.0 | 0.37396596549279126 | 209.14 | 19020.3 | 0.0 | 0.0 | VALID |
+| 1000K | ON | 4 | 3.0 | 2.0 | 0.0 | 0.3758567714488301 | 202.57 | 19637.2 | 6.13 | 0.0 | VALID |
+
+## (2) Multi-turn: 8 sessions x 5 turns, shared ~250K system prefix; a GPU flush before each of turns 2-5
+
+| arm | turn | first toucher TTFT s (host hit tok / GPU hit tok) | followers TTFT p50 / p90 s | all p50 / p90 s | valid |
+|---|---|---|---|---|---|
+| OFF | 1 | 10.66 (0.0 / 0.0) | 1.078 / 1.107 | 1.078 / 10.66 | VALID |
+| OFF | 2 | 10.991 (0.0 / 0.0) | 1.432 / 1.485 | 1.432 / 10.991 | VALID |
+| OFF | 3 | 8.22 (0.0 / 88448.0) | 1.744 / 1.812 | 1.744 / 8.22 | VALID |
+| OFF | 4 | 8.762 (0.0 / 81536.0) | 2.158 / 2.19 | 2.158 / 8.762 | VALID |
+| OFF | 5 | 8.879 (0.0 / 85760.0) | 2.515 / 2.565 | 2.515 / 8.879 | VALID |
+| ON | 1 | 10.227 (0.0 / 0.0) | 1.066 / 1.102 | 1.066 / 10.227 | VALID |
+| ON | 2 | 1.152 (262656.0 / 0.0) | 1.11 / 1.136 | 1.11 / 1.152 | VALID |
+| ON | 3 | 1.157 (185984.0 / 84864.0) | 1.109 / 1.135 | 1.109 / 1.157 | VALID |
+| ON | 4 | 1.042 (193408.0 / 85632.0) | 1.137 / 1.24 | 1.125 / 1.24 | VALID |
+| ON | 5 | 1.251 (201216.0 / 85760.0) | 1.165 / 1.216 | 1.165 / 1.251 | VALID |
+Eviction check turn 3: FAILED: OFF first toucher had GPU prefix hits >= 10% (P not evicted); ON first toucher got < 80% of the shared prefix (250000 tokens) from the host tier
+Eviction check turn 4: FAILED: OFF first toucher had GPU prefix hits >= 10% (P not evicted); ON first toucher got < 80% of the shared prefix (250000 tokens) from the host tier
+Eviction check turn 5: FAILED: OFF first toucher had GPU prefix hits >= 10% (P not evicted)
+
+Turns [2] pooled (n=8 per arm): OFF p50/p90 1.432 / 10.991 s; ON p50/p90 1.11 / 1.152 s; first toucher p50 OFF 10.991 s vs ON 1.152 s.
+Eviction check: 1 of 4 turns pass ([2]) -> fewer than 3: P3/P4 NOT MEASURED
+
+## (3) Decode and (4) prefill at 250K
+
+| arm | C1 cold prefill tok/s (median, n=4) | C1 decode tok/s (median, n=2) | C4 decode per stream (median) | C4 aggregate tok/s | press C4 agg prefill tok/s |
+|---|---|---|---|---|---|
+| OFF | 24925.8 | 155.1 | 73.4 | 250.9 | 24715.0 |
+| ON | 25952.9 | 156.2 | 70.9 | 244.7 | 25735.4 |
+
+## (5) Correctness at 250K (thinking off, temperature 0; 2 documents x 10 questions)
+
+| arm | pass | correct / n | valid | host hit tokens (sum) |
+|---|---|---|---|---|
+| OFF | 1 | 16 / 20 | VALID | 0.0 |
+| OFF | 2 | 18 / 20 | VALID | 0.0 |
+| ON | 1 | 18 / 20 | VALID | 0.0 |
+| ON | 2 | 18 / 20 | VALID | 509184.0 |
+
+Answer identity: ON p1 == OFF p1: (18, 20); ON p2 (host reload) == ON p1: (20, 20); OFF p2 (recompute) == OFF p1 (baseline): (18, 20).
+
+## Predictions (prereg.json)
+
+| prediction | verdict | detail |
+|---|---|---|
+| P0 ON GPU KV pool >= 0.97 x OFF | HELD | ON GPU pool 3459043.0 vs OFF 3459043.0 |
+| P1 held sessions ON == OFF (+-1) at 250K/500K/1M | HELD | per length [250, 500, 1000] |ON held - OFF held| <= 1: [True, True, True] |
+| P2 250K over-subscribed batch: ON wall <= 0.90 x OFF | NOT HELD | 250K wall ON 154.04 vs OFF 160.56 s (OFF preemptions 0.0) |
+| P3 first-toucher TTFT p50 (turns 2-5): ON <= 0.25 x OFF | NOT MEASURED | first toucher p50 ON 1.152 vs OFF 10.991 (turns [2]) |
+| P4 all-session TTFT p90 (turns 2-5): ON <= OFF | NOT MEASURED | all-session p90 ON 1.152 vs OFF 10.991 (turns [2]) |
+| P5 decode tok/s ON >= 0.95 x OFF (C1 median and C4 aggregate) | HELD | C1 156.2 vs 155.1; C4 agg 244.7 vs 250.9 |
+| P6 C1 cold prefill tok/s ON >= 0.90 x OFF | HELD | ON 25952.9 vs OFF 24925.8 tok/s |
+| P7 answers identical >= 19/20 (ON p1 vs OFF p1; ON p2 vs ON p1); correct ON >= OFF - 1 | NOT HELD | identical (18, 20) / (20, 20); correct ON 18 vs OFF 16 |

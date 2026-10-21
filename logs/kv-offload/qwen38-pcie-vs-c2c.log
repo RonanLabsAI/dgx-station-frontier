@@ -1,0 +1,198 @@
+# KV offload, one DGX Station GB300 (left): RTX PRO 6000 Blackwell Max-Q over PCIe 5 x16 vs GB300 over NVLink-C2C, both reaching
+# the same Grace LPDDR5X. Model nvidia/Qwen3.8-27B-NVFP4 (bf16 KV, 64 KiB per token), vLLM nightly af7f9488, native OffloadingConnector
+# with a 96 GiB pinned host tier, GPU KV pool fixed at 40 GiB (--kv-cache-memory-bytes) on both GPUs, no speculative decoding.
+# Window 1 (run kvp-left-1019-045020, 2026-10-19 04:50-04:53 PT) measured nothing: numactl --membind=0 needs CAP_SYS_NICE.
+# Window 2 (run kvp-left-1019-045626, 04:56-05:19 PT) is the measured one: CapAdd CAP_IPC_LOCK + CAP_SYS_NICE, nothing else changed.
+# Probes: tools/kvp_microbench.py (mb), tools/kvp_probe.py (calib, ladder, rr, decode). Arms run one after the other, never together.
+# Excerpt: lines selected verbatim from the raw files named below; GPU UUIDs, host paths and a served-model alias are replaced
+# with <placeholders>; each container's create-body.json is shown as its image, command, selected env and CapAdd fields.
+# Nothing else edited. vLLM log stamps are UTC (PT = UTC-7); runner stamps are PT.
+
+--- window 1: run.log (selected)
+2026-10-19 04:50:38 [kvp-left] mb RTX (exit 1): setting membind: Operation not permitted
+2026-10-19 04:50:39 [kvp-left] mb GB300 (exit 1): setting membind: Operation not permitted
+2026-10-19 04:51:10 [kvp-left] KILL LINE: 2 consecutive boot failures on arm RTX = NOT MEASURED
+2026-10-19 04:51:41 [kvp-left] KILL LINE: 2 consecutive boot failures on arm GB300 = NOT MEASURED
+2026-10-19 04:53:44 [kvp-left] {"P0": "NOT MEASURED", "P1": "NOT MEASURED", "P2": "NOT MEASURED", "P3": "NOT MEASURED", "P4": "NOT MEASURED", "P5": "NOT MEASURED", "P6": "NOT MEASURED", "P7": "NOT MEASURED"}
+2026-10-19 04:53:44 [kvp-left] kvp-left done rc=2; elapsed 3 min; outputs <bench>/kvp-left-1019-045020
+
+--- window 1: arm-GB300/server.log (first lines)
+get_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+setting membind: Operation not permitted
+
+--- window 1: deviations.txt
+arm RTX boot 1 failed (other) -> boot 2 with KVP_EAGER=1 (pre-registered)
+arm RTX NOT MEASURED (2 boot failures)
+arm GB300 boot 1 failed (other) -> boot 2 with KVP_EAGER=1 (pre-registered)
+arm GB300 NOT MEASURED (2 boot failures)
+
+--- window 2: preflight.txt (selected)
+fit.jsonl == pin (11c1f306)
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063 present
+image vLLM commit af7f9488c2210d67e1033ecdc845b087ee7fe92b (= the source read for REQUEST.md)
+Qwen3.8-27B NVFP4 config.json == pin 71fa01bb; 3 shards present (full shard sha only with PF_FULL_SHA=1)
+config: 16 full-attention layers x 4 KV heads x 256 (64 KiB/token in bf16), 262144 positions
+/usr/bin/numactl present (bound into the containers)
+
+--- window 2: arm-RTX/create-body.json (arm-GB300 identical apart from the GPU)
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+entrypoint ["/usr/local/bin/numactl"] cmd ["--membind=0", "vllm", "serve", "/model", "--served-model-name", "qwen3.8-27b", "--host", "127.0.0.1", "--port", "8017", "--max-model-len", "262144", "--max-num-seqs", "8", "--max-num-batched-tokens", "8192", "--kv-cache-memory-bytes", "42949672960", "--kv-cache-dtype", "auto", "--enable-prefix-caching", "--language-model-only", "--enable-prompt-tokens-details", "--kv-offloading-size", "96", "--kv-offloading-backend", "native"]
+env (selected) CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HUB_OFFLINE=1 VLLM_USAGE_SOURCE=kvp-1019 VLLM_SERVER_DEV_MODE=1
+CapAdd ["CAP_IPC_LOCK", "CAP_SYS_NICE"]
+
+--- window 2: arm-GB300/create-body.json
+image sha256:3af6a45b060d681aa6254200f87859d1bb3c1f962afb3d15540b4b31d4a41063
+entrypoint ["/usr/local/bin/numactl"] cmd ["--membind=0", "vllm", "serve", "/model", "--served-model-name", "qwen3.8-27b", "--host", "127.0.0.1", "--port", "8017", "--max-model-len", "262144", "--max-num-seqs", "8", "--max-num-batched-tokens", "8192", "--kv-cache-memory-bytes", "42949672960", "--kv-cache-dtype", "auto", "--enable-prefix-caching", "--language-model-only", "--enable-prompt-tokens-details", "--kv-offloading-size", "96", "--kv-offloading-backend", "native"]
+env (selected) CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HUB_OFFLINE=1 VLLM_USAGE_SOURCE=kvp-1019 VLLM_SERVER_DEV_MODE=1
+CapAdd ["CAP_IPC_LOCK", "CAP_SYS_NICE"]
+
+--- window 2: arm-RTX/bootfacts.txt (selected)
+(EngineCore pid=615) INFO 10-19 11:58:10 [core.py:129] Initializing a V1 LLM engine (v0.30.1rc1.dev245+gaf7f9488c) with config: model='/model', speculative_config=None, tokenizer='/model', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False
+(EngineCore pid=615) INFO 10-19 11:58:19 [model_runner.py:407] Model loading took 19.05 GiB memory and 7.967867 seconds
+(EngineCore pid=615) INFO 10-19 11:59:14 [kv_cache_utils.py:2408] GPU KV cache size: 641,906 tokens, Maximum concurrency for 262,144 tokens per request: 2.45x
+(EngineCore pid=615) INFO 10-19 11:59:14 [factory.py:62] Creating v1 connector with name: OffloadingConnector and engine_id: ca2d1cfb-254b-47bb-8de0-3eb1895c4229
+
+--- window 2: arm-GB300/bootfacts.txt (selected)
+(EngineCore pid=616) INFO 10-19 12:09:56 [core.py:129] Initializing a V1 LLM engine (v0.30.1rc1.dev245+gaf7f9488c) with config: model='/model', speculative_config=None, tokenizer='/model', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False
+(EngineCore pid=616) INFO 10-19 12:10:20 [model_runner.py:407] Model loading took 19.05 GiB memory and 22.609787 seconds
+(EngineCore pid=616) INFO 10-19 12:12:18 [kv_cache_utils.py:2408] GPU KV cache size: 641,906 tokens, Maximum concurrency for 262,144 tokens per request: 2.45x
+(EngineCore pid=616) INFO 10-19 12:12:18 [factory.py:62] Creating v1 connector with name: OffloadingConnector and engine_id: a2fc746b-87c8-4d9f-9b52-c0d4dd2bb475
+
+--- window 2: run.log (selected)
+2026-10-19 04:56:59 [kvp-left] mb RTX (exit 0): microbench NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition: h2d 55.09 GB/s, d2h 57.21, bidir 101.91, zero-copy read 52.92; kvread host/device ms {'32768': (67.122, 4.745), '131072': (163.307, 11.914), '245760': (305.822, 22.098)}; identical True
+2026-10-19 04:57:21 [kvp-left] mb GB300 (exit 0): microbench NVIDIA GB300: h2d 349.2 GB/s, d2h 377.95, bidir 333.14, zero-copy read 346.41; kvread host/device ms {'32768': (6.552, 3.182), '131072': (24.944, 4.033), '245760': (44.97, 7.155)}; identical True
+2026-10-19 05:01:22 [kvp-left] arm RTX up in 241 s (KVP_KV_BYTES=42949672960): KV pool 641906 tokens ( GiB), host 96 GiB pinned, 391 391; RTX 62085 MiB, GB300 22 MiB, MemAvailable 346 GiB
+2026-10-19 05:01:22 [kvp-left] arm-RTX calib (cap 7 min, rc 0, elapsed 4 min): calib: 200000 chars = 43197 tokens, 4.630 chars/token
+2026-10-19 05:02:24 [kvp-left] arm-RTX ladder131072 (cap 11 min, rc 0, elapsed 5 min): ladder 131072: cold1 27.78s reload1 0.66s gpu1 0.47s cold2 28.36s; reload load 54.76 GB/s; valid 10/10; correct 10/10
+2026-10-19 05:05:16 [kvp-left] arm-RTX ladder245760 (cap 13 min, rc 0, elapsed 8 min): ladder 245760: cold1 80.82s reload1 1.39s gpu1 1.05s cold2 80.54s; reload load 54.76 GB/s; valid 10/10; correct 10/10
+2026-10-19 05:05:27 [kvp-left] arm-RTX ladder32768 (cap 9 min, rc 0, elapsed 9 min): ladder 32768: cold1 4.15s reload1 0.28s gpu1 0.22s cold2 4.12s; reload load 54.73 GB/s; valid 10/10; correct 10/10
+2026-10-19 05:08:24 [kvp-left] arm-RTX rr (cap 17 min, rc 0, elapsed 11 min): rr 6 x 131072 tokens x 2 rounds: 12 valid
+2026-10-19 05:09:16 [kvp-left] arm-RTX decode (cap 9 min, rc 0, elapsed 12 min): decode at 131072: [47.22, 47.1] tok/s (C1, GPU-resident KV)
+2026-10-19 05:15:34 [kvp-left] arm GB300 up in 376 s (KVP_KV_BYTES=42949672960): KV pool 641906 tokens ( GiB), host 96 GiB pinned, 391 391; RTX 47 MiB, GB300 63574 MiB, MemAvailable 338 GiB
+2026-10-19 05:15:35 [kvp-left] arm-GB300 calib (cap 7 min, rc 0, elapsed 19 min): calib: 200000 chars = 43197 tokens, 4.630 chars/token
+2026-10-19 05:15:51 [kvp-left] arm-GB300 ladder131072 (cap 9 min, rc 0, elapsed 19 min): ladder 131072: cold1 6.16s reload1 0.54s gpu1 0.48s cold2 5.47s; reload load 352.74 GB/s; valid 10/10; correct 10/10
+2026-10-19 05:16:27 [kvp-left] arm-GB300 ladder245760 (cap 9 min, rc 0, elapsed 20 min): ladder 245760: cold1 15.04s reload1 0.88s gpu1 0.79s cold2 14.95s; reload load 357.86 GB/s; valid 10/10; correct 10/10
+2026-10-19 05:16:32 [kvp-left] arm-GB300 ladder32768 (cap 9 min, rc 0, elapsed 20 min): ladder 32768: cold1 1.17s reload1 0.28s gpu1 0.26s cold2 1.06s; reload load 329.8 GB/s; valid 10/10; correct 10/10
+2026-10-19 05:17:09 [kvp-left] arm-GB300 rr (cap 11 min, rc 0, elapsed 20 min): rr 6 x 131072 tokens x 2 rounds: 12 valid
+2026-10-19 05:17:24 [kvp-left] arm-GB300 decode (cap 9 min, rc 0, elapsed 20 min): decode at 131072: [130.33, 130.31] tok/s (C1, GPU-resident KV)
+2026-10-19 05:19:28 [kvp-left] {"P0": "HELD", "P1": "HELD", "P2": "HELD", "P3": "HELD", "P4": "HELD", "P5": "HELD", "P6": "HELD", "P7": "HELD"}
+2026-10-19 05:19:28 [kvp-left] kvp-left done rc=0; elapsed 23 min; outputs <bench>/kvp-left-1019-045626
+
+--- window 2: summary.log
+RTX L=32768 cold1 4.1478 reload 0.2731 gpu 0.2208 load 54.63 GB/s counts True
+RTX L=131072 cold1 27.7843 reload 0.6451 gpu 0.4729 load 54.74 GB/s counts True
+RTX L=245760 cold1 80.8219 reload 1.3567 gpu 1.0495 load 54.74 GB/s counts True
+GB300 L=32768 cold1 1.1744 reload 0.274 gpu 0.2579 load 330.34 GB/s counts True
+GB300 L=131072 cold1 6.1571 reload 0.5238 gpu 0.4878 load 352.09 GB/s counts True
+GB300 L=245760 cold1 15.044 reload 0.8481 gpu 0.7918 load 357.59 GB/s counts True
+{"P0": "HELD", "P1": "HELD", "P2": "HELD", "P3": "HELD", "P4": "HELD", "P5": "HELD", "P6": "HELD", "P7": "HELD"}
+
+--- window 2: arm-RTX/ladder-32768.jsonl (cold1 and reload1-4 rows)
+{"answer": "856591", "cached_tokens": 0, "chunks": 6, "completion_tokens": 7, "correct": true, "decode_s": 0.0704, "error": null, "length": 32768, "load_gbps": null, "metrics_delta": {"vllm:external_prefix_cache_hits": 0.0, "vllm:external_prefix_cache_queries": 33356.0, "vllm:kv_offload_load_bytes": 0.0, "vllm:kv_offload_load_time": 0.0, "vllm:kv_offload_store_bytes": 2311913472.0, "vllm:kv_offload_store_time": 0.041212, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 33356.0}, "phase": "ladder", "prompt_sha256": "4f758be10092e3774bbf96297c533189ce1ec92bdd8f118db78b72480f41c586", "prompt_tokens": 33356, "q": 1, "reset": "all", "reset_tries": 1, "state": "cold1", "store_gbps": 56.1, "t": 1792411520.8, "total_s": 4.2356, "ttft_s": 4.1478, "valid": true}
+{"answer": "856591", "cached_tokens": 32928, "chunks": 6, "completion_tokens": 7, "correct": true, "decode_s": 0.0678, "error": null, "length": 32768, "load_gbps": 54.73, "metrics_delta": {"vllm:external_prefix_cache_hits": 32928.0, "vllm:external_prefix_cache_queries": 33356.0, "vllm:kv_offload_load_bytes": 2311913472.0, "vllm:kv_offload_load_time": 0.042241, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 33356.0}, "phase": "ladder", "prompt_sha256": "4f758be10092e3774bbf96297c533189ce1ec92bdd8f118db78b72480f41c586", "prompt_tokens": 33356, "q": 1, "reset": "gpu", "reset_tries": 1, "state": "reload1", "store_gbps": null, "t": 1792411521.2, "total_s": 0.3613, "ttft_s": 0.2764, "valid": true}
+{"answer": "924270", "cached_tokens": 32928, "chunks": 6, "completion_tokens": 7, "correct": true, "decode_s": 0.069, "error": null, "length": 32768, "load_gbps": 54.56, "metrics_delta": {"vllm:external_prefix_cache_hits": 32928.0, "vllm:external_prefix_cache_queries": 33356.0, "vllm:kv_offload_load_bytes": 2311913472.0, "vllm:kv_offload_load_time": 0.04237, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 33356.0}, "phase": "ladder", "prompt_sha256": "87a48a2873d002f92fbe7f0168f20c0cb17c7aed6f8fb23050ed63412830601e", "prompt_tokens": 33356, "q": 2, "reset": "gpu", "reset_tries": 1, "state": "reload2", "store_gbps": null, "t": 1792411521.6, "total_s": 0.3568, "ttft_s": 0.2707, "valid": true}
+{"answer": "715081", "cached_tokens": 32928, "chunks": 6, "completion_tokens": 7, "correct": true, "decode_s": 0.0696, "error": null, "length": 32768, "load_gbps": 54.6, "metrics_delta": {"vllm:external_prefix_cache_hits": 32928.0, "vllm:external_prefix_cache_queries": 33356.0, "vllm:kv_offload_load_bytes": 2311913472.0, "vllm:kv_offload_load_time": 0.042342, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 33356.0}, "phase": "ladder", "prompt_sha256": "349e4e08c83cea7f9a26a461ea0371331600969893d1a13773971232ea2c3de5", "prompt_tokens": 33356, "q": 3, "reset": "gpu", "reset_tries": 1, "state": "reload3", "store_gbps": null, "t": 1792411522.0, "total_s": 0.3556, "ttft_s": 0.2692, "valid": true}
+{"answer": "472233", "cached_tokens": 32928, "chunks": 6, "completion_tokens": 7, "correct": true, "decode_s": 0.0676, "error": null, "length": 32768, "load_gbps": 54.61, "metrics_delta": {"vllm:external_prefix_cache_hits": 32928.0, "vllm:external_prefix_cache_queries": 33356.0, "vllm:kv_offload_load_bytes": 2311913472.0, "vllm:kv_offload_load_time": 0.042334, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 33356.0}, "phase": "ladder", "prompt_sha256": "008c7f213538219b436b62498a4707b9ca3a941fae15281b65742316ca97dd18", "prompt_tokens": 33356, "q": 4, "reset": "gpu", "reset_tries": 1, "state": "reload4", "store_gbps": null, "t": 1792411522.4, "total_s": 0.3601, "ttft_s": 0.2754, "valid": true}
+
+--- window 2: arm-RTX/ladder-131072.jsonl (cold1 and reload1-4 rows)
+{"answer": "515988", "cached_tokens": 0, "chunks": 5, "completion_tokens": 7, "correct": true, "decode_s": 0.0548, "error": null, "length": 131072, "load_gbps": null, "metrics_delta": {"vllm:external_prefix_cache_hits": 0.0, "vllm:external_prefix_cache_queries": 132931.0, "vllm:kv_offload_load_bytes": 0.0, "vllm:kv_offload_load_time": 0.0, "vllm:kv_offload_store_bytes": 8837201920.0, "vllm:kv_offload_store_time": 0.160267, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 132931.0}, "phase": "ladder", "prompt_sha256": "1ab8f3337dc40b8faea131b952646c5fd61b30b0704920ca960029708f1c015e", "prompt_tokens": 132931, "q": 1, "reset": "all", "reset_tries": 1, "state": "cold1", "store_gbps": 55.14, "t": 1792411310.7, "total_s": 27.8622, "ttft_s": 27.7843, "valid": true}
+{"answer": "515988", "cached_tokens": 132496, "chunks": 5, "completion_tokens": 7, "correct": true, "decode_s": 0.0555, "error": null, "length": 131072, "load_gbps": 54.76, "metrics_delta": {"vllm:external_prefix_cache_hits": 132496.0, "vllm:external_prefix_cache_queries": 132931.0, "vllm:kv_offload_load_bytes": 8837201920.0, "vllm:kv_offload_load_time": 0.16138, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 132931.0}, "phase": "ladder", "prompt_sha256": "1ab8f3337dc40b8faea131b952646c5fd61b30b0704920ca960029708f1c015e", "prompt_tokens": 132931, "q": 1, "reset": "gpu", "reset_tries": 1, "state": "reload1", "store_gbps": null, "t": 1792411311.4, "total_s": 0.7401, "ttft_s": 0.6616, "valid": true}
+{"answer": "416783", "cached_tokens": 132496, "chunks": 5, "completion_tokens": 7, "correct": true, "decode_s": 0.0561, "error": null, "length": 131072, "load_gbps": 54.71, "metrics_delta": {"vllm:external_prefix_cache_hits": 132496.0, "vllm:external_prefix_cache_queries": 132931.0, "vllm:kv_offload_load_bytes": 8837201920.0, "vllm:kv_offload_load_time": 0.161531, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 132931.0}, "phase": "ladder", "prompt_sha256": "efb255e6eb7f76475109a538759df86211d59ebb492be5a802c5b29c1067381a", "prompt_tokens": 132931, "q": 2, "reset": "gpu", "reset_tries": 1, "state": "reload2", "store_gbps": null, "t": 1792411312.2, "total_s": 0.728, "ttft_s": 0.6491, "valid": true}
+{"answer": "540338", "cached_tokens": 132496, "chunks": 5, "completion_tokens": 7, "correct": true, "decode_s": 0.0564, "error": null, "length": 131072, "load_gbps": 54.76, "metrics_delta": {"vllm:external_prefix_cache_hits": 132496.0, "vllm:external_prefix_cache_queries": 132931.0, "vllm:kv_offload_load_bytes": 8837201920.0, "vllm:kv_offload_load_time": 0.161383, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 132931.0}, "phase": "ladder", "prompt_sha256": "ba18b4994dde594b4a463f058fbc13c0678723cb0e0a1cc951e6e6883dce0c3f", "prompt_tokens": 132931, "q": 3, "reset": "gpu", "reset_tries": 1, "state": "reload3", "store_gbps": null, "t": 1792411312.9, "total_s": 0.7157, "ttft_s": 0.6365, "valid": true}
+{"answer": "169617", "cached_tokens": 132496, "chunks": 5, "completion_tokens": 7, "correct": true, "decode_s": 0.0563, "error": null, "length": 131072, "load_gbps": 54.73, "metrics_delta": {"vllm:external_prefix_cache_hits": 132496.0, "vllm:external_prefix_cache_queries": 132931.0, "vllm:kv_offload_load_bytes": 8837201920.0, "vllm:kv_offload_load_time": 0.161465, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 132931.0}, "phase": "ladder", "prompt_sha256": "237ef42e8c109665140b3fa18a302d74b09f8d00d4d54bbbb637bd26261aefe9", "prompt_tokens": 132931, "q": 4, "reset": "gpu", "reset_tries": 1, "state": "reload4", "store_gbps": null, "t": 1792411313.7, "total_s": 0.72, "ttft_s": 0.641, "valid": true}
+
+--- window 2: arm-RTX/ladder-245760.jsonl (cold1 and reload1-4 rows)
+{"answer": "467822", "cached_tokens": 0, "chunks": 4, "completion_tokens": 7, "correct": true, "decode_s": 0.038, "error": null, "length": 245760, "load_gbps": null, "metrics_delta": {"vllm:external_prefix_cache_hits": 0.0, "vllm:external_prefix_cache_queries": 249094.0, "vllm:kv_offload_load_bytes": 0.0, "vllm:kv_offload_load_time": 0.0, "vllm:kv_offload_store_bytes": 16441475072.0, "vllm:kv_offload_store_time": 0.295675, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 249094.0}, "phase": "ladder", "prompt_sha256": "1154d3bdb28c274266e322454a966177ad1400bf43783ea49e29e0bd12a608ae", "prompt_tokens": 249094, "q": 1, "reset": "all", "reset_tries": 1, "state": "cold1", "store_gbps": 55.61, "t": 1792411425.4, "total_s": 80.8897, "ttft_s": 80.8219, "valid": true}
+{"answer": "467822", "cached_tokens": 248528, "chunks": 4, "completion_tokens": 7, "correct": true, "decode_s": 0.0408, "error": null, "length": 245760, "load_gbps": 54.76, "metrics_delta": {"vllm:external_prefix_cache_hits": 248528.0, "vllm:external_prefix_cache_queries": 249094.0, "vllm:kv_offload_load_bytes": 16441475072.0, "vllm:kv_offload_load_time": 0.300256, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 249094.0}, "phase": "ladder", "prompt_sha256": "1154d3bdb28c274266e322454a966177ad1400bf43783ea49e29e0bd12a608ae", "prompt_tokens": 249094, "q": 1, "reset": "gpu", "reset_tries": 1, "state": "reload1", "store_gbps": null, "t": 1792411426.9, "total_s": 1.4607, "ttft_s": 1.3906, "valid": true}
+{"answer": "227704", "cached_tokens": 248528, "chunks": 4, "completion_tokens": 7, "correct": true, "decode_s": 0.0415, "error": null, "length": 245760, "load_gbps": 54.75, "metrics_delta": {"vllm:external_prefix_cache_hits": 248528.0, "vllm:external_prefix_cache_queries": 249094.0, "vllm:kv_offload_load_bytes": 16441475072.0, "vllm:kv_offload_load_time": 0.300301, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 249094.0}, "phase": "ladder", "prompt_sha256": "2fd23b6c3a09782c2e1bfeb3e3f6deaaffb6b4628e65927c3bedf2aef93ae23c", "prompt_tokens": 249094, "q": 2, "reset": "gpu", "reset_tries": 1, "state": "reload2", "store_gbps": null, "t": 1792411428.4, "total_s": 1.4306, "ttft_s": 1.3597, "valid": true}
+{"answer": "680128", "cached_tokens": 248528, "chunks": 4, "completion_tokens": 7, "correct": true, "decode_s": 0.0416, "error": null, "length": 245760, "load_gbps": 54.74, "metrics_delta": {"vllm:external_prefix_cache_hits": 248528.0, "vllm:external_prefix_cache_queries": 249094.0, "vllm:kv_offload_load_bytes": 16441475072.0, "vllm:kv_offload_load_time": 0.300379, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 249094.0}, "phase": "ladder", "prompt_sha256": "8766a3a40a3d12a019d63beeba63b6d6e9397dd12304f24a4a148d077b3e8eca", "prompt_tokens": 249094, "q": 3, "reset": "gpu", "reset_tries": 1, "state": "reload3", "store_gbps": null, "t": 1792411429.8, "total_s": 1.4246, "ttft_s": 1.3537, "valid": true}
+{"answer": "982758", "cached_tokens": 248528, "chunks": 4, "completion_tokens": 7, "correct": true, "decode_s": 0.041, "error": null, "length": 245760, "load_gbps": 54.73, "metrics_delta": {"vllm:external_prefix_cache_hits": 248528.0, "vllm:external_prefix_cache_queries": 249094.0, "vllm:kv_offload_load_bytes": 16441475072.0, "vllm:kv_offload_load_time": 0.300385, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 249094.0}, "phase": "ladder", "prompt_sha256": "be2f3d6a83363649ee1b7dbf1226fb0704730e0ae9d27b8accf6491147c09c32", "prompt_tokens": 249094, "q": 4, "reset": "gpu", "reset_tries": 1, "state": "reload4", "store_gbps": null, "t": 1792411431.3, "total_s": 1.421, "ttft_s": 1.3506, "valid": true}
+
+--- window 2: arm-GB300/ladder-32768.jsonl (cold1 and reload1-4 rows)
+{"answer": "856591", "cached_tokens": 0, "chunks": 5, "completion_tokens": 7, "correct": true, "decode_s": 0.0196, "error": null, "length": 32768, "load_gbps": null, "metrics_delta": {"vllm:external_prefix_cache_hits": 0.0, "vllm:external_prefix_cache_queries": 33356.0, "vllm:kv_offload_load_bytes": 0.0, "vllm:kv_offload_load_time": 0.0, "vllm:kv_offload_store_bytes": 2311913472.0, "vllm:kv_offload_store_time": 0.006402, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 33356.0}, "phase": "ladder", "prompt_sha256": "4f758be10092e3774bbf96297c533189ce1ec92bdd8f118db78b72480f41c586", "prompt_tokens": 33356, "q": 1, "reset": "all", "reset_tries": 1, "state": "cold1", "store_gbps": 361.12, "t": 1792412189.2, "total_s": 1.2016, "ttft_s": 1.1744, "valid": true}
+{"answer": "856591", "cached_tokens": 32928, "chunks": 6, "completion_tokens": 7, "correct": true, "decode_s": 0.0213, "error": null, "length": 32768, "load_gbps": 329.8, "metrics_delta": {"vllm:external_prefix_cache_hits": 32928.0, "vllm:external_prefix_cache_queries": 33356.0, "vllm:kv_offload_load_bytes": 2311913472.0, "vllm:kv_offload_load_time": 0.00701, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 33356.0}, "phase": "ladder", "prompt_sha256": "4f758be10092e3774bbf96297c533189ce1ec92bdd8f118db78b72480f41c586", "prompt_tokens": 33356, "q": 1, "reset": "gpu", "reset_tries": 1, "state": "reload1", "store_gbps": null, "t": 1792412189.5, "total_s": 0.3073, "ttft_s": 0.2786, "valid": true}
+{"answer": "924270", "cached_tokens": 32928, "chunks": 6, "completion_tokens": 7, "correct": true, "decode_s": 0.0213, "error": null, "length": 32768, "load_gbps": 329.61, "metrics_delta": {"vllm:external_prefix_cache_hits": 32928.0, "vllm:external_prefix_cache_queries": 33356.0, "vllm:kv_offload_load_bytes": 2311913472.0, "vllm:kv_offload_load_time": 0.007014, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 33356.0}, "phase": "ladder", "prompt_sha256": "87a48a2873d002f92fbe7f0168f20c0cb17c7aed6f8fb23050ed63412830601e", "prompt_tokens": 33356, "q": 2, "reset": "gpu", "reset_tries": 1, "state": "reload2", "store_gbps": null, "t": 1792412189.9, "total_s": 0.3056, "ttft_s": 0.2769, "valid": true}
+{"answer": "715081", "cached_tokens": 32928, "chunks": 6, "completion_tokens": 7, "correct": true, "decode_s": 0.022, "error": null, "length": 32768, "load_gbps": 331.12, "metrics_delta": {"vllm:external_prefix_cache_hits": 32928.0, "vllm:external_prefix_cache_queries": 33356.0, "vllm:kv_offload_load_bytes": 2311913472.0, "vllm:kv_offload_load_time": 0.006982, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 33356.0}, "phase": "ladder", "prompt_sha256": "349e4e08c83cea7f9a26a461ea0371331600969893d1a13773971232ea2c3de5", "prompt_tokens": 33356, "q": 3, "reset": "gpu", "reset_tries": 1, "state": "reload3", "store_gbps": null, "t": 1792412190.2, "total_s": 0.3003, "ttft_s": 0.271, "valid": true}
+{"answer": "472233", "cached_tokens": 32928, "chunks": 6, "completion_tokens": 7, "correct": true, "decode_s": 0.0219, "error": null, "length": 32768, "load_gbps": 330.84, "metrics_delta": {"vllm:external_prefix_cache_hits": 32928.0, "vllm:external_prefix_cache_queries": 33356.0, "vllm:kv_offload_load_bytes": 2311913472.0, "vllm:kv_offload_load_time": 0.006988, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 33356.0}, "phase": "ladder", "prompt_sha256": "008c7f213538219b436b62498a4707b9ca3a941fae15281b65742316ca97dd18", "prompt_tokens": 33356, "q": 4, "reset": "gpu", "reset_tries": 1, "state": "reload4", "store_gbps": null, "t": 1792412190.5, "total_s": 0.2965, "ttft_s": 0.2672, "valid": true}
+
+--- window 2: arm-GB300/ladder-131072.jsonl (cold1 and reload1-4 rows)
+{"answer": "515988", "cached_tokens": 0, "chunks": 2, "completion_tokens": 7, "correct": true, "decode_s": 0.002, "error": null, "length": 131072, "load_gbps": null, "metrics_delta": {"vllm:external_prefix_cache_hits": 0.0, "vllm:external_prefix_cache_queries": 132931.0, "vllm:kv_offload_load_bytes": 0.0, "vllm:kv_offload_load_time": 0.0, "vllm:kv_offload_store_bytes": 8837201920.0, "vllm:kv_offload_store_time": 0.024632, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 132931.0}, "phase": "ladder", "prompt_sha256": "1ab8f3337dc40b8faea131b952646c5fd61b30b0704920ca960029708f1c015e", "prompt_tokens": 132931, "q": 1, "reset": "all", "reset_tries": 1, "state": "cold1", "store_gbps": 358.77, "t": 1792412141.4, "total_s": 6.1592, "ttft_s": 6.1571, "valid": true}
+{"answer": "515988", "cached_tokens": 132496, "chunks": 2, "completion_tokens": 7, "correct": true, "decode_s": 0.0019, "error": null, "length": 131072, "load_gbps": 352.74, "metrics_delta": {"vllm:external_prefix_cache_hits": 132496.0, "vllm:external_prefix_cache_queries": 132931.0, "vllm:kv_offload_load_bytes": 8837201920.0, "vllm:kv_offload_load_time": 0.025053, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 132931.0}, "phase": "ladder", "prompt_sha256": "1ab8f3337dc40b8faea131b952646c5fd61b30b0704920ca960029708f1c015e", "prompt_tokens": 132931, "q": 1, "reset": "gpu", "reset_tries": 1, "state": "reload1", "store_gbps": null, "t": 1792412141.9, "total_s": 0.537, "ttft_s": 0.535, "valid": true}
+{"answer": "416783", "cached_tokens": 132496, "chunks": 2, "completion_tokens": 7, "correct": true, "decode_s": 0.0019, "error": null, "length": 131072, "load_gbps": 352.82, "metrics_delta": {"vllm:external_prefix_cache_hits": 132496.0, "vllm:external_prefix_cache_queries": 132931.0, "vllm:kv_offload_load_bytes": 8837201920.0, "vllm:kv_offload_load_time": 0.025047, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 132931.0}, "phase": "ladder", "prompt_sha256": "efb255e6eb7f76475109a538759df86211d59ebb492be5a802c5b29c1067381a", "prompt_tokens": 132931, "q": 2, "reset": "gpu", "reset_tries": 1, "state": "reload2", "store_gbps": null, "t": 1792412142.5, "total_s": 0.5279, "ttft_s": 0.526, "valid": true}
+{"answer": "540338", "cached_tokens": 132496, "chunks": 2, "completion_tokens": 7, "correct": true, "decode_s": 0.0019, "error": null, "length": 131072, "load_gbps": 352.4, "metrics_delta": {"vllm:external_prefix_cache_hits": 132496.0, "vllm:external_prefix_cache_queries": 132931.0, "vllm:kv_offload_load_bytes": 8837201920.0, "vllm:kv_offload_load_time": 0.025077, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 132931.0}, "phase": "ladder", "prompt_sha256": "ba18b4994dde594b4a463f058fbc13c0678723cb0e0a1cc951e6e6883dce0c3f", "prompt_tokens": 132931, "q": 3, "reset": "gpu", "reset_tries": 1, "state": "reload3", "store_gbps": null, "t": 1792412143.0, "total_s": 0.5151, "ttft_s": 0.5131, "valid": true}
+{"answer": "169617", "cached_tokens": 132496, "chunks": 2, "completion_tokens": 7, "correct": true, "decode_s": 0.002, "error": null, "length": 131072, "load_gbps": 350.4, "metrics_delta": {"vllm:external_prefix_cache_hits": 132496.0, "vllm:external_prefix_cache_queries": 132931.0, "vllm:kv_offload_load_bytes": 8837201920.0, "vllm:kv_offload_load_time": 0.02522, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 132931.0}, "phase": "ladder", "prompt_sha256": "237ef42e8c109665140b3fa18a302d74b09f8d00d4d54bbbb637bd26261aefe9", "prompt_tokens": 132931, "q": 4, "reset": "gpu", "reset_tries": 1, "state": "reload4", "store_gbps": null, "t": 1792412143.5, "total_s": 0.5236, "ttft_s": 0.5216, "valid": true}
+
+--- window 2: arm-GB300/ladder-245760.jsonl (cold1 and reload1-4 rows)
+{"answer": "467822", "cached_tokens": 0, "chunks": 2, "completion_tokens": 7, "correct": true, "decode_s": 0.0032, "error": null, "length": 245760, "load_gbps": null, "metrics_delta": {"vllm:external_prefix_cache_hits": 0.0, "vllm:external_prefix_cache_queries": 249094.0, "vllm:kv_offload_load_bytes": 0.0, "vllm:kv_offload_load_time": 0.0, "vllm:kv_offload_store_bytes": 16441475072.0, "vllm:kv_offload_store_time": 0.046524, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 249094.0}, "phase": "ladder", "prompt_sha256": "1154d3bdb28c274266e322454a966177ad1400bf43783ea49e29e0bd12a608ae", "prompt_tokens": 249094, "q": 1, "reset": "all", "reset_tries": 1, "state": "cold1", "store_gbps": 353.4, "t": 1792412166.2, "total_s": 15.0473, "ttft_s": 15.044, "valid": true}
+{"answer": "467822", "cached_tokens": 248528, "chunks": 2, "completion_tokens": 7, "correct": true, "decode_s": 0.0032, "error": null, "length": 245760, "load_gbps": 357.86, "metrics_delta": {"vllm:external_prefix_cache_hits": 248528.0, "vllm:external_prefix_cache_queries": 249094.0, "vllm:kv_offload_load_bytes": 16441475072.0, "vllm:kv_offload_load_time": 0.045944, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 249094.0}, "phase": "ladder", "prompt_sha256": "1154d3bdb28c274266e322454a966177ad1400bf43783ea49e29e0bd12a608ae", "prompt_tokens": 249094, "q": 1, "reset": "gpu", "reset_tries": 1, "state": "reload1", "store_gbps": null, "t": 1792412167.1, "total_s": 0.8783, "ttft_s": 0.8751, "valid": true}
+{"answer": "227704", "cached_tokens": 248528, "chunks": 2, "completion_tokens": 7, "correct": true, "decode_s": 0.0031, "error": null, "length": 245760, "load_gbps": 357.52, "metrics_delta": {"vllm:external_prefix_cache_hits": 248528.0, "vllm:external_prefix_cache_queries": 249094.0, "vllm:kv_offload_load_bytes": 16441475072.0, "vllm:kv_offload_load_time": 0.045988, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 249094.0}, "phase": "ladder", "prompt_sha256": "2fd23b6c3a09782c2e1bfeb3e3f6deaaffb6b4628e65927c3bedf2aef93ae23c", "prompt_tokens": 249094, "q": 2, "reset": "gpu", "reset_tries": 1, "state": "reload2", "store_gbps": null, "t": 1792412167.9, "total_s": 0.8555, "ttft_s": 0.8523, "valid": true}
+{"answer": "680128", "cached_tokens": 248528, "chunks": 2, "completion_tokens": 7, "correct": true, "decode_s": 0.0031, "error": null, "length": 245760, "load_gbps": 357.17, "metrics_delta": {"vllm:external_prefix_cache_hits": 248528.0, "vllm:external_prefix_cache_queries": 249094.0, "vllm:kv_offload_load_bytes": 16441475072.0, "vllm:kv_offload_load_time": 0.046032, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 249094.0}, "phase": "ladder", "prompt_sha256": "8766a3a40a3d12a019d63beeba63b6d6e9397dd12304f24a4a148d077b3e8eca", "prompt_tokens": 249094, "q": 3, "reset": "gpu", "reset_tries": 1, "state": "reload3", "store_gbps": null, "t": 1792412168.8, "total_s": 0.8471, "ttft_s": 0.8439, "valid": true}
+{"answer": "982758", "cached_tokens": 248528, "chunks": 2, "completion_tokens": 7, "correct": true, "decode_s": 0.0031, "error": null, "length": 245760, "load_gbps": 357.8, "metrics_delta": {"vllm:external_prefix_cache_hits": 248528.0, "vllm:external_prefix_cache_queries": 249094.0, "vllm:kv_offload_load_bytes": 16441475072.0, "vllm:kv_offload_load_time": 0.045951, "vllm:kv_offload_store_bytes": 0.0, "vllm:kv_offload_store_time": 0.0, "vllm:num_preemptions": 0.0, "vllm:prefix_cache_hits": 0.0, "vllm:prefix_cache_queries": 249094.0}, "phase": "ladder", "prompt_sha256": "be2f3d6a83363649ee1b7dbf1226fb0704730e0ae9d27b8accf6491147c09c32", "prompt_tokens": 249094, "q": 4, "reset": "gpu", "reset_tries": 1, "state": "reload4", "store_gbps": null, "t": 1792412169.7, "total_s": 0.8445, "ttft_s": 0.8413, "valid": true}
+
+--- window 2: SUMMARY.md (the runner's checked summary, verbatim apart from its title line)
+Run: `kvp-left-1019-045626`. Status: done. Model Qwen3.8-27B NVFP4, vLLM af7f9488, OffloadingConnector, 96 GiB host tier in Grace LPDDR on both.
+
+## Microbenchmark (pinned host memory, GB/s, median)
+
+| | H2D | D2H | both ways | zero-copy kernel read | device read | 10-06 H2D |
+|---|---:|---:|---:|---:|---:|---:|
+| RTX | 55.09 | 57.21 | 101.91 | 52.92 | 1622.33 | 55.1 |
+| GB300 | 349.2 | 377.95 | 333.14 | 346.41 | 5930.66 | 353.6 |
+
+## The crutch: one decode step's attention reading Qwen3.8-27B's KV in place (16 layers, bf16)
+
+| GPU | tokens | KV bytes | host-resident ms | device-resident ms | host GB/s | ceiling tok/s from attention reads alone | identical |
+|---|---:|---:|---:|---:|---:|---:|---|
+| RTX | 32768 | 2.15 GB | 67.122 | 4.745 | 31.99 | 14.9 | True |
+| RTX | 131072 | 8.59 GB | 163.307 | 11.914 | 52.6 | 6.1 | True |
+| RTX | 245760 | 16.11 GB | 305.822 | 22.098 | 52.67 | 3.3 | True |
+| GB300 | 32768 | 2.15 GB | 6.552 | 3.182 | 327.74 | 152.6 | True |
+| GB300 | 131072 | 8.59 GB | 24.944 | 4.033 | 344.36 | 40.1 | True |
+| GB300 | 245760 | 16.11 GB | 44.97 | 7.155 | 358.16 | 22.2 | True |
+
+## Serving arms
+
+| GPU | boot s | boot env | KV pool tokens | KV GiB | connector | host region | decode tok/s (GPU-resident, 128K) |
+|---|---:|---|---:|---:|---|---|---|
+| RTX | 241 | KVP_KV_BYTES=42949672960 | 641906 |  | OffloadingConnector, 96 GiB | pinned | [47.22, 47.1] |
+| GB300 | 376 | KVP_KV_BYTES=42949672960 | 641906 |  | OffloadingConnector, 96 GiB | pinned | [130.33, 130.31] |
+
+## Reuse ladder (TTFT seconds; reload = prefix in host memory only; gpu = prefix in GPU memory; cold = recompute)
+
+| GPU | L | counts | cold1 | cold2 | reload p50 | gpu p50 | engine load GB/s | store GB/s | stored B/token | reload1==cold1 | gpu==reload | cold2==cold1 | correct reload / cold |
+|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---|---|---|---|
+| RTX | 32768 | yes | 4.1478 | 4.1245 | 0.2731 | 0.2208 | 54.63 | 56.1 | 69310 | True | 4/4 | True | 4/4, 2/2 |
+| RTX | 131072 | yes | 27.7843 | 28.3558 | 0.6451 | 0.4729 | 54.74 | 55.14 | 66480 | True | 4/4 | True | 4/4, 2/2 |
+| RTX | 245760 | yes | 80.8219 | 80.5364 | 1.3567 | 1.0495 | 54.74 | 55.61 | 66005 | True | 4/4 | True | 4/4, 2/2 |
+| GB300 | 32768 | yes | 1.1744 | 1.0625 | 0.274 | 0.2579 | 330.34 | 361.12 | 69310 | True | 4/4 | True | 4/4, 2/2 |
+| GB300 | 131072 | yes | 6.1571 | 5.4685 | 0.5238 | 0.4878 | 352.09 | 358.77 | 66480 | True | 4/4 | True | 4/4, 2/2 |
+| GB300 | 245760 | yes | 15.044 | 14.9504 | 0.8481 | 0.7918 | 357.59 | 353.4 | 66005 | True | 4/4 | True | 4/4, 2/2 |
+
+## Six sessions round-robin (working set > GPU pool)
+
+| GPU | round | n | valid | TTFT p50 | p90 | host (external) prefix hits | load GB/s |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| RTX | 1 | 6 | 6 | 28.5956 | 28.6852 | 0 | None |
+| RTX | 2 | 6 | 6 | 0.7432 | 0.7659 | 791056 | 54.73 |
+| GB300 | 1 | 6 | 6 | 5.6392 | 5.6696 | 0 | None |
+| GB300 | 2 | 6 | 6 | 0.5269 | 0.5363 | 791056 | 364.56 |
+
+## Predictions (prereg.json)
+
+- **P0 HELD**: both arms boot with OffloadingConnector + a 96 GiB host tier (pinned), GPU KV pool tokens within 3% of each other
+- **P1 HELD**: copy ceiling (mb): pinned H2D median RTX in [45, 64] GB/s, GB300 >= 250 GB/s, GB300 / RTX >= 5; reported against the 10-06 membench (RTX 55.1, GB300 353.6 GB/s) as consistent if within +-15%
+- **P2 HELD**: engine link (vLLM connector metrics, reload rows of ladder 131072 + 245760 pooled): effective load GB/s GB300 >= 4 x RTX, and each arm <= 1.10 x its own mb pinned-H2D median
+- **P3 HELD**: reuse works on both links: reload TTFT p50 (reload1-4) <= 0.25 x cold1 TTFT at 131072 and at 245760, on each GPU
+- **P4 HELD**: the link shows in reuse: at 245760, (reload p50 - gpu p50) on the RTX >= 3 x the same difference on the GB300
+- **P5 HELD**: the crutch (mb kvread at 245760): host-resident attention step RTX >= 4 x GB300, and GB300 host-resident >= 5 x GB300 device-resident; host and device outputs equal on both GPUs (max abs difference <= 1e-2; byte identity reported)
+- **P6 HELD**: correctness: per GPU, reload1 byte-identical to cold1 at >= 2 of 3 lengths, and gpu_k byte-identical to reload_k on >= 10 of 12 (k x L); needle accuracy of reload rows >= cold1+cold2 accuracy - 1 per GPU. cold2 vs cold1 is the nondeterminism baseline, reported. Cross-GPU answer identity is reported only (different kernels).
+- **P7 HELD**: multi-session reuse (rr): round-2 TTFT p50 <= 0.30 x round-1 p50 on each GPU, with external (host) prefix hits > 0 in round 2
+
+Derived: {"engine_load_gbps": {"GB300": 354.84, "RTX": 54.74}, "reload_minus_gpu_at_Lmax": {"GB300": 0.05630000000000002, "RTX": 0.3071999999999999}}
+
+`boots.tsv`:
+```
+RTX	up	KVP_KV_BYTES=42949672960	241 s	KV 641906
+GB300	up	KVP_KV_BYTES=42949672960	376 s	KV 641906
+```
