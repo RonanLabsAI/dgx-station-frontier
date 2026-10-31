@@ -1,0 +1,487 @@
+# Verbatim result JSON excerpts; DGX Spark 2; qwen3.8-flash-next; vLLM 0.1.dev21830+g8244d1c44.d20261015; runs dated 2026-10-30.
+
+## s2g-1
+{
+ "unit": "s2g-1",
+ "model": "qwen3.8-flash-next",
+ "targetTokens": 8000,
+ "found": 5,
+ "trials": 6,
+ "rows": [
+  {
+   "depth": 0.25,
+   "code": "ZK-2517",
+   "ok": true,
+   "got": "zk-2517",
+   "s": 4.5
+  },
+  {
+   "depth": 0.25,
+   "code": "ZK-2527",
+   "ok": false,
+   "got": "",
+   "s": 4.4
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5017",
+   "ok": true,
+   "got": "zk-5017",
+   "s": 4.6
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5027",
+   "ok": true,
+   "got": "zk-5027",
+   "s": 4.6
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7517",
+   "ok": true,
+   "got": "zk-7517",
+   "s": 4.7
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7527",
+   "ok": true,
+   "got": "zk-7527",
+   "s": 4.7
+  }
+ ]
+}
+
+## s2h-1
+{
+ "unit": "s2h-1",
+ "model": "qwen3.8-flash-next",
+ "targetTokens": 12000,
+ "found": 4,
+ "trials": 6,
+ "rows": [
+  {
+   "depth": 0.25,
+   "code": "ZK-2517",
+   "ok": true,
+   "got": "zk-2517",
+   "s": 6.2
+  },
+  {
+   "depth": 0.25,
+   "code": "ZK-2527",
+   "ok": true,
+   "got": "zk-2527",
+   "s": 6.2
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5017",
+   "ok": false,
+   "got": "",
+   "s": 6.3
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5027",
+   "ok": false,
+   "got": "",
+   "s": 4.5
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7517",
+   "ok": true,
+   "got": "zk-7517",
+   "s": 2.9
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7527",
+   "ok": true,
+   "got": "zk-7527",
+   "s": 2.9
+  }
+ ]
+}
+
+## s2f-1
+{
+ "unit": "s2f-1",
+ "model": "qwen3.8-flash-next",
+ "targetTokens": 16000,
+ "found": 5,
+ "trials": 6,
+ "rows": [
+  {
+   "depth": 0.25,
+   "code": "ZK-2517",
+   "ok": true,
+   "got": "zk-2517",
+   "s": 7.9
+  },
+  {
+   "depth": 0.25,
+   "code": "ZK-2527",
+   "ok": true,
+   "got": "zk-2527",
+   "s": 7.9
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5017",
+   "ok": true,
+   "got": "zk-5017",
+   "s": 7.9
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5027",
+   "ok": true,
+   "got": "zk-5027",
+   "s": 7.9
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7517",
+   "ok": true,
+   "got": "zk-7517",
+   "s": 8.1
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7527",
+   "ok": false,
+   "got": "",
+   "s": 4.4
+  }
+ ]
+}
+
+## s2i-1
+{
+ "unit": "s2i-1",
+ "model": "qwen3.8-flash-next",
+ "targetTokens": 32000,
+ "found": 4,
+ "trials": 6,
+ "rows": [
+  {
+   "depth": 0.25,
+   "code": "ZK-2517",
+   "ok": true,
+   "got": "zk-2517",
+   "s": 12.7
+  },
+  {
+   "depth": 0.25,
+   "code": "ZK-2527",
+   "ok": false,
+   "got": "",
+   "s": 12.7
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5017",
+   "ok": true,
+   "got": "zk-5017",
+   "s": 11.1
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5027",
+   "ok": false,
+   "got": "",
+   "s": 11.3
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7517",
+   "ok": true,
+   "got": "zk-7517",
+   "s": 11.1
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7527",
+   "ok": true,
+   "got": "zk-7527",
+   "s": 11.3
+  }
+ ]
+}
+
+## s2j-1
+{
+ "unit": "s2j-1",
+ "model": "qwen3.8-flash-next",
+ "tasks": 18,
+ "correct": 18,
+ "rows": [
+  {
+   "i": 1,
+   "want": 2,
+   "ok": true,
+   "got": "2",
+   "s": 2.7
+  },
+  {
+   "i": 2,
+   "want": 3,
+   "ok": true,
+   "got": "3",
+   "s": 2.3
+  },
+  {
+   "i": 3,
+   "want": 6,
+   "ok": true,
+   "got": "6",
+   "s": 2.3
+  },
+  {
+   "i": 4,
+   "want": 66,
+   "ok": true,
+   "got": "66",
+   "s": 2.6
+  },
+  {
+   "i": 5,
+   "want": 75,
+   "ok": true,
+   "got": "75",
+   "s": 2.3
+  },
+  {
+   "i": 6,
+   "want": 198,
+   "ok": true,
+   "got": "198",
+   "s": 2.2
+  },
+  {
+   "i": 7,
+   "want": 40,
+   "ok": true,
+   "got": "40",
+   "s": 2.7
+  },
+  {
+   "i": 8,
+   "want": 48,
+   "ok": true,
+   "got": "48",
+   "s": 2.5
+  },
+  {
+   "i": 9,
+   "want": 24,
+   "ok": true,
+   "got": "24",
+   "s": 2.9
+  },
+  {
+   "i": 10,
+   "want": 6,
+   "ok": true,
+   "got": "6",
+   "s": 2.4
+  },
+  {
+   "i": 11,
+   "want": 8,
+   "ok": true,
+   "got": "8",
+   "s": 3.5
+  },
+  {
+   "i": 12,
+   "want": 8,
+   "ok": true,
+   "got": "8",
+   "s": 2.3
+  },
+  {
+   "i": 13,
+   "want": 23,
+   "ok": true,
+   "got": "23",
+   "s": 1.8
+  },
+  {
+   "i": 14,
+   "want": 40,
+   "ok": true,
+   "got": "40",
+   "s": 1.9
+  },
+  {
+   "i": 15,
+   "want": 26,
+   "ok": true,
+   "got": "26",
+   "s": 1.7
+  },
+  {
+   "i": 16,
+   "want": 486,
+   "ok": true,
+   "got": "486",
+   "s": 2.0
+  },
+  {
+   "i": 17,
+   "want": 96,
+   "ok": true,
+   "got": "96",
+   "s": 1.4
+  },
+  {
+   "i": 18,
+   "want": 1215,
+   "ok": true,
+   "got": "1215",
+   "s": 2.1
+  }
+ ]
+}
+
+## s2k-1
+{
+ "unit": "s2k-1",
+ "model": "qwen3.8-flash-next",
+ "targetTokens": 16000,
+ "trials": 3,
+ "totalFound": 9,
+ "totalCodes": 9,
+ "byDepth": {
+  "0.2": 3,
+  "0.5": 3,
+  "0.8": 3
+ },
+ "rows": [
+  {
+   "codes": [
+    "ZK-2017",
+    "ZK-5017",
+    "ZK-8017"
+   ],
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "n": 3,
+   "got": "zk-2017, zk-5017, zk-8017",
+   "s": 8.0
+  },
+  {
+   "codes": [
+    "ZK-2027",
+    "ZK-5027",
+    "ZK-8027"
+   ],
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "n": 3,
+   "got": "zk-2027, zk-5027, zk-8027",
+   "s": 8.1
+  },
+  {
+   "codes": [
+    "ZK-2037",
+    "ZK-5037",
+    "ZK-8037"
+   ],
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "n": 3,
+   "got": "zk-2037, zk-5037, zk-8037",
+   "s": 8.1
+  }
+ ]
+}
+
+## s2m-1
+{
+ "unit": "s2m-1",
+ "model": "qwen3.8-flash-next",
+ "targetTokens": 16000,
+ "correct": 3,
+ "trials": 3,
+ "rows": [
+  {
+   "trial": 1,
+   "depth": 0.25,
+   "target": "ZK-9117",
+   "ok": true,
+   "decoy": "",
+   "got": "zk-9117",
+   "s": 8.7
+  },
+  {
+   "trial": 2,
+   "depth": 0.5,
+   "target": "ZK-9217",
+   "ok": true,
+   "decoy": "",
+   "got": "zk-9217",
+   "s": 8.2
+  },
+  {
+   "trial": 3,
+   "depth": 0.75,
+   "target": "ZK-9317",
+   "ok": true,
+   "decoy": "",
+   "got": "zk-9317",
+   "s": 8.4
+  }
+ ]
+}
+
+## s2o-1
+{
+ "unit": "s2o-1",
+ "model": "qwen3.8-flash-next",
+ "targetTokens": 16000,
+ "correct": 3,
+ "trials": 3,
+ "rows": [
+  {
+   "trial": 1,
+   "want": 3,
+   "got": 3,
+   "ok": true,
+   "raw": "3",
+   "s": 8.0
+  },
+  {
+   "trial": 2,
+   "want": 5,
+   "got": 5,
+   "ok": true,
+   "raw": "5",
+   "s": 8.3
+  },
+  {
+   "trial": 3,
+   "want": 7,
+   "got": 7,
+   "ok": true,
+   "raw": "7",
+   "s": 10.7
+  }
+ ]
+}
+
+## serving metadata
+{"id":"qwen3.8-flash-next","max_model_len":262144}

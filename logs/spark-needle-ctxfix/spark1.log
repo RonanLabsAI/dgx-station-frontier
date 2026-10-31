@@ -1,0 +1,771 @@
+# Verbatim result JSON excerpts; DGX Spark 1; nemotron-3-nano:30b; Ollama 0.32.4; runs dated 2026-10-30.
+
+## s1g-1
+{
+ "unit": "s1g-1",
+ "model": "nemotron-3-nano:30b",
+ "targetTokens": 8000,
+ "found": 6,
+ "trials": 6,
+ "rows": [
+  {
+   "depth": 0.25,
+   "code": "ZK-2517",
+   "ok": true,
+   "got": "zk-2517",
+   "s": 6.7
+  },
+  {
+   "depth": 0.25,
+   "code": "ZK-2527",
+   "ok": true,
+   "got": "zk-2527",
+   "s": 15.0
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5017",
+   "ok": true,
+   "got": "zk-5017",
+   "s": 11.2
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5027",
+   "ok": true,
+   "got": "zk-5027",
+   "s": 9.3
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7517",
+   "ok": true,
+   "got": "zk-7517",
+   "s": 11.5
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7527",
+   "ok": true,
+   "got": "zk-7527",
+   "s": 12.6
+  }
+ ]
+}
+
+## s1h-1
+{
+ "unit": "s1h-1",
+ "model": "nemotron-3-nano:30b",
+ "targetTokens": 12000,
+ "found": 2,
+ "trials": 6,
+ "rows": [
+  {
+   "depth": 0.25,
+   "code": "ZK-2517",
+   "ok": false,
+   "got": "sector0",
+   "s": 112.3
+  },
+  {
+   "depth": 0.25,
+   "code": "ZK-2527",
+   "ok": false,
+   "got": "sector0",
+   "s": 106.9
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5017",
+   "ok": false,
+   "got": "sector0",
+   "s": 107.3
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5027",
+   "ok": false,
+   "got": "sector0",
+   "s": 110.2
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7517",
+   "ok": true,
+   "got": "zk-7517",
+   "s": 16.1
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7527",
+   "ok": true,
+   "got": "zk-7527",
+   "s": 7.2
+  }
+ ]
+}
+
+## s1f-1
+{
+ "unit": "s1f-1",
+ "model": "nemotron-3-nano:30b",
+ "targetTokens": 16000,
+ "found": 2,
+ "trials": 6,
+ "rows": [
+  {
+   "depth": 0.25,
+   "code": "ZK-2517",
+   "ok": false,
+   "got": "sectorzero",
+   "s": 80.9
+  },
+  {
+   "depth": 0.25,
+   "code": "ZK-2527",
+   "ok": false,
+   "got": "sectorzero",
+   "s": 82.8
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5017",
+   "ok": false,
+   "got": "sectorzero",
+   "s": 79.0
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5027",
+   "ok": false,
+   "got": "sectorzero",
+   "s": 86.0
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7517",
+   "ok": true,
+   "got": "zk-7517",
+   "s": 10.0
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7527",
+   "ok": true,
+   "got": "zk-7527",
+   "s": 6.3
+  }
+ ]
+}
+
+## s1i-1
+{
+ "unit": "s1i-1",
+ "model": "nemotron-3-nano:30b",
+ "targetTokens": 32000,
+ "found": 0,
+ "trials": 6,
+ "rows": [
+  {
+   "depth": 0.25,
+   "code": "ZK-2517",
+   "ok": false,
+   "got": "0",
+   "s": 66.0
+  },
+  {
+   "depth": 0.25,
+   "code": "ZK-2527",
+   "ok": false,
+   "got": "0",
+   "s": 63.9
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5017",
+   "ok": false,
+   "got": "0",
+   "s": 62.9
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5027",
+   "ok": false,
+   "got": "0",
+   "s": 60.9
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7517",
+   "ok": false,
+   "got": "0",
+   "s": 64.4
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7527",
+   "ok": false,
+   "got": "0",
+   "s": 60.5
+  }
+ ]
+}
+
+## s1j-1
+{
+ "unit": "s1j-1",
+ "model": "nemotron-3-nano:30b",
+ "tasks": 18,
+ "correct": 18,
+ "rows": [
+  {
+   "i": 1,
+   "want": 2,
+   "ok": true,
+   "got": "2",
+   "s": 5.4
+  },
+  {
+   "i": 2,
+   "want": 3,
+   "ok": true,
+   "got": "3",
+   "s": 4.4
+  },
+  {
+   "i": 3,
+   "want": 6,
+   "ok": true,
+   "got": "6",
+   "s": 5.3
+  },
+  {
+   "i": 4,
+   "want": 66,
+   "ok": true,
+   "got": "66",
+   "s": 5.2
+  },
+  {
+   "i": 5,
+   "want": 75,
+   "ok": true,
+   "got": "75",
+   "s": 3.5
+  },
+  {
+   "i": 6,
+   "want": 198,
+   "ok": true,
+   "got": "198",
+   "s": 5.8
+  },
+  {
+   "i": 7,
+   "want": 40,
+   "ok": true,
+   "got": "40",
+   "s": 14.8
+  },
+  {
+   "i": 8,
+   "want": 48,
+   "ok": true,
+   "got": "48",
+   "s": 5.5
+  },
+  {
+   "i": 9,
+   "want": 24,
+   "ok": true,
+   "got": "24",
+   "s": 5.2
+  },
+  {
+   "i": 10,
+   "want": 6,
+   "ok": true,
+   "got": "6",
+   "s": 5.6
+  },
+  {
+   "i": 11,
+   "want": 8,
+   "ok": true,
+   "got": "8",
+   "s": 6.2
+  },
+  {
+   "i": 12,
+   "want": 8,
+   "ok": true,
+   "got": "8",
+   "s": 5.0
+  },
+  {
+   "i": 13,
+   "want": 23,
+   "ok": true,
+   "got": "23",
+   "s": 4.1
+  },
+  {
+   "i": 14,
+   "want": 40,
+   "ok": true,
+   "got": "40",
+   "s": 3.4
+  },
+  {
+   "i": 15,
+   "want": 26,
+   "ok": true,
+   "got": "26",
+   "s": 3.7
+  },
+  {
+   "i": 16,
+   "want": 486,
+   "ok": true,
+   "got": "486",
+   "s": 5.4
+  },
+  {
+   "i": 17,
+   "want": 96,
+   "ok": true,
+   "got": "96",
+   "s": 4.3
+  },
+  {
+   "i": 18,
+   "want": 1215,
+   "ok": true,
+   "got": "1215",
+   "s": 4.0
+  }
+ ]
+}
+
+## s1k-1
+{
+ "unit": "s1k-1",
+ "model": "nemotron-3-nano:30b",
+ "targetTokens": 16000,
+ "trials": 3,
+ "totalFound": 0,
+ "totalCodes": 9,
+ "byDepth": {
+  "0.2": 0,
+  "0.5": 0,
+  "0.8": 0
+ },
+ "rows": [
+  {
+   "codes": [
+    "ZK-2017",
+    "ZK-5017",
+    "ZK-8017"
+   ],
+   "found": [
+    false,
+    false,
+    false
+   ],
+   "n": 0,
+   "got": "",
+   "s": 34.9
+  },
+  {
+   "codes": [
+    "ZK-2027",
+    "ZK-5027",
+    "ZK-8027"
+   ],
+   "found": [
+    false,
+    false,
+    false
+   ],
+   "n": 0,
+   "got": "",
+   "s": 35.2
+  },
+  {
+   "codes": [
+    "ZK-2037",
+    "ZK-5037",
+    "ZK-8037"
+   ],
+   "found": [
+    false,
+    false,
+    false
+   ],
+   "n": 0,
+   "got": "",
+   "s": 40.7
+  }
+ ]
+}
+
+## s1m-1
+{
+ "unit": "s1m-1",
+ "model": "nemotron-3-nano:30b",
+ "targetTokens": 16000,
+ "correct": 1,
+ "trials": 3,
+ "rows": [
+  {
+   "trial": 1,
+   "depth": 0.25,
+   "target": "ZK-9117",
+   "ok": false,
+   "decoy": "",
+   "got": "(no current drill code is provided)",
+   "s": 14.1
+  },
+  {
+   "trial": 2,
+   "depth": 0.5,
+   "target": "ZK-9217",
+   "ok": false,
+   "decoy": "",
+   "got": "(no current drill code is provided)",
+   "s": 10.8
+  },
+  {
+   "trial": 3,
+   "depth": 0.75,
+   "target": "ZK-9317",
+   "ok": true,
+   "decoy": "",
+   "got": "zk-9317",
+   "s": 6.1
+  }
+ ]
+}
+
+## s1o-1
+{
+ "unit": "s1o-1",
+ "model": "nemotron-3-nano:30b",
+ "targetTokens": 16000,
+ "correct": 0,
+ "trials": 3,
+ "rows": [
+  {
+   "trial": 1,
+   "want": 3,
+   "got": 1,
+   "ok": false,
+   "raw": "1",
+   "s": 2.7
+  },
+  {
+   "trial": 2,
+   "want": 5,
+   "got": 1,
+   "ok": false,
+   "raw": "1",
+   "s": 6.4
+  },
+  {
+   "trial": 3,
+   "want": 7,
+   "got": 2,
+   "ok": false,
+   "raw": "2",
+   "s": 7.3
+  }
+ ]
+}
+
+## s1ag-1
+{
+ "unit": "s1ag-1",
+ "model": "nemotron-3-nano:30b",
+ "targetTokens": 16000,
+ "found": 6,
+ "trials": 6,
+ "rows": [
+  {
+   "depth": 0.25,
+   "code": "ZK-2517",
+   "ok": true,
+   "got": "zk-2517",
+   "s": 27.8,
+   "promptEval": 15143,
+   "numCtx": 32768
+  },
+  {
+   "depth": 0.25,
+   "code": "ZK-2527",
+   "ok": true,
+   "got": "zk-2527",
+   "s": 45.4,
+   "promptEval": 15143,
+   "numCtx": 32768
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5017",
+   "ok": true,
+   "got": "zk-5017",
+   "s": 15.4,
+   "promptEval": 15143,
+   "numCtx": 32768
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5027",
+   "ok": true,
+   "got": "zk-5027",
+   "s": 15.7,
+   "promptEval": 15143,
+   "numCtx": 32768
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7517",
+   "ok": true,
+   "got": "zk-7517",
+   "s": 15.8,
+   "promptEval": 15143,
+   "numCtx": 32768
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7527",
+   "ok": true,
+   "got": "zk-7527",
+   "s": 16.2,
+   "promptEval": 15143,
+   "numCtx": 32768
+  }
+ ]
+}
+
+## s1ah-1
+{
+ "unit": "s1ah-1",
+ "model": "nemotron-3-nano:30b",
+ "targetTokens": 32000,
+ "found": 6,
+ "trials": 6,
+ "rows": [
+  {
+   "depth": 0.25,
+   "code": "ZK-2517",
+   "ok": true,
+   "got": "zk-2517",
+   "s": 38.8,
+   "promptEval": 30300,
+   "numCtx": 65536
+  },
+  {
+   "depth": 0.25,
+   "code": "ZK-2527",
+   "ok": true,
+   "got": "zk-2527",
+   "s": 26.4,
+   "promptEval": 30300,
+   "numCtx": 65536
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5017",
+   "ok": true,
+   "got": "zk-5017",
+   "s": 27.0,
+   "promptEval": 30300,
+   "numCtx": 65536
+  },
+  {
+   "depth": 0.5,
+   "code": "ZK-5027",
+   "ok": true,
+   "got": "zk-5027",
+   "s": 60.4,
+   "promptEval": 30300,
+   "numCtx": 65536
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7517",
+   "ok": true,
+   "got": "zk-7517",
+   "s": 26.7,
+   "promptEval": 30300,
+   "numCtx": 65536
+  },
+  {
+   "depth": 0.75,
+   "code": "ZK-7527",
+   "ok": true,
+   "got": "zk-7527",
+   "s": 26.2,
+   "promptEval": 30300,
+   "numCtx": 65536
+  }
+ ]
+}
+
+## s1ai-1
+{
+ "unit": "s1ai-1",
+ "model": "nemotron-3-nano:30b",
+ "targetTokens": 16000,
+ "trials": 3,
+ "totalFound": 9,
+ "totalCodes": 9,
+ "byDepth": {
+  "0.2": 3,
+  "0.5": 3,
+  "0.8": 3
+ },
+ "rows": [
+  {
+   "codes": [
+    "ZK-2017",
+    "ZK-5017",
+    "ZK-8017"
+   ],
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "n": 3,
+   "got": "zk-2017,zk-5017,zk-8017",
+   "s": 30.7,
+   "promptEval": 15189,
+   "numCtx": 32768
+  },
+  {
+   "codes": [
+    "ZK-2027",
+    "ZK-5027",
+    "ZK-8027"
+   ],
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "n": 3,
+   "got": "zk-2027, zk-5027, zk-8027",
+   "s": 18.0,
+   "promptEval": 15189,
+   "numCtx": 32768
+  },
+  {
+   "codes": [
+    "ZK-2037",
+    "ZK-5037",
+    "ZK-8037"
+   ],
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "n": 3,
+   "got": "zk-2037,zk-5037,zk-8037",
+   "s": 17.9,
+   "promptEval": 15189,
+   "numCtx": 32768
+  }
+ ]
+}
+
+## s1aj-1
+{
+ "unit": "s1aj-1",
+ "model": "nemotron-3-nano:30b",
+ "targetTokens": 16000,
+ "correct": 3,
+ "trials": 3,
+ "rows": [
+  {
+   "trial": 1,
+   "depth": 0.25,
+   "target": "ZK-9117",
+   "ok": true,
+   "decoy": "",
+   "got": "zk-9117",
+   "s": 28.9,
+   "promptEval": 15290,
+   "numCtx": 32768
+  },
+  {
+   "trial": 2,
+   "depth": 0.5,
+   "target": "ZK-9217",
+   "ok": true,
+   "decoy": "",
+   "got": "zk-9217",
+   "s": 17.1,
+   "promptEval": 15290,
+   "numCtx": 32768
+  },
+  {
+   "trial": 3,
+   "depth": 0.75,
+   "target": "ZK-9317",
+   "ok": true,
+   "decoy": "",
+   "got": "zk-9317",
+   "s": 16.9,
+   "promptEval": 15290,
+   "numCtx": 32768
+  }
+ ]
+}
+
+## s1ak-1
+{
+ "unit": "s1ak-1",
+ "model": "nemotron-3-nano:30b",
+ "targetTokens": 16000,
+ "correct": 3,
+ "trials": 3,
+ "rows": [
+  {
+   "trial": 1,
+   "want": 3,
+   "got": 3,
+   "ok": true,
+   "raw": "3",
+   "s": 35.5,
+   "promptEval": 15216,
+   "numCtx": 32768
+  },
+  {
+   "trial": 2,
+   "want": 5,
+   "got": 5,
+   "ok": true,
+   "raw": "5",
+   "s": 22.7,
+   "promptEval": 15274,
+   "numCtx": 32768
+  },
+  {
+   "trial": 3,
+   "want": 7,
+   "got": 7,
+   "ok": true,
+   "raw": "7",
+   "s": 52.3,
+   "promptEval": 15332,
+   "numCtx": 32768
+  }
+ ]
+}
+
+## serving metadata and direct probe (Mission Control result-package excerpts, 2026-10-30)
+{"name":"nemotron-3-nano:30b","digest":"b725f11174073334edd0c2ff396b8d4e66d7dab22a5a63717ccad5a08a270cf1","context_length":8192}
+A direct probe showed prompt_eval_count 4098 of a 15,143-token prompt under default options.
