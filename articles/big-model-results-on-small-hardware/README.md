@@ -1,6 +1,6 @@
 # Big-model results on small hardware: where Mixture of Models actually stands
 
-*Stephen J. Ronan, MD ([@SJRonanMD](https://x.com/SJRonanMD)), November 2026. First published as an X Article.*
+*Stephen J. Ronan, MD ([@SJRonanMD](https://x.com/SJRonanMD)), November 2026. First published as an [X Article](https://x.com/SJRonanMD/status/2116932583711982000).*
 
 ![Cover: Big-model results on small hardware? Mixture of Models, state of the art.](img/0-cover.png)
 
