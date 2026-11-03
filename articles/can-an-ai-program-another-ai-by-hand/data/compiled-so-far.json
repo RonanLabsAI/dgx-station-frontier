@@ -1,0 +1,300 @@
+{
+ "read": {
+  "Muse": {
+   "clean": {
+    "n": 12,
+    "correct": 6,
+    "accuracy": 0.5,
+    "unparsed": 0
+   },
+   "permuted": {
+    "n": 12,
+    "correct": 7,
+    "accuracy": 0.583,
+    "unparsed": 0
+   },
+   "random-control": {
+    "n": 4,
+    "correct": 0,
+    "accuracy": 0.0,
+    "unparsed": 0
+   }
+  },
+  "astra": {
+   "clean": {
+    "n": 12,
+    "correct": 11,
+    "accuracy": 0.917,
+    "unparsed": 0
+   },
+   "permuted": {
+    "n": 12,
+    "correct": 12,
+    "accuracy": 1.0,
+    "unparsed": 0
+   },
+   "random-control": {
+    "n": 4,
+    "correct": 0,
+    "accuracy": 0.0,
+    "unparsed": 0
+   }
+  },
+  "claude-opus": {
+   "clean": {
+    "n": 12,
+    "correct": 6,
+    "accuracy": 0.5,
+    "unparsed": 0
+   },
+   "permuted": {
+    "n": 12,
+    "correct": 7,
+    "accuracy": 0.583,
+    "unparsed": 0
+   },
+   "random-control": {
+    "n": 4,
+    "correct": 0,
+    "accuracy": 0.0,
+    "unparsed": 0
+   }
+  },
+  "deepseek": {
+   "clean": {
+    "n": 12,
+    "correct": 5,
+    "accuracy": 0.417,
+    "unparsed": 0
+   },
+   "permuted": {
+    "n": 12,
+    "correct": 3,
+    "accuracy": 0.25,
+    "unparsed": 0
+   },
+   "random-control": {
+    "n": 4,
+    "correct": 0,
+    "accuracy": 0.0,
+    "unparsed": 0
+   }
+  },
+  "glm-flash": {
+   "clean": {
+    "n": 12,
+    "correct": 4,
+    "accuracy": 0.333,
+    "unparsed": 7
+   },
+   "permuted": {
+    "n": 12,
+    "correct": 3,
+    "accuracy": 0.25,
+    "unparsed": 5
+   },
+   "random-control": {
+    "n": 4,
+    "correct": 0,
+    "accuracy": 0.0,
+    "unparsed": 2
+   }
+  },
+  "glm-full": {
+   "clean": {
+    "n": 12,
+    "correct": 2,
+    "accuracy": 0.167,
+    "unparsed": 9
+   },
+   "permuted": {
+    "n": 12,
+    "correct": 2,
+    "accuracy": 0.167,
+    "unparsed": 5
+   },
+   "random-control": {
+    "n": 4,
+    "correct": 0,
+    "accuracy": 0.0,
+    "unparsed": 3
+   }
+  },
+  "gpt-oss": {
+   "clean": {
+    "n": 12,
+    "correct": 3,
+    "accuracy": 0.25,
+    "unparsed": 0
+   },
+   "permuted": {
+    "n": 12,
+    "correct": 3,
+    "accuracy": 0.25,
+    "unparsed": 0
+   },
+   "random-control": {
+    "n": 4,
+    "correct": 0,
+    "accuracy": 0.0,
+    "unparsed": 0
+   }
+  },
+  "muse": {
+   "clean": {
+    "n": 12,
+    "correct": 6,
+    "accuracy": 0.5,
+    "unparsed": 0
+   },
+   "permuted": {
+    "n": 12,
+    "correct": 5,
+    "accuracy": 0.417,
+    "unparsed": 0
+   },
+   "random-control": {
+    "n": 4,
+    "correct": 0,
+    "accuracy": 0.0,
+    "unparsed": 0
+   }
+  }
+ },
+ "write": {
+  "Muse": {
+   "breakout": {
+    "exec_ok": true,
+    "normalized": 1.1379524344952783,
+    "return": 11.021885871887207
+   },
+   "breakout_flip": {
+    "exec_ok": true,
+    "normalized": 1.512798725344724,
+    "return": 10.971105575561523
+   }
+  },
+  "astra": {
+   "breakout": {
+    "exec_ok": true,
+    "normalized": 1.1993432034061784,
+    "return": 11.58477783203125
+   },
+   "breakout_flip": {
+    "exec_ok": true,
+    "normalized": 1.6014412584184965,
+    "return": 11.58477783203125
+   }
+  },
+  "deepseek": {
+   "breakout": {
+    "exec_ok": true,
+    "normalized": 0.019457552370347457,
+    "return": 0.7664062976837158
+   },
+   "breakout_flip": {
+    "exec_ok": true,
+    "normalized": 0.036287566304430696,
+    "return": 0.7492188215255737
+   }
+  },
+  "glm-flash": {
+   "breakout": {
+    "exec_ok": true,
+    "normalized": null,
+    "return": null
+   },
+   "breakout_flip": {
+    "exec_ok": false,
+    "normalized": null,
+    "return": null
+   }
+  },
+  "glm-full": {
+   "breakout": {
+    "exec_ok": true,
+    "normalized": 0.419881646980804,
+    "return": 4.437894821166992
+   },
+   "breakout_flip": {
+    "exec_ok": true,
+    "normalized": 0.04497699883568585,
+    "return": 0.8093757629394531
+   }
+  },
+  "gpt-oss": {
+   "breakout": {
+    "exec_ok": true,
+    "normalized": 0.028446835095495757,
+    "return": 0.8488290309906006
+   },
+   "breakout_flip": {
+    "exec_ok": true,
+    "normalized": 0.02838817297783818,
+    "return": 0.6945313215255737
+   }
+  },
+  "muse": {
+   "breakout": {
+    "exec_ok": true,
+    "normalized": 1.1993432034061784,
+    "return": 11.58477783203125
+   },
+   "breakout_flip": {
+    "exec_ok": true,
+    "normalized": 1.6014412584184965,
+    "return": 11.58477783203125
+   }
+  }
+ },
+ "fix": {
+  "Muse": {
+   "exec_ok": true,
+   "cross": 1.0,
+   "hit": 0.0,
+   "timeout": 0.0,
+   "changed": 19,
+   "changed_frac": 0.0011
+  },
+  "astra": {
+   "exec_ok": true,
+   "cross": 1.0,
+   "hit": 0.0,
+   "timeout": 0.0,
+   "changed": 22,
+   "changed_frac": 0.00128
+  },
+  "deepseek": {
+   "exec_ok": true,
+   "cross": 0.0,
+   "hit": 0.0,
+   "timeout": 1.0,
+   "changed": 165,
+   "changed_frac": 0.00956
+  },
+  "glm-flash": {
+   "exec_ok": false,
+   "invalid": null
+  },
+  "glm-full": {
+   "exec_ok": true,
+   "cross": 0.4140625,
+   "hit": 0.5859375,
+   "timeout": 0.0,
+   "changed": 33,
+   "changed_frac": 0.00191
+  },
+  "gpt-oss": {
+   "exec_ok": false,
+   "invalid": "banned code, missing code, or code does not load stuck.npz"
+  },
+  "muse": {
+   "exec_ok": true,
+   "cross": 1.0,
+   "hit": 0.0,
+   "timeout": 0.0,
+   "changed": 41,
+   "changed_frac": 0.00238
+  }
+ }
+}

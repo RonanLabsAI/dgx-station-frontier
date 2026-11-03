@@ -1,0 +1,138 @@
+[
+ {
+  "label": "pristine",
+  "accuracy": 0.8733333333333333,
+  "hit_limit_rate": 0.0016666666666666668,
+  "n": 600,
+  "items": 300,
+  "wall_s": 440.4
+ },
+ {
+  "label": "pristine-t2",
+  "accuracy": 0.7516666666666667,
+  "hit_limit_rate": 0.021666666666666667,
+  "n": 600,
+  "items": 300,
+  "wall_s": 745.0
+ },
+ {
+  "label": "pristine-m500x100",
+  "accuracy": 0.415,
+  "hit_limit_rate": 0.06,
+  "n": 200,
+  "items": 100,
+  "wall_s": 2484.3
+ },
+ {
+  "label": "astra-ctrl-1-m500",
+  "accuracy": 0.345,
+  "hit_limit_rate": 0.205,
+  "n": 200,
+  "items": 100,
+  "wall_s": 2832.2
+ },
+ {
+  "label": "astra-ctrl-1-t2",
+  "accuracy": 0.765,
+  "hit_limit_rate": 0.03,
+  "n": 600,
+  "items": 300,
+  "wall_s": 574.6
+ },
+ {
+  "label": "astra-ctrl2-1-m500",
+  "accuracy": 0.415,
+  "hit_limit_rate": 0.07,
+  "n": 200,
+  "items": 100,
+  "wall_s": 2119.7
+ },
+ {
+  "label": "astra-ctrl2-1-t2",
+  "accuracy": 0.7566666666666667,
+  "hit_limit_rate": 0.01,
+  "n": 600,
+  "items": 300,
+  "wall_s": 591.4
+ },
+ {
+  "label": "dumb-ablate-a10-m500",
+  "accuracy": 0.145,
+  "hit_limit_rate": 0.015,
+  "n": 200,
+  "items": 100,
+  "wall_s": 979.1
+ },
+ {
+  "label": "dumb-ablate-a10-t2",
+  "accuracy": 0.20333333333333334,
+  "hit_limit_rate": 0.005,
+  "n": 600,
+  "items": 300,
+  "wall_s": 418.8
+ },
+ {
+  "label": "dumb-eos20-m500",
+  "accuracy": 0.17,
+  "hit_limit_rate": 0.005,
+  "n": 200,
+  "items": 100,
+  "wall_s": 942.0
+ },
+ {
+  "label": "dumb-eos20-t2",
+  "accuracy": 0.27166666666666667,
+  "hit_limit_rate": 0.0016666666666666668,
+  "n": 600,
+  "items": 300,
+  "wall_s": 414.0
+ },
+ {
+  "label": "dumb-norm09-m500",
+  "accuracy": 0.395,
+  "hit_limit_rate": 0.055,
+  "n": 200,
+  "items": 100,
+  "wall_s": 1985.1
+ },
+ {
+  "label": "dumb-norm09-t2",
+  "accuracy": 0.7616666666666667,
+  "hit_limit_rate": 0.011666666666666667,
+  "n": 600,
+  "items": 300,
+  "wall_s": 623.2
+ },
+ {
+  "label": "dumb-norm11-m500",
+  "accuracy": 0.36,
+  "hit_limit_rate": 0.1,
+  "n": 200,
+  "items": 100,
+  "wall_s": 2725.7
+ },
+ {
+  "label": "dumb-norm11-t2",
+  "accuracy": 0.75,
+  "hit_limit_rate": 0.005,
+  "n": 600,
+  "items": 300,
+  "wall_s": 770.5
+ },
+ {
+  "label": "dumb-rand20-m500",
+  "accuracy": 0.4,
+  "hit_limit_rate": 0.06,
+  "n": 200,
+  "items": 100,
+  "wall_s": 2539.1
+ },
+ {
+  "label": "dumb-rand20-t2",
+  "accuracy": 0.7566666666666667,
+  "hit_limit_rate": 0.01,
+  "n": 600,
+  "items": 300,
+  "wall_s": 727.2
+ }
+]
