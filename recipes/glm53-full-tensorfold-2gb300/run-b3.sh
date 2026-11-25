@@ -11,10 +11,10 @@
 #   LEFT_HOST, RIGHT_HOST   user@host of the rank-0 and rank-1 Stations (ssh keys, no password)
 #   RAIL_IP_A, RAIL_IP_B    the two Stations' addresses on the 400G rail (rank 0 = A, rank 1 = B)
 #   RUNS                    output directory on the Stations (also holds ckpt-full-verify.log from the sha256 check)
-# The interface/HCA names below (enP1p3s0f1np1, mlx5_1, uverbs1) are the 400G port on our Stations; change them for yours.
+# The interface/HCA names below (enP1p3s0f1np1 for OOB; mlx5_0+mlx5_1, uverbs0+uverbs1 = both 400G rails) are our Stations'; change them for yours.
 #
 # 2026-10-11: CP=0 and DISK_CACHE=0 (Mia's TP>2 defaults turn on context parallelism, FP4 KV, a 500K window and a
-# 64 GiB /cache/pcache disk prompt cache that is not mounted here); devices: only /dev/infiniband/uverbs1 (no rdma_cm).
+# 64 GiB /cache/pcache disk prompt cache that is not mounted here); devices: /dev/infiniband/uverbs0 + uverbs1 since 2026-11-25 (no rdma_cm).
 # usage: DRAFTS=dspark|none ./run-b3.sh      (default dspark; ~45-75 min: two loads of ~136 GiB a rank + JIT + bench)
 set -euo pipefail
 L="${LEFT_HOST:?set LEFT_HOST}"; Rt="${RIGHT_HOST:?set RIGHT_HOST}"
@@ -34,7 +34,7 @@ log() { echo "[$(TZ=America/Los_Angeles date '+%F %T %Z')] $*" | tee -a "$LOCAL/
 on() { local h=$1; shift; ssh -o BatchMode=yes "$h" "$@" </dev/null; }
 onin() { local h=$1; shift; ssh -o BatchMode=yes "$h" "$@"; }   # keeps stdin (pipes, heredocs)
 gb300_used() { on "$1" "nvidia-smi --query-gpu=name,memory.used --format=csv,noheader,nounits | awk -F', ' '\$1==\"NVIDIA GB300\"{print \$2}'"; }
-NCCL_ENV="-e NCCL_SOCKET_IFNAME=enP1p3s0f1np1 -e GLOO_SOCKET_IFNAME=enP1p3s0f1np1 -e NCCL_IB_DISABLE=0 -e NCCL_IB_HCA==mlx5_1:1 \
+NCCL_ENV="-e NCCL_SOCKET_IFNAME=enP1p3s0f1np1 -e GLOO_SOCKET_IFNAME=enP1p3s0f1np1 -e NCCL_IB_DISABLE=0 -e NCCL_IB_HCA==mlx5_0:1,mlx5_1:1 \
  -e NCCL_IB_TC=106 -e NCCL_NET_GDR_LEVEL=SYS -e NCCL_DMABUF_ENABLE=1 -e NCCL_DEBUG=INFO -e NCCL_DEBUG_SUBSYS=INIT,NET"
 
 teardown() {
@@ -76,7 +76,7 @@ serve_rank() {   # serve_rank HOST RANK EXTRA
   on "$h" "U=\$(nvidia-smi --query-gpu=uuid,name --format=csv,noheader | awk -F', ' '\$2==\"NVIDIA GB300\"{print \$1}'); \
     docker run -d --name $NAME --restart no --network host --gpus \"\\\"device=\$U\\\"\" --shm-size 16g \
       --ulimit memlock=-1 --ulimit stack=67108864 --cap-add IPC_LOCK \
-      --device /dev/infiniband/uverbs1 \
+      --device /dev/infiniband/uverbs0 --device /dev/infiniband/uverbs1 \
       -v $CKPT:/model:ro -v $DSPARK:/drafter:ro -v $OUT:/out --env-file $OUT/tf.env $NCCL_ENV \
       --entrypoint tensorfold $IMAGE serve /model --tp 2 --rank $r --master $MASTER --master-port 29551 \
       $DRAFT_ARGS --context $CONTEXT $extra >/dev/null && \

@@ -4,9 +4,9 @@
 # OVL=1 bind-mounts the host MOFED libibverbs/libmlx5 (~/hostrdma, Data Direct API) OVER the image's real files + provider dir.
 set -e
 # env: IMG (default: the SGLang dev image digest we measured with), DDDIR (scripts + tuner + nccl-tests, mounted at /dd),
-#      UVERBS (the rail's uverbs device), HOSTRDMA (host MOFED libs with the Data Direct symbol, see README).
+#      UVERBS (the rails' uverbs devices, space-separated), HOSTRDMA (host MOFED libs with the Data Direct symbol, see README).
 NAME=dd-bench; IMG=${IMG:-lmsysorg/sglang@sha256:352f1373e721c37d0849cf10ac9ec3c5b81dce76e148b9f271c1b59085eaba1d}
-DDDIR=${DDDIR:-$HOME/dd}; UVERBS=${UVERBS:-uverbs1}; HOSTRDMA=${HOSTRDMA:-$HOME/hostrdma}
+DDDIR=${DDDIR:-$HOME/dd}; UVERBS=${UVERBS:-uverbs0 uverbs1}; HOSTRDMA=${HOSTRDMA:-$HOME/hostrdma}
 GB300=$(nvidia-smi --query-gpu=uuid,name --format=csv,noheader | awk -F", " '/GB300/{print $1;exit}')
 case "$1" in
  down) docker rm -f $NAME >/dev/null 2>&1 || true; echo "down $(hostname)";;
@@ -21,7 +21,7 @@ case "$1" in
   SSHM=(); [ -f ~/.ssh/id_ed25519 ] && SSHM=(-v $HOME/.ssh:/hostssh:ro)
   docker rm -f $NAME >/dev/null 2>&1 || true
   docker run -d --name $NAME --network host --ipc host --ulimit memlock=-1:-1 --ulimit stack=67108864 --cap-add IPC_LOCK \
-    --gpus device=$GB300 --device /dev/infiniband/$UVERBS $([ -c /dev/infiniband/rdma_cm ] && echo --device /dev/infiniband/rdma_cm) "${OV[@]}" "${SSHM[@]}" \
+    --gpus device=$GB300 $(for u in $UVERBS; do echo --device /dev/infiniband/$u; done) $([ -c /dev/infiniband/rdma_cm ] && echo --device /dev/infiniband/rdma_cm) "${OV[@]}" "${SSHM[@]}" \
     -v $DDDIR:/dd -v $HOME/bench:/bench --entrypoint sleep "$IMG" infinity >/dev/null
   docker exec $NAME bash -c 'if [ -d /hostssh ]; then mkdir -p /root/.ssh && cp /hostssh/id_ed25519 /root/.ssh/ && chmod 700 /root/.ssh && chmod 600 /root/.ssh/id_ed25519; fi'
   echo "up $(hostname) ovl=$2 gpu=$GB300";;

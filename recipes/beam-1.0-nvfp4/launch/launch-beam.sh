@@ -8,7 +8,7 @@
 # cookbook's MNNVL env (two Stations are not one NVLink domain).
 #
 # usage: [NNODES=1|2] [TP=1|2] [OFFGB=0] [MEMF=0.85] [SPEC=0|1] [BLOCK=8] [NOGRAPH=0|1] [OPTFLAGS=".."] launch-beam.sh RANK
-#   NNODES=2 also needs RANK0_IP=<rail ip of rank 0> RANK1_IP=<rail ip of rank 1> [IFN=<rail netdev>] [HCA=<rdma dev>] [UVERBS=uverbs1]
+#   NNODES=2 also needs RANK0_IP=<rail ip of rank 0> RANK1_IP=<rail ip of rank 1> [IFN=<rail netdev>] [HCA=<rdma devs, comma-sep>] [UVERBS="uverbs0 uverbs1"]
 #   RANK 0 serves the HTTP API on PORT; RANK 1 (NNODES=2 only) serves no HTTP. Start rank 1 first, then rank 0.
 #   Measured arms (README): a1 = NNODES=1 TP=1 OFFGB=60 MEMF=0.92 NOGRAPH=1; b1 = a1 + SPEC=1;
 #                           a2 = NNODES=2 TP=2 SPEC=1 (OFFGB=0 MEMF=0.85 NOGRAPH=0, the defaults).
@@ -66,11 +66,11 @@ if [ "$NNODES" = 2 ]; then
              -e NCCL_TUNER_PLUGIN=/opt/nccl-tuner/libnccl-tuner-example.so -e NCCL_TUNER_CONFIG_FILE=/opt/nccl-tuner/$TUNER_CSV
              -e NCCL_IB_QPS_PER_CONNECTION=4 -e NCCL_IB_SPLIT_DATA_ON_QPS=1 -e NCCL_IB_TC=106)
   fi
-  IFN=${IFN:-enP1p3s0f1np1}; HCA=${HCA:-mlx5_1}   # the rail's netdev and RDMA device (port 1 of the CX-8 on our pair)
+  IFN=${IFN:-enP1p3s0f1np1}; HCA=${HCA:-mlx5_0,mlx5_1}; HCAS=$(echo "$HCA" | sed 's/[^,]*/&:1/g')   # OOB netdev; RDMA devices, comma-separated (both 400G CX-8 ports; HCA=mlx5_1 = one rail)
   NCCL=(-e NCCL_SOCKET_IFNAME=$IFN -e GLOO_SOCKET_IFNAME=$IFN -e TP_SOCKET_IFNAME=$IFN
-        -e NCCL_IB_HCA==$HCA:1 -e NCCL_IB_DISABLE=0 -e NCCL_NET_GDR_LEVEL=SYS -e NCCL_DMABUF_ENABLE=1
+        -e NCCL_IB_HCA==$HCAS -e NCCL_IB_DISABLE=0 -e NCCL_NET_GDR_LEVEL=SYS -e NCCL_DMABUF_ENABLE=1
         -e NCCL_MNNVL_ENABLE=0 -e NCCL_CUMEM_ENABLE=0 -e NCCL_NVLS_ENABLE=0 -e NCCL_DEBUG=INFO -e NCCL_DEBUG_SUBSYS=INIT,NET
-        -e SGLANG_HOST_IP="$MYIP" --device "/dev/infiniband/${UVERBS:-uverbs1}")
+        -e SGLANG_HOST_IP="$MYIP" $(for u in ${UVERBS:-uverbs0 uverbs1}; do echo --device /dev/infiniband/$u; done))
 fi
 ENVS=(-e HF_HUB_OFFLINE=1 -e TRANSFORMERS_OFFLINE=1 -e CUDA_DEVICE_ORDER=PCI_BUS_ID)
 

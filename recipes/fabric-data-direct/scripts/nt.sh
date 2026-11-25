@@ -4,7 +4,7 @@
 # env RANK0_IP RANK1_IP (rail IPs), RAIL_NET (e.g. 10.10.1.0/24), IFN, HCA, RSH_USER (ssh user on the peer).
 SET=$1; O=$2; T=$3; shift 3
 NL=/opt/sglang/lib/python3.12/site-packages/nvidia/nccl/lib
-B="-x LD_LIBRARY_PATH=$NL -x NCCL_SOCKET_IFNAME=${IFN:-enP1p3s0f1np1} -x NCCL_IB_HCA==${HCA:-mlx5_1}:1 -x NCCL_IB_DISABLE=0 -x NCCL_NET_GDR_LEVEL=SYS -x NCCL_DMABUF_ENABLE=1 -x NCCL_IB_TC=106 -x NCCL_DEBUG=${DBG:-WARN}"
+B="-x LD_LIBRARY_PATH=$NL -x NCCL_SOCKET_IFNAME=${IFN:-enP1p3s0f1np1} -x NCCL_IB_HCA==$(echo ${HCA:-mlx5_0,mlx5_1} | sed 's/[^,]*/&:1/g') -x NCCL_IB_DISABLE=0 -x NCCL_NET_GDR_LEVEL=SYS -x NCCL_DMABUF_ENABLE=1 -x NCCL_IB_TC=106 -x NCCL_DEBUG=${DBG:-WARN}"
 [ -n "$SUBSYS" ] && B="$B -x NCCL_DEBUG_SUBSYS=$SUBSYS"
 case $SET in
   E0|E2) X="";;

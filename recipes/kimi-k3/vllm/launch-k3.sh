@@ -14,7 +14,7 @@
 # The fabric block (Data Direct overlay + NCCL tuner + traffic class) is the one from recipes/fabric-data-direct; DD=0
 # skips it (untested for this model).
 #
-# usage: RANK0_IP=<rail ip of rank 0> RANK1_IP=<rail ip of rank 1> [IFN=<rail netdev>] [HCA=<rdma dev>] [UVERBS=uverbs1]
+# usage: RANK0_IP=<rail ip of rank 0> RANK1_IP=<rail ip of rank 1> [IFN=<rail netdev>] [HCA=<rdma devs, comma-sep>] [UVERBS="uverbs0 uverbs1"]
 #        [MODEL=/models/hf/vellum-ai__Kimi-K3-W3A16-g64] [SHARDS=275] [OFFGB=408] [CTX=65536] [SEQS=16] [MBT=8192]
 #        [UTIL=0.95] [PORT=8010] [HOOKDIR=<dir>] [LOGDIR=..] [EXTRA_ARGS=".."] launch-k3.sh RANK
 #   Start RANK 1 on the second Station first, then RANK 0. Ready in about 17 minutes from a warm page cache.
@@ -71,9 +71,9 @@ if [ "$DD" = 1 ]; then
 fi
 
 # --- engine env / args -----------------------------------------------------------------------------------------------------
-IFN=${IFN:-enP1p3s0f1np1}; HCA=${HCA:-mlx5_1}   # the rail's netdev and RDMA device (port 1 of the CX-8 on our pair)
+IFN=${IFN:-enP1p3s0f1np1}; HCA=${HCA:-mlx5_0,mlx5_1}; HCAS=$(echo "$HCA" | sed 's/[^,]*/&:1/g')   # OOB netdev; RDMA devices, comma-separated (both 400G CX-8 ports; HCA=mlx5_1 = one rail)
 NCCL=(-e NCCL_SOCKET_IFNAME=$IFN -e GLOO_SOCKET_IFNAME=$IFN -e TP_SOCKET_IFNAME=$IFN
-      -e NCCL_IB_HCA==$HCA:1 -e NCCL_IB_DISABLE=0 -e NCCL_NET_GDR_LEVEL=SYS -e NCCL_DMABUF_ENABLE=1
+      -e NCCL_IB_HCA==$HCAS -e NCCL_IB_DISABLE=0 -e NCCL_NET_GDR_LEVEL=SYS -e NCCL_DMABUF_ENABLE=1
       -e NCCL_MNNVL_ENABLE=0 -e NCCL_CUMEM_ENABLE=0 -e NCCL_DEBUG=INFO -e NCCL_DEBUG_SUBSYS=INIT,NET)
 ENVS=(-e VLLM_HOST_IP="$MYIP" -e VLLM_ENGINE_READY_TIMEOUT_S=5400 -e VLLM_LOGGING_LEVEL=INFO
       -e VLLM_ALLREDUCE_USE_SYMM_MEM=0 -e VLLM_ALLREDUCE_USE_FLASHINFER=0 -e VLLM_USE_NCCL_SYMM_MEM=0
@@ -101,7 +101,7 @@ MOUNTS=(-v "$MODEL":/model:ro -v "$HOOKDIR":/opt/k3hook:ro -v "$CACHE/vllm":/roo
 
 docker rm -f "$N" 2>/dev/null || true
 docker run -d --name "$N" --device "nvidia.com/gpu=$GB300" --ipc host --network host --ulimit memlock=-1 --ulimit stack=67108864 \
-  --cap-add IPC_LOCK --cap-add SYS_NICE --device "/dev/infiniband/${UVERBS:-uverbs1}" "${DDARGS[@]}" \
+  --cap-add IPC_LOCK --cap-add SYS_NICE $(for u in ${UVERBS:-uverbs0 uverbs1}; do echo --device /dev/infiniband/$u; done) "${DDARGS[@]}" \
   "${MOUNTS[@]}" "${ENVS[@]}" "${NCCL[@]}" --entrypoint vllm "$IMAGE" "${ARGS[@]}" >/dev/null
 nohup docker logs -f "$N" > "$LOGDIR/server-rank$RANK.log" 2>&1 &
 docker inspect --format '{{.Image}}' "$N" > "$LOGDIR/image-digest-rank$RANK.txt"
