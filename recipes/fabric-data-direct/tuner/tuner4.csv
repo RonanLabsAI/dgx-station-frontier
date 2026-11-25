@@ -1,0 +1,10 @@
+allreduce,0,32768,ring,ll,1,2,2,-1,-1
+allreduce,32769,131072,ring,ll,2,2,2,-1,-1
+allreduce,131073,262144,ring,ll128,2,2,2,-1,-1
+allreduce,262145,2097152,ring,ll128,4,2,2,-1,-1
+allreduce,2097153,8388608,ring,ll128,8,2,2,-1,-1
+allreduce,8388609,4294967295,ring,simple,8,2,2,-1,-1
+allgather,0,131072,ring,ll,2,2,2,-1,-1
+allgather,131073,1048576,ring,ll128,4,2,2,-1,-1
+reducescatter,0,131072,ring,ll,2,2,2,-1,-1
+reducescatter,131073,1048576,ring,ll128,4,2,2,-1,-1

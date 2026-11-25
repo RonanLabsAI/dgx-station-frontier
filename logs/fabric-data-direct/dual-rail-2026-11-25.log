@@ -1,0 +1,162 @@
+# Two 400G rails between the Stations: link, NCCL sweep and fused GLM-5.3 A/B. 2026-11-25 PT.
+# Excerpt: result lines selected verbatim from the raw files named below; no other edits, except that the two E0 `1 MiB` rows are dropped (an NCCL INFO line with a hostname was interleaved). nccl-tests rows: size, count,
+# type, redop, root, then out-of-place time/algbw/busbw/#wrong, in-place time/algbw/busbw/#wrong. NCCL 2.30.7.
+# Every nccl-tests run: NCCL_IB_TC=106, NCCL_NET_GDR_LEVEL=SYS, NCCL_DMABUF_ENABLE=1, Data Direct overlay. HCA = one rail
+# (mlx5_1:1) or two rails (mlx5_0:1,mlx5_1:1). Sweeps add NCCL_IB_QPS_PER_CONNECTION=4 NCCL_IB_SPLIT_DATA_ON_QPS=1.
+
+## RDMA write, GPU memory, Data Direct (perftest ib_write_bw, 4 QPs, 4 MiB, 10 s): mlx5_1 alone 392.16 Gb/s;
+## both rails at once 392.16 + 392.14 Gb/s. Host memory: one port 228.58 Gb/s; both at once 113.99 + 115.15 Gb/s.
+
+--- E0_all_reduce_perf_r1.log (one rail, stock NCCL)
+     4194304       1048576     float     sum      -1   148.13   28.32   28.32       0   147.21   28.49   28.49       0
+    16777216       4194304     float     sum      -1   411.12   40.81   40.81       0   410.71   40.85   40.85       0
+    67108864      16777216     float     sum      -1  1600.37   41.93   41.93       0  1599.47   41.96   41.96       0
+   268435456      67108864     float     sum      -1  6369.79   42.14   42.14       0  6355.55   42.24   42.24       0
+  1073741824     268435456     float     sum      -1  25362.0   42.34   42.34       0  25373.6   42.32   42.32       0
+# Avg bus bandwidth    : 35.6494 
+--- E0_all_reduce_perf_r2.log (two rails, stock NCCL)
+     4194304       1048576     float     sum      -1   114.92   36.50   36.50       0   110.67   37.90   37.90       0
+    16777216       4194304     float     sum      -1   242.22   69.26   69.26       0   240.87   69.65   69.65       0
+    67108864      16777216     float     sum      -1   842.58   79.65   79.65       0   826.03   81.24   81.24       0
+   268435456      67108864     float     sum      -1  3065.96   87.55   87.55       0  3062.07   87.66   87.66       0
+  1073741824     268435456     float     sum      -1  11783.3   91.12   91.12       0  11626.5   92.35   92.35       0
+# Avg bus bandwidth    : 62.0034 
+--- sweep2/X_all_reduce_perf_mid_auto_a.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1  args=-b 1M -e 8M -f 2 -g 1 -n 200 -w 20
+     1048576        262144     float     sum      -1   268.29    3.91    3.91       0   254.57    4.12    4.12       0
+     2097152        524288     float     sum      -1    76.94   27.26   27.26       0    71.62   29.28   29.28       0
+     4194304       1048576     float     sum      -1    89.07   47.09   47.09       0    88.77   47.25   47.25       0
+     8388608       2097152     float     sum      -1   155.22   54.04   54.04       0   155.81   53.84   53.84       0
+--- sweep2/X_all_reduce_perf_mid_LL128_2_a.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 -x NCCL_ALGO=Ring -x NCCL_PROTO=LL128 -x NCCL_MIN_NCHANNELS=2 -x NCCL_MAX_NCHANNELS=2 args=-b 1M -e 8M -f 2 -g 1 -n 200 -w 20
+     1048576        262144     float     sum      -1    62.68   16.73   16.73       0    63.13   16.61   16.61       0
+     2097152        524288     float     sum      -1    99.52   21.07   21.07       0    97.46   21.52   21.52       0
+     4194304       1048576     float     sum      -1   176.65   23.74   23.74       0   176.83   23.72   23.72       0
+     8388608       2097152     float     sum      -1   340.19   24.66   24.66       0   334.10   25.11   25.11       0
+--- sweep2/X_all_reduce_perf_mid_LL128_4_a.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 -x NCCL_ALGO=Ring -x NCCL_PROTO=LL128 -x NCCL_MIN_NCHANNELS=4 -x NCCL_MAX_NCHANNELS=4 args=-b 1M -e 8M -f 2 -g 1 -n 200 -w 20
+     1048576        262144     float     sum      -1    52.06   20.14   20.14       0    52.07   20.14   20.14       0
+     2097152        524288     float     sum      -1    70.96   29.56   29.56       0    70.05   29.94   29.94       0
+     4194304       1048576     float     sum      -1   117.60   35.67   35.67       0   117.25   35.77   35.77       0
+     8388608       2097152     float     sum      -1   206.49   40.63   40.63       0   207.96   40.34   40.34       0
+--- sweep2/X_all_reduce_perf_mid_LL128_6_a.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 -x NCCL_ALGO=Ring -x NCCL_PROTO=LL128 -x NCCL_MIN_NCHANNELS=6 -x NCCL_MAX_NCHANNELS=6 args=-b 1M -e 8M -f 2 -g 1 -n 200 -w 20
+     1048576        262144     float     sum      -1    74.58   14.06   14.06       0    59.72   17.56   17.56       0
+     2097152        524288     float     sum      -1    69.05   30.37   30.37       0    68.29   30.71   30.71       0
+     4194304       1048576     float     sum      -1    95.44   43.95   43.95       0    95.23   44.04   44.04       0
+     8388608       2097152     float     sum      -1   177.12   47.36   47.36       0   177.48   47.27   47.27       0
+--- sweep2/X_all_reduce_perf_mid_LL128_8_a.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 -x NCCL_ALGO=Ring -x NCCL_PROTO=LL128 -x NCCL_MIN_NCHANNELS=8 -x NCCL_MAX_NCHANNELS=8 args=-b 1M -e 8M -f 2 -g 1 -n 200 -w 20
+     1048576        262144     float     sum      -1    89.87   11.67   11.67       0    74.21   14.13   14.13       0
+     2097152        524288     float     sum      -1    78.08   26.86   26.86       0    78.65   26.67   26.67       0
+     4194304       1048576     float     sum      -1    90.95   46.12   46.12       0    88.23   47.54   47.54       0
+     8388608       2097152     float     sum      -1   155.27   54.03   54.03       0   155.54   53.93   53.93       0
+--- sweep2/X_all_reduce_perf_big_auto.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1  args=-b 8M -e 512M -f 2 -g 1 -n 200 -w 20
+     8388608       2097152     float     sum      -1   180.05   46.59   46.59       0   165.70   50.62   50.62       0
+    16777216       4194304     float     sum      -1   250.35   67.02   67.02       0   249.28   67.30   67.30       0
+    33554432       8388608     float     sum      -1   428.36   78.33   78.33       0   427.79   78.44   78.44       0
+    67108864      16777216     float     sum      -1   807.86   83.07   83.07       0   802.87   83.59   83.59       0
+   134217728      33554432     float     sum      -1  1556.12   86.25   86.25       0  1554.71   86.33   86.33       0
+   268435456      67108864     float     sum      -1  3017.88   88.95   88.95       0  3020.98   88.86   88.86       0
+   536870912     134217728     float     sum      -1  5860.60   91.61   91.61       0  5905.18   90.92   90.92       0
+--- sweep2/X_all_reduce_perf_big_LL128_8.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 -x NCCL_ALGO=Ring -x NCCL_PROTO=LL128 -x NCCL_MIN_NCHANNELS=8 -x NCCL_MAX_NCHANNELS=8 args=-b 8M -e 512M -f 2 -g 1 -n 200 -w 20
+     8388608       2097152     float     sum      -1   180.23   46.54   46.54       0   165.54   50.68   50.68       0
+    16777216       4194304     float     sum      -1   285.44   58.78   58.78       0   285.50   58.76   58.76       0
+    33554432       8388608     float     sum      -1   523.99   64.04   64.04       0   523.33   64.12   64.12       0
+    67108864      16777216     float     sum      -1   985.56   68.09   68.09       0   985.78   68.08   68.08       0
+   134217728      33554432     float     sum      -1  1811.13   74.11   74.11       0  1813.58   74.01   74.01       0
+   268435456      67108864     float     sum      -1  3440.19   78.03   78.03       0  3449.00   77.83   77.83       0
+   536870912     134217728     float     sum      -1  6664.75   80.55   80.55       0  6673.41   80.45   80.45       0
+--- sweep2/X_all_reduce_perf_big_Simple_16.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 -x NCCL_ALGO=Ring -x NCCL_PROTO=Simple -x NCCL_MIN_NCHANNELS=16 -x NCCL_MAX_NCHANNELS=16 args=-b 8M -e 512M -f 2 -g 1 -n 200 -w 20
+     8388608       2097152     float     sum      -1   410.94   20.41   20.41       0   379.05   22.13   22.13       0
+    16777216       4194304     float     sum      -1   355.91   47.14   47.14       0   344.99   48.63   48.63       0
+    33554432       8388608     float     sum      -1   421.52   79.60   79.60       0   423.10   79.31   79.31       0
+    67108864      16777216     float     sum      -1   853.30   78.65   78.65       0   841.13   79.78   79.78       0
+   134217728      33554432     float     sum      -1  1650.31   81.33   81.33       0  1630.09   82.34   82.34       0
+   268435456      67108864     float     sum      -1  3226.00   83.21   83.21       0  3192.15   84.09   84.09       0
+   536870912     134217728     float     sum      -1  6406.08   83.81   83.81       0  6353.85   84.50   84.50       0
+--- sweep2/X_all_reduce_perf_big_Simple_8.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 -x NCCL_ALGO=Ring -x NCCL_PROTO=Simple -x NCCL_MIN_NCHANNELS=8 -x NCCL_MAX_NCHANNELS=8 args=-b 8M -e 512M -f 2 -g 1 -n 200 -w 20
+     8388608       2097152     float     sum      -1   200.31   41.88   41.88       0   182.10   46.07   46.07       0
+    16777216       4194304     float     sum      -1   248.83   67.42   67.42       0   248.03   67.64   67.64       0
+    33554432       8388608     float     sum      -1   427.81   78.43   78.43       0   427.82   78.43   78.43       0
+    67108864      16777216     float     sum      -1   809.53   82.90   82.90       0   806.42   83.22   83.22       0
+   134217728      33554432     float     sum      -1  1559.00   86.09   86.09       0  1559.14   86.08   86.08       0
+   268435456      67108864     float     sum      -1  3006.69   89.28   89.28       0  3017.90   88.95   88.95       0
+   536870912     134217728     float     sum      -1  5846.02   91.84   91.84       0  5897.38   91.04   91.04       0
+--- sweep3/X_all_reduce_perf_auto.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1  args=-b 8K -e 512K -f 2 -g 1 -n 500 -w 50
+        8192          2048     float     sum      -1    18.80    0.44    0.44       0    18.80    0.44    0.44       0
+       16384          4096     float     sum      -1    22.34    0.73    0.73       0    22.41    0.73    0.73       0
+       32768          8192     float     sum      -1    38.80    0.84    0.84       0    32.46    1.01    1.01       0
+       65536         16384     float     sum      -1    87.53    0.75    0.75       0    72.99    0.90    0.90       0
+      131072         32768     float     sum      -1    80.98    1.62    1.62       0    80.23    1.63    1.63       0
+      262144         65536     float     sum      -1    99.58    2.63    2.63       0    99.04    2.65    2.65       0
+      524288        131072     float     sum      -1   133.78    3.92    3.92       0   133.14    3.94    3.94       0
+--- sweep3/X_all_reduce_perf_LL128_2.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 -x NCCL_ALGO=Ring -x NCCL_PROTO=LL128 -x NCCL_MIN_NCHANNELS=2 -x NCCL_MAX_NCHANNELS=2 args=-b 8K -e 512K -f 2 -g 1 -n 500 -w 50
+        8192          2048     float     sum      -1    27.66    0.30    0.30       0    27.62    0.30    0.30       0
+       16384          4096     float     sum      -1    27.85    0.59    0.59       0    27.84    0.59    0.59       0
+       32768          8192     float     sum      -1    31.40    1.04    1.04       0    31.40    1.04    1.04       0
+       65536         16384     float     sum      -1    31.37    2.09    2.09       0    31.76    2.06    2.06       0
+      131072         32768     float     sum      -1    35.00    3.74    3.74       0    34.85    3.76    3.76       0
+      262144         65536     float     sum      -1    37.55    6.98    6.98       0    37.44    7.00    7.00       0
+      524288        131072     float     sum      -1    45.88   11.43   11.43       0    45.90   11.42   11.42       0
+--- sweep3/X_all_reduce_perf_LL128_4.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 -x NCCL_ALGO=Ring -x NCCL_PROTO=LL128 -x NCCL_MIN_NCHANNELS=4 -x NCCL_MAX_NCHANNELS=4 args=-b 8K -e 512K -f 2 -g 1 -n 500 -w 50
+        8192          2048     float     sum      -1    27.68    0.30    0.30       0    27.65    0.30    0.30       0
+       16384          4096     float     sum      -1    27.87    0.59    0.59       0    27.91    0.59    0.59       0
+       32768          8192     float     sum      -1    31.51    1.04    1.04       0    31.20    1.05    1.05       0
+       65536         16384     float     sum      -1    43.43    1.51    1.51       0    38.18    1.72    1.72       0
+      131072         32768     float     sum      -1    38.06    3.44    3.44       0    38.19    3.43    3.43       0
+      262144         65536     float     sum      -1    40.91    6.41    6.41       0    40.65    6.45    6.45       0
+      524288        131072     float     sum      -1    43.72   11.99   11.99       0    43.56   12.04   12.04       0
+--- sweep3/X_all_reduce_perf_LL_1.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 -x NCCL_ALGO=Ring -x NCCL_PROTO=LL -x NCCL_MIN_NCHANNELS=1 -x NCCL_MAX_NCHANNELS=1 args=-b 8K -e 512K -f 2 -g 1 -n 500 -w 50
+        8192          2048     float     sum      -1    18.68    0.44    0.44       0    18.66    0.44    0.44       0
+       16384          4096     float     sum      -1    19.07    0.86    0.86       0    19.16    0.86    0.86       0
+       32768          8192     float     sum      -1    20.60    1.59    1.59       0    20.78    1.58    1.58       0
+       65536         16384     float     sum      -1    27.50    2.38    2.38       0    28.07    2.33    2.33       0
+      131072         32768     float     sum      -1    47.42    2.76    2.76       0    48.09    2.73    2.73       0
+      262144         65536     float     sum      -1    86.37    3.04    3.04       0    88.14    2.97    2.97       0
+      524288        131072     float     sum      -1   167.51    3.13    3.13       0   169.68    3.09    3.09       0
+--- sweep3/X_all_reduce_perf_LL_2.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 -x NCCL_ALGO=Ring -x NCCL_PROTO=LL -x NCCL_MIN_NCHANNELS=2 -x NCCL_MAX_NCHANNELS=2 args=-b 8K -e 512K -f 2 -g 1 -n 500 -w 50
+        8192          2048     float     sum      -1    19.05    0.43    0.43       0    19.04    0.43    0.43       0
+       16384          4096     float     sum      -1    22.72    0.72    0.72       0    22.75    0.72    0.72       0
+       32768          8192     float     sum      -1    23.41    1.40    1.40       0    23.70    1.38    1.38       0
+       65536         16384     float     sum      -1    25.48    2.57    2.57       0    25.37    2.58    2.58       0
+      131072         32768     float     sum      -1    33.52    3.91    3.91       0    33.62    3.90    3.90       0
+      262144         65536     float     sum      -1    54.44    4.82    4.82       0    55.22    4.75    4.75       0
+      524288        131072     float     sum      -1    96.28    5.45    5.45       0    97.78    5.36    5.36       0
+--- sweep3/X_all_reduce_perf_LL_4.log (two rails) SET=X -x NCCL_IB_QPS_PER_CONNECTION=4 -x NCCL_IB_SPLIT_DATA_ON_QPS=1 -x NCCL_ALGO=Ring -x NCCL_PROTO=LL -x NCCL_MIN_NCHANNELS=4 -x NCCL_MAX_NCHANNELS=4 args=-b 8K -e 512K -f 2 -g 1 -n 500 -w 50
+        8192          2048     float     sum      -1    18.89    0.43    0.43       0    18.89    0.43    0.43       0
+       16384          4096     float     sum      -1    22.77    0.72    0.72       0    22.86    0.72    0.72       0
+       32768          8192     float     sum      -1    39.54    0.83    0.83       0    34.24    0.96    0.96       0
+       65536         16384     float     sum      -1    35.66    1.84    1.84       0    34.92    1.88    1.88       0
+      131072         32768     float     sum      -1    43.81    2.99    2.99       0    44.08    2.97    2.97       0
+      262144         65536     float     sum      -1    63.85    4.11    4.11       0    64.07    4.09    4.09       0
+      524288        131072     float     sum      -1   119.56    4.38    4.38       0   120.36    4.36    4.36       0
+--- fused/prefill-r1.log
+[r1] PREFILL 8192 median 9,019 tok/s
+[r1] PREFILL 65536 median 10,882 tok/s
+[r1] PREFILL-CONC 65536x4: 271285 tok in 24.84s -> 10,923 tok/s agg
+[r1] PREFILL-CONC 8192x16: 136447 tok in 11.70s -> 11,663 tok/s agg
+--- fused/decode-r1.log
+[r1] conc= 1:    110.0 agg tok/s  109.98 per-stream (reps 110/122/109)
+[r1] conc= 8:    478.1 agg tok/s   59.76 per-stream (reps 488/478/476)
+[r1] conc=16:    713.4 agg tok/s   44.59 per-stream (reps 728/706/713)
+[r1] conc=32:   1066.9 agg tok/s   33.34 per-stream (reps 1067/1052/1100)
+--- fused/prefill-r2.log
+[r2] PREFILL 8192 median 11,328 tok/s
+[r2] PREFILL 65536 median 14,504 tok/s
+[r2] PREFILL-CONC 65536x4: 271701 tok in 18.52s -> 14,673 tok/s agg
+[r2] PREFILL-CONC 8192x16: 136468 tok in 8.56s -> 15,944 tok/s agg
+--- fused/decode-r2.log
+[r2] conc= 1:    114.4 agg tok/s  114.37 per-stream (reps 119/106/114)
+[r2] conc= 8:    465.1 agg tok/s   58.13 per-stream (reps 456/465/469)
+[r2] conc=16:    764.7 agg tok/s   47.79 per-stream (reps 765/763/780)
+[r2] conc=32:    986.8 agg tok/s   30.84 per-stream (reps 944/1000/987)
+--- fused/prefill-r2t4.log
+[r2t4] PREFILL 8192 median 13,040 tok/s
+[r2t4] PREFILL 65536 median 14,478 tok/s
+[r2t4] PREFILL-CONC 65536x4: 271480 tok in 18.55s -> 14,636 tok/s agg
+[r2t4] PREFILL-CONC 8192x16: 136421 tok in 8.64s -> 15,785 tok/s agg
+--- fused/decode-r2t4.log
+[r2t4] conc= 1:    112.6 agg tok/s  112.57 per-stream (reps 113/114/111)
+[r2t4] conc= 8:    443.2 agg tok/s   55.40 per-stream (reps 443/452/427)
+[r2t4] conc=16:    763.4 agg tok/s   47.71 per-stream (reps 757/781/763)
+[r2t4] conc=32:   1187.3 agg tok/s   37.10 per-stream (reps 1100/1187/1191)
+--- fused/decode-r2t4-rerun.log
+[r2t4-rerun] conc= 1:    109.5 agg tok/s  109.50 per-stream (reps 106/102/114/112/110)
+[r2t4-rerun] conc= 8:    449.7 agg tok/s   56.21 per-stream (reps 445/445/450/468/467)
+[r2t4-rerun] conc=32:   1196.9 agg tok/s   37.40 per-stream (reps 1194/1197/1197/1163/1203)

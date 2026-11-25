@@ -10,10 +10,10 @@
 #     PFC-protected class on our link; without a TC, RoCE goes out on priority 0, which is lossy).
 # Usage:   IMAGE=<image> source dd-overlay.sh ; docker run ... "${DDARGS[@]}" ... "$IMAGE" ...
 # Env:     DD=1 (0 = no-op, reproduces the stock launch), HOSTRDMA (default ~/hostrdma), TUNERDIR (default ~/nccl-tuner,
-#          must hold libnccl-tuner-example.so and the CSV), TUNER_CSV (default tuner3.csv)
+#          must hold libnccl-tuner-example.so and the CSV), TUNER_CSV (default tuner4.csv on two rails, tuner3.csv when HCA names one device)
 # Check:   every rank's NCCL INFO log must show "NET/IB: Data Direct DMA Interface is detected for device <hca>" and no
 #          "dlvsym failed" lines (needs NCCL_DEBUG=INFO, NCCL_DEBUG_SUBSYS=INIT,NET).
-DD=${DD:-1}; DDARGS=(); TUNER_CSV=${TUNER_CSV:-tuner3.csv}
+DD=${DD:-1}; DDARGS=(); TUNER_CSV=${TUNER_CSV:-$(case "${HCA:-mlx5_0,mlx5_1}" in *,*) echo tuner4.csv;; *) echo tuner3.csv;; esac)}
 HOSTRDMA=${HOSTRDMA:-$HOME/hostrdma}; TUNERDIR=${TUNERDIR:-$HOME/nccl-tuner}
 if [ "$DD" = 1 ]; then
   : "${IMAGE:?set IMAGE before sourcing dd-overlay.sh}"

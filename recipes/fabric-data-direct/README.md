@@ -1,7 +1,8 @@
 # Fabric: Data Direct in containers, a per-size NCCL tuner, and the small-message floor
 
-Two DGX Stations, one 400G DAC between their ConnectX-8 ports (RoCEv2, no switch). This recipe is what we add to every
-two-Station launcher, and what we measured about the link.
+Two DGX Stations, two 400G DACs between their ConnectX-8 ports (RoCEv2, no switch). Until 2026-11-25 our launchers used
+only one of the two rails; the [two-rail section](#two-rails-2026-11-25) has what changed. This recipe is what we add to
+every two-Station launcher, and what we measured about the link.
 
 **The short version:**
 
@@ -9,12 +10,15 @@ two-Station launcher, and what we measured about the link.
    NCCL logs `dlvsym failed` and falls back to a slower host path. Mounting the host's MOFED `libibverbs` and
    `libmlx5` over the image's files fixes it.
 2. **Add a per-size tuner.** Data Direct alone helps bandwidth but NCCL then picks a poor protocol for mid-size
-   messages and loses decode throughput. `tuner3.csv` fixes that.
+   messages and loses decode throughput. `tuner3.csv` fixes that on one rail; on two rails use `tuner4.csv`.
 3. **Use traffic class 106.** On this link only priority 3 is lossless (PFC); `NCCL_IB_TC=106` puts RoCE there.
    Without it RoCE goes out on priority 0, which has no PFC.
 4. **Small messages are latency-bound, and NCCL settings cannot move it.** A graph-captured all-reduce of a decode-sized
-   message costs about 31-33 µs on the engine path in every setting we tried, 11.3-13.1 µs above nccl-tests. A second
-   400G rail would add bandwidth, not lower this floor; single-user decode across Stations needs a different collective.
+   message costs about 31-33 µs on the engine path in every setting we tried, 11.3-13.1 µs above nccl-tests. The second
+   400G rail adds bandwidth but does not lower this floor (C1 decode is unchanged on two rails); single-user decode
+   across Stations needs a different collective.
+5. **Use both rails.** Listing both ports in `NCCL_IB_HCA` doubles NCCL bandwidth (1 GiB all-reduce 42.3 to 91.1 GB/s
+   bus bandwidth), makes fused prefill about a third faster, and with `tuner4.csv` makes C32 decode 11% faster.
 
 Credit: catid published the Data Direct container overlay first ([dgx_station_benchmarks](https://github.com/catid/dgx_station_benchmarks)).
 That repository has no licence, so nothing is copied from it; `scripts/dd-overlay.sh` and `scripts/ctr.sh` are ours.
@@ -101,11 +105,77 @@ comparable with the `flash_bench` rows above (short prose prompt, 256 output tok
 | Decode tok/s (aggregate) | 84.8 | 422.6 | 588.0 | 977.1 | [log](../../logs/fabric-data-direct/fused-glm-clean-rerun.log) |
 <!-- /results -->
 
+## Two rails (2026-11-25)
+
+Each Station's ConnectX-8 has two 400G ports, and both were cabled from the start. Every launcher here pinned NCCL to
+`mlx5_1` (`NCCL_IB_HCA==mlx5_1:1`, `uverbs1` only), so the second rail carried no NCCL traffic. Both ports have the same
+setup (MTU 9000, PFC on priority 3, RoCEv2 GID 3), so the fix is to list both devices. NCCL then reports
+`NET/IB : Using [0]mlx5_0_dma:1/RoCE [1]mlx5_1_dma:1/RoCE` on every rank, with Data Direct detected on each.
+
+<!-- results -->
+| Link measurement | One rail | Two rails | Receipt |
+|---|---|---|---|
+| RDMA write, GPU memory, Data Direct, Gb/s | 392.16 | 392.16 + 392.14 = 784.3 | [log](../../logs/fabric-data-direct/dual-rail-2026-11-25.log) |
+| nccl-tests all_reduce `1 GiB` bus bandwidth, stock NCCL, GB/s | 42.34 | 91.12 (729 Gb/s, 91% of 800) | [log](../../logs/fabric-data-direct/dual-rail-2026-11-25.log) |
+| nccl-tests all_reduce `16 MiB` bus bandwidth, stock NCCL, GB/s | 40.81 | 69.26 | [log](../../logs/fabric-data-direct/dual-rail-2026-11-25.log) |
+<!-- /results -->
+
+Host-memory RDMA tops out at about 230 Gb/s total, one port or two, so a host-memory perftest understates the link. Test
+with GPU memory (`--use_cuda_bus_id=<GB300> --use_cuda_dmabuf --use_data_direct`).
+
+**tuner3 is wrong for two rails.** Above `1 MB` it forces Simple with 8 channels. On two rails that costs about
+`176 µs` at `2 MB`, while LL128 with 4 channels takes `70 µs`, and `2 MB` is the size of each decode step's all-reduce at
+C32 (with 5 speculative tokens). We swept protocol and channel count from `8 KB` to `512 MB` on two rails, with repeat
+runs, and took the fastest setting at each size ([log](../../logs/fabric-data-direct/dual-rail-2026-11-25.log)):
+
+| All-reduce size | [`tuner4.csv`](tuner/tuner4.csv) (two rails) | `tuner3.csv` (one rail) |
+|---|---|---|
+| up to `32 KB` | LL, 1 channel | LL, 2 |
+| `32-128 KB` | LL, 2 | LL, 2 |
+| `128-256 KB` | LL128, 2 | LL128, 4 |
+| `256 KB-2 MB` | LL128, 4 | LL128, 4 up to `1 MB`, then Simple, 8 |
+| `2-8 MB` | LL128, 8 | Simple, 8 |
+| above `8 MB` | Simple, 8 | Simple, 8 |
+
+All-gather and reduce-scatter rows are the same as tuner3.
+
+<!-- results -->
+| End to end: GLM-5.3 NVFP4, SGLang TP2 + EP2, tok/s | One rail, tuner3 | Two rails, tuner3 | Two rails, tuner4 | Receipt |
+|---|---|---|---|---|
+| Prefill, `~8K`-token prompt | 9,019 | 11,328 | 13,040 | [log](../../logs/fabric-data-direct/dual-rail-2026-11-25.log) |
+| Prefill, `~68K`-token prompt | 10,882 | 14,504 | 14,478 | [log](../../logs/fabric-data-direct/dual-rail-2026-11-25.log) |
+| Prefill, `~68K` x4 concurrent | 10,923 | 14,673 | 14,636 | [log](../../logs/fabric-data-direct/dual-rail-2026-11-25.log) |
+| Prefill, `~8K` x16 concurrent | 11,663 | 15,944 | 15,785 | [log](../../logs/fabric-data-direct/dual-rail-2026-11-25.log) |
+| Decode C1 | 110.0 | 114.4 | 112.6 / 109.5 | [log](../../logs/fabric-data-direct/dual-rail-2026-11-25.log) |
+| Decode C8 aggregate | 478.1 | 465.1 | 443.2 / 449.7 | [log](../../logs/fabric-data-direct/dual-rail-2026-11-25.log) |
+| Decode C16 aggregate | 713.4 | 764.7 | 763.4 | [log](../../logs/fabric-data-direct/dual-rail-2026-11-25.log) |
+| Decode C32 aggregate | 1,066.9 | 986.8 | **1,187.3 / 1,196.9** | [log](../../logs/fabric-data-direct/dual-rail-2026-11-25.log) |
+<!-- /results -->
+
+Same afternoon, a fresh load per arm, both with Data Direct, 4 QPs and `TC 106`. Two values = the first pass and a rerun
+on the same load (5 repetitions). Decode uses [`scripts/decode_bench.py`](scripts/decode_bench.py): a prose prompt with
+a nonce, 256 output tokens with `ignore_eos`, thinking off, median of three repetitions. It is not the `flash_bench`
+harness of the October tables, so compare these decode numbers only with each other.
+
+What these say:
+
+- **Two rails with tuner4 win almost everywhere.** Prefill is 26-37% faster and C32 decode 11% faster than one rail.
+- **C8 decode is 3-6% slower on two rails**, consistent across repetitions. tuner3 and tuner4 choose the same
+  setting at C8's message sizes, so the tuner cannot recover it; splitting mid-size messages over two NICs likely costs
+  a little.
+- **tuner3 + 4 QPs ran fine in the engine on two rails.** In nccl-tests the external tuner plugin hung under OpenMPI
+  (`tcp_peer_recv_connect_ack: invalid header type`) on one rail as well as two; the sweeps above force the protocol
+  with `NCCL_PROTO` / `NCCL_*_NCHANNELS` instead of loading the plugin.
+
+The launchers now default to two rails: `HCA=mlx5_0,mlx5_1` and `UVERBS="uverbs0 uverbs1"`, and `dd-overlay.sh` and
+the launchers pick `tuner4.csv` when `HCA` lists two devices. `HCA=mlx5_1 UVERBS=uverbs1` gives the one-rail launch
+with `tuner3.csv`.
+
 ## Hardware and software
 
 | Item | Value |
 |---|---|
-| Link | one 400G DAC, ConnectX-8 port 1 on each Station (`mlx5_1`), RoCEv2, GID 3, firmware 40.47.1088, no switch |
+| Link | two 400G DACs, ConnectX-8 ports 0 and 1 on each Station (`mlx5_0`, `mlx5_1`), RoCEv2, GID 3, firmware 40.47.1088, no switch. Before 2026-11-25 only `mlx5_1` was used; the October tables are one-rail numbers |
 | QoS (as shipped) | trust DSCP; PFC on priority 3 only; DSCP 24-31 map to priority 3. TC 106 = DSCP 26 |
 | Image | `lmsysorg/sglang@sha256:352f1373e721c37d0849cf10ac9ec3c5b81dce76e148b9f271c1b59085eaba1d` (CUDA 13.0.88, torch 2.13.0+cu130); NCCL 2.30.7 is what loads at run time (`torch.cuda.nccl.version()` reports the compile-time 2.29.7) |
 | Tools | nccl-tests @`afd59ab` built in the image with MPI against NCCL 2.30.7 for `sm_103`; perftest 25.10 on the hosts |
@@ -120,20 +190,22 @@ comparable with the `flash_bench` rows above (short prose prompt, 256 output tok
    nm -D ~/hostrdma/libmlx5.so.1 | grep mlx5dv_get_data_direct_sysfs_path
    ```
 2. **Build the tuner plugin** from the NCCL source (the example tuner under the NCCL tree's tuner-plugin examples) and
-   put `libnccl-tuner-example.so` plus [`tuner/tuner3.csv`](tuner/tuner3.csv) in `~/nccl-tuner/`.
+   put `libnccl-tuner-example.so` plus [`tuner/tuner4.csv`](tuner/tuner4.csv) (two rails) and
+   [`tuner/tuner3.csv`](tuner/tuner3.csv) (one rail) in `~/nccl-tuner/`.
    CSV columns: collective, min bytes, max bytes, algorithm, protocol, channels, nodes, ranks, pipeline ops, registered
    buffers (`-1` = any).
 3. **Source the overlay in your launcher** and add the arguments to `docker run`:
    ```bash
    IMAGE=<engine image> source scripts/dd-overlay.sh        # fills DDARGS; DD=0 makes it a no-op
-   docker run ... --device /dev/infiniband/uverbs1 "${DDARGS[@]}" ... "$IMAGE" ...
+   docker run ... --device /dev/infiniband/uverbs0 --device /dev/infiniband/uverbs1 "${DDARGS[@]}" ... "$IMAGE" ...
    ```
-   Keep your rail settings too: `NCCL_SOCKET_IFNAME`, `NCCL_IB_HCA==mlx5_1:1`, `NCCL_NET_GDR_LEVEL=SYS`,
+   Keep your rail settings too: `NCCL_SOCKET_IFNAME` (one netdev; it carries only bootstrap traffic),
+   `NCCL_IB_HCA==mlx5_0:1,mlx5_1:1`, `NCCL_NET_GDR_LEVEL=SYS`,
    `NCCL_DMABUF_ENABLE=1`. [`../dsv4-pro-two-stations/launch/launch-dsv4pro.sh`](../dsv4-pro-two-stations/launch/launch-dsv4pro.sh)
    is a complete example.
 4. **Check every rank's log** (`NCCL_DEBUG=INFO`, `NCCL_DEBUG_SUBSYS=INIT,NET`) for
-   `NET/IB: Data Direct DMA Interface is detected for device mlx5_1`, `Successfully loaded external tuner plugin`, and
-   no `dlvsym failed` lines.
+   `NET/IB: Data Direct DMA Interface is detected for device` (once per rail: `mlx5_0` and `mlx5_1`),
+   `NET/IB : Using` listing both devices, `Successfully loaded external tuner plugin`, and no `dlvsym failed` lines.
 
 ## Reproducing the link measurements
 

@@ -17,7 +17,7 @@
 #      BLOCK (--speculative-dflash-block-size; the drafter's config.json says 16, we ran 8) NOGRAPH (1 = --disable-cuda-graph)
 #      CTX (131072) SEQS (16) CHUNK (8192) PAGE (64) OPTFLAGS EXTRA_ARGS NAME (beam) SERVED (beam) PORT (8050) DPORT (29650, dist-init on
 #      rank 0's rail IP) MINAVAIL (GiB of host MemAvailable required) LOGDIR CACHE DD (1 when NNODES=2: host RDMA libs + NCCL tuner, see
-#      recipes/fabric-data-direct) TUNER_CSV (tuner3.csv)
+#      recipes/fabric-data-direct) TUNER_CSV (tuner4.csv on two rails, tuner3.csv on one)
 # Teardown: docker rm -f beam (rank 0 first, then rank 1); the GB300 returns to about 22 MiB.
 set -euo pipefail
 RANK=${1:?rank 0|1}; N=${NAME:-beam}
@@ -50,7 +50,7 @@ grep -E "MemAvailable|Shmem:|Mlocked|Unevictable|AnonPages|Cached:" /proc/meminf
 DDARGS=(); NCCL=()
 if [ "$NNODES" = 2 ]; then
   if [ "${DD:-1}" = 1 ]; then
-    TUNER_CSV=${TUNER_CSV:-tuner3.csv}
+    TUNER_CSV=${TUNER_CSV:-$(case "${HCA:-mlx5_0,mlx5_1}" in *,*) echo tuner4.csv;; *) echo tuner3.csv;; esac)}
     nm -D "$HOME/hostrdma/libmlx5.so.1" | grep -q mlx5dv_get_data_direct_sysfs_path || { echo "~/hostrdma not staged (DD=0 to skip)"; exit 3; }
     for f in libnccl-tuner-example.so "$TUNER_CSV"; do [ -s "$HOME/nccl-tuner/$f" ] || { echo "~/nccl-tuner/$f missing"; exit 3; }; done
     _C=$(docker create "$IMAGE" true); _T=$(mktemp -d)

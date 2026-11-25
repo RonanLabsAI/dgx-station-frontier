@@ -55,7 +55,7 @@ AVAIL=$(awk '/MemAvailable/{print int($2/1048576)}' /proc/meminfo)
 grep -E "MemAvailable|Shmem:|Mlocked|Unevictable|AnonPages|Cached:" /proc/meminfo > "$LOGDIR/meminfo-pre-rank$RANK.txt"
 
 # --- Data Direct block (recipes/fabric-data-direct): DD overlay + tuner3 + NCCL_IB_TC=106; DD=0 = off ---
-DD=${DD:-1}; DDARGS=(); TUNER_CSV=${TUNER_CSV:-tuner3.csv}   # file in ~/nccl-tuner; tuner3 = LL 2ch <=128K (fixes tuner2's C8 -3.2%)
+DD=${DD:-1}; DDARGS=(); TUNER_CSV=${TUNER_CSV:-$(case "${HCA:-mlx5_0,mlx5_1}" in *,*) echo tuner4.csv;; *) echo tuner3.csv;; esac)}   # file in ~/nccl-tuner; tuner3 = LL 2ch <=128K (fixes tuner2's C8 -3.2%)
 if [ "$DD" = 1 ]; then
   nm -D "$HOME/hostrdma/libmlx5.so.1" | grep -q mlx5dv_get_data_direct_sysfs_path || { echo "~/hostrdma not staged (DD=0 to skip)"; exit 3; }
   for f in libnccl-tuner-example.so "$TUNER_CSV"; do [ -s "$HOME/nccl-tuner/$f" ] || { echo "~/nccl-tuner/$f missing"; exit 3; }; done

@@ -61,7 +61,7 @@ grep -E "MemAvailable|Shmem:|Mlocked|Unevictable|AnonPages|Cached:" /proc/meminf
 nvidia-smi --query-gpu=index,name,memory.used,power.draw,power.limit,driver_version --format=csv > "$LOGDIR/gpus-pre-rank$RANK.csv"
 
 # --- fabric block (recipes/fabric-data-direct): Data Direct overlay + tuner3 + NCCL_IB_TC=106; two-Station arm only -------
-DDARGS=(); DD=${DD:-$([ "$MODE" = tp ] && echo 1 || echo 0)}; TUNER_CSV=${TUNER_CSV:-tuner3.csv}
+DDARGS=(); DD=${DD:-$([ "$MODE" = tp ] && echo 1 || echo 0)}; TUNER_CSV=${TUNER_CSV:-$(case "${HCA:-mlx5_0,mlx5_1}" in *,*) echo tuner4.csv;; *) echo tuner3.csv;; esac)}
 HOSTRDMA=${HOSTRDMA:-$HOME/hostrdma}; TUNERDIR=${TUNERDIR:-$HOME/nccl-tuner}
 if [ "$DD" = 1 ]; then
   nm -D "$HOSTRDMA/libmlx5.so.1" | grep -q mlx5dv_get_data_direct_sysfs_path \
